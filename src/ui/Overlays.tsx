@@ -1,0 +1,155 @@
+import { useEffect, useRef } from 'react';
+import { creditLine, SUBMISSION, periodLabel } from '../app/config';
+import { useStory } from '../app/store';
+import { MEDIA_CREDITS, SOURCES } from '../content/citations';
+import { GLOSSARY } from '../content/glossary';
+import { Cites } from './RichText';
+
+function CloseButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button type="button" className="icon-btn overlay__close" aria-label={label} onClick={onClick}>
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.6" />
+      </svg>
+    </button>
+  );
+}
+
+function useDialogFocus(open: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.activeElement as HTMLElement | null;
+    ref.current?.focus();
+    return () => prev?.focus?.();
+  }, [open]);
+  return ref;
+}
+
+export function SourcesOverlay() {
+  const open = useStory((s) => s.sourcesOpen);
+  const focus = useStory((s) => s.sourceFocus);
+  const close = useStory((s) => s.closeOverlays);
+  const ref = useDialogFocus(open);
+
+  useEffect(() => {
+    if (!open || focus == null) return;
+    const el = document.getElementById(`ref-${focus}`);
+    el?.scrollIntoView({ block: 'center' });
+  }, [open, focus]);
+
+  if (!open) return null;
+  return (
+    <div className="overlay" role="presentation" onClick={close}>
+      <div
+        ref={ref}
+        className="overlay__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sources-title"
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <CloseButton onClick={close} label="Close sources" />
+        <h2 id="sources-title">Sources</h2>
+        <p className="lede">
+          References in APA style. Numbers match the small markers beside each fact. Information was paraphrased; the
+          1907 article is quoted only in its original scanned pages.
+        </p>
+
+        <h3>References</h3>
+        <ol className="ref-list">
+          {SOURCES.map((s) => (
+            <li key={s.id} id={`ref-${s.id}`} className={`ref${focus === s.id ? ' is-focus' : ''}`}>
+              <span className="ref__n">{s.id}</span>
+              <span className="ref__text">
+                {s.authors} ({s.year}). {s.container ? <>{s.title}. </> : <i>{s.title}. </i>}
+                {s.container && <i>{s.container}</i>}
+                {s.details ? <>. {s.details} </> : '. '}
+                <a href={s.url} target="_blank" rel="noreferrer">
+                  {s.url.replace(/^https?:\/\//, '')}
+                </a>
+              </span>
+              <span className="ref__use">Used for: {s.usedFor}</span>
+            </li>
+          ))}
+        </ol>
+
+        <h3>Images, 3D models and media</h3>
+        <ul className="credit-list">
+          {MEDIA_CREDITS.map((c) => (
+            <li key={c.what}>
+              <b>{c.what}</b> — {c.creator}. {c.license}.
+              {c.url && (
+                <>
+                  {' '}
+                  <a href={c.url} target="_blank" rel="noreferrer" style={{ color: 'inherit' }}>
+                    Source
+                  </a>
+                </>
+              )}
+              {c.note && <span>{c.note}</span>}
+            </li>
+          ))}
+        </ul>
+
+        <h3>Accuracy note</h3>
+        <p style={{ fontSize: 14.5, lineHeight: 1.55 }}>
+          The class eponym list gave “Allen Whipple” for #26. Whipple’s disease is named for George Hoyt Whipple, who
+          described it in 1907 <Cites ids={[5, 6]} />. Allen Oldfather Whipple (1881–1963) was a surgeon; the Whipple
+          procedure, a pancreas operation, is named for him <Cites ids={[8, 15]} />.
+        </p>
+
+        <div className="student-card">
+          <div>
+            <b style={{ color: 'var(--ivory)' }}>{SUBMISSION.studentName}</b>
+          </div>
+          <div>
+            {SUBMISSION.course} · {periodLabel()} · Eponym {SUBMISSION.assignedEponym}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function GlossaryOverlay() {
+  const open = useStory((s) => s.glossaryOpen);
+  const close = useStory((s) => s.closeOverlays);
+  const ref = useDialogFocus(open);
+  if (!open) return null;
+  return (
+    <div className="overlay" role="presentation" onClick={close}>
+      <div
+        ref={ref}
+        className="overlay__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="terms-title"
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <CloseButton onClick={close} label="Close medical terms" />
+        <h2 id="terms-title">Medical terms</h2>
+        <p className="lede">Pronunciation guides are respellings; word parts come from MedlinePlus.</p>
+        <ul className="gloss-list">
+          {GLOSSARY.map((t) => (
+            <li key={t.key} className="gloss">
+              <span className="gloss__term">{t.key === 'tropheryma' ? <i>{t.term}</i> : t.term}</span>
+              {t.say && <span className="gloss__say">{t.say}</span>}
+              {t.parts && (
+                <p style={{ color: 'var(--muted)', fontSize: 13 }}>
+                  {t.parts.map((p) => `${p.part} = ${p.meaning}`).join(' · ')}
+                </p>
+              )}
+              <p>
+                {t.definition} <Cites ids={t.cites} />
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p className="student-card">{creditLine()}</p>
+      </div>
+    </div>
+  );
+}
