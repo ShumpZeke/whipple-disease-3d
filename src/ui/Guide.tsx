@@ -77,7 +77,7 @@ export function Guide() {
           return (
             <li key={s.id} className="guide__stop">
               <div className="guide__num">
-                {i + 1}
+                <span className="guide__n">{i + 1}</span>
                 <small>{TIMES[i]}</small>
               </div>
               <div>

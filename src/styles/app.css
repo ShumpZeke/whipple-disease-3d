@@ -3164,3 +3164,78 @@ html::-webkit-scrollbar {
     bottom: auto;
   }
 }
+
+/* presenter guide: plan table, stop numbers with times, questions */
+.guide__num {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  width: auto;
+  height: auto;
+  background: none;
+  color: #1d1a17;
+}
+.guide__n {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #1d1a17;
+  color: #fbfaf7;
+  font-family: var(--display);
+  font-weight: 800;
+}
+.guide__num small {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #6b635a;
+}
+.guide__plan {
+  margin: 0 0 8px;
+}
+.guide__plan table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.guide__plan th,
+.guide__plan td {
+  padding: 6px 10px 6px 0;
+  border-top: 1px solid #e3ddd2;
+  text-align: left;
+  vertical-align: top;
+}
+.guide__plan th {
+  font-family: var(--display);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.guide__time {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #6b635a;
+}
+.guide__h {
+  margin: 30px 0 4px;
+}
+.guide__do b,
+.guide__say b,
+.guide__term b {
+  font-family: var(--display);
+}
+.guide__qa {
+  margin: 8px 0 0;
+}
+.guide__qa dt {
+  margin-top: 10px;
+  font-family: var(--display);
+  font-weight: 800;
+}
+.guide__qa dd {
+  margin: 2px 0 0;
+}
+.guide__src {
+  color: #9a6a33;
+  font-size: 0.9em;
+}
