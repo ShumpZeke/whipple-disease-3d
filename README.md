@@ -38,6 +38,9 @@ While it is empty the exhibit shows a visible **Period ___** placeholder. Nothin
 
 Tip: to open straight at a stop, add `?stop=` to the address, e.g. `…/?stop=villi` or `…/#villi`.
 
+**Backup video.** If the classroom computer can’t run 3D, `node scripts/record-tour.mjs tour.mp4`
+records the whole zoom as a 1280×720 MP4 (needs ffmpeg).
+
 ### One sentence per stop (a presenter’s cheat sheet)
 
 | # | Stop | Say |

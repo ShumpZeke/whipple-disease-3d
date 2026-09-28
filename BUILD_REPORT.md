@@ -106,3 +106,4 @@ labelled as an illustration, not a patient image.
 | `npm run assets:images` | prepare archive scans as WebP |
 | `node scripts/fallback-shots.mjs` | re-render the no-WebGL still images into `public/fallback/` |
 | `node scripts/journey-shots.mjs <outDir> [w] [h] [t,…]` | screenshots at scroll positions for review |
+| `node scripts/record-tour.mjs [out.mp4]` | record the full zoom as an MP4 (backup for presenting; needs ffmpeg) |
