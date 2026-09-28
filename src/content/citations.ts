@@ -214,7 +214,7 @@ export interface MediaCredit {
 
 export const MEDIA_CREDITS: MediaCredit[] = [
   {
-    what: '3D digestive organs, heart, brain and knee',
+    what: '3D digestive organs, heart, brain and knee (also the home-screen picture)',
     creator: 'BodyParts3D, © The Database Center for Life Science (DBCLS)',
     license: 'CC BY-SA 2.1 Japan',
     url: 'https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html',
@@ -231,12 +231,6 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     creator: 'G. H. Whipple, Bulletin of the Johns Hopkins Hospital (1907); scan by the Internet Archive',
     license: 'Public domain (published 1907)',
     url: 'https://archive.org/details/sim_johns-hopkins-medical-journal_1907-09_18_198',
-  },
-  {
-    what: 'Background film of an early-1900s laboratory',
-    creator: 'AI-generated for this project with Google Vids',
-    license: 'Illustrative reconstruction — not a historical record',
-    note: 'No people are shown. It is only atmosphere behind the real archival images.',
   },
   {
     what: 'Tissue, villi, microscopic, diagnosis and PCR scenes; paper and grain textures',

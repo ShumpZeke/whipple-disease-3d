@@ -17,13 +17,31 @@ function collectErrors(page: Page) {
 const state = (page: Page) => page.evaluate(() => window.__whipple?.state());
 const waitForStage = (page: Page) => page.waitForFunction(() => !!window.__whipple, null, { timeout: 60_000 });
 
-test('opens in 1907 with the student credit', async ({ page }) => {
+test('opens on a home screen that introduces the eponym and guides the viewer', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: /Start the zoom/ })).toBeVisible();
-  await expect(page.locator('.credit')).toContainText('Vardhmansinh Rathod');
-  await expect(page.locator('.credit')).toContainText('Period');
+  await page.goto('/?e2e');
+  await expect(page.getByRole('heading', { name: 'Whipple’s Disease', level: 1 })).toBeVisible();
+  const cover = page.locator('.cover');
+  await expect(cover).toContainText('Whipple disease'); // the modern spelling
+  await expect(cover.locator('.cover__def')).toContainText('small intestine');
+  await expect(cover.locator('.cover__by')).toContainText('Vardhmansinh Rathod');
+  await expect(cover.locator('.cover__by')).toContainText('Period');
+  await expect(cover.getByRole('button', { name: /Start/ })).toBeVisible();
+  // the "What's inside" menu jumps straight to a part
+  const menu = page.getByRole('navigation', { name: 'What’s inside' });
+  await expect(menu.getByRole('button')).toHaveCount(5);
+  await waitForStage(page);
+  await menu.getByRole('button', { name: /Four facts/ }).click();
+  await expect.poll(async () => (await state(page))?.id).toBe('cause');
   expect(errors).toEqual([]);
+});
+
+test('the history begins with a profile of George Hoyt Whipple', async ({ page }) => {
+  await page.goto('/?stop=doctor');
+  const card = page.getByRole('article', { name: 'Profile of George Hoyt Whipple' });
+  await expect(card).toBeVisible();
+  for (const year of ['1878', '1905', '1907', '1934']) await expect(card).toContainText(year);
+  await expect(page.locator('section.caption[data-step="doctor"] .keyterm')).toContainText('Pathology');
 });
 
 test('one continuous page: a presenter clicker walks every stop in order', async ({ page }) => {

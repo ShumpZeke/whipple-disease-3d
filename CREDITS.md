@@ -4,10 +4,9 @@
 
 | What | Creator / source | License |
 | --- | --- | --- |
-| 3D digestive organs, heart, brain and knee | [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html), © The Database Center for Life Science (DBCLS) | CC BY-SA 2.1 Japan |
+| 3D digestive organs, heart, brain and knee (also the home-screen picture) | [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html), © The Database Center for Life Science (DBCLS) | CC BY-SA 2.1 Japan |
 | Portrait of George Hoyt Whipple (1934) | The Nobel Foundation, via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:George_Whipple_nobel.jpg) | Public domain (PD-Sweden-photo, PD-1996) |
 | 1907 article page, naming paragraph and photomicrograph plates (Figs. 2 and 9) | G. H. Whipple, *Bulletin of the Johns Hopkins Hospital* (1907); scan by the [Internet Archive](https://archive.org/details/sim_johns-hopkins-medical-journal_1907-09_18_198) | Public domain (published 1907) |
-| Background film of an early-1900s laboratory | AI-generated for this project with Google Vids | Illustrative reconstruction — **not** a historical record; no people shown |
 | Tissue, villi, cell, microscope, biopsy and PCR scenes; paper and grain textures | Created for this project (procedural 3D and code) | Original work (MIT, with the code) |
 | Typefaces: Newsreader, Instrument Sans | The Newsreader Project Authors; The Instrument Sans Project Authors (via Fontsource) | SIL Open Font License 1.1 |
 

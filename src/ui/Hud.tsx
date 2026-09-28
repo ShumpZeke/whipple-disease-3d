@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { creditLine } from '../app/config';
-import { currentTargetStop, scrollToStop, smoothstep } from '../app/journey';
+import { currentTargetStop, scrollToStop } from '../app/journey';
 import { useStory } from '../app/store';
 import { LAST_STOP, SOURCES_PAGE, STOPS } from '../content/story';
 import { useJourney } from './useJourney';
@@ -151,35 +150,5 @@ export function PresenterNav() {
         </svg>
       </button>
     </nav>
-  );
-}
-
-/** Only on the opening: a gentle reminder that scrolling is the way in. */
-export function ScrollCue() {
-  const ref = useRef<HTMLDivElement>(null);
-  useJourney((t) => {
-    if (ref.current) ref.current.style.opacity = String(1 - smoothstep(0.02, 0.2, t));
-  });
-  return (
-    <div ref={ref} className="scroll-cue" aria-hidden="true">
-      <span className="scroll-cue__mouse">
-        <span />
-      </span>
-    </div>
-  );
-}
-
-export function Credit() {
-  const ref = useRef<HTMLDivElement>(null);
-  useJourney((t) => {
-    if (!ref.current) return;
-    const o = 1 - smoothstep(0.1, 0.35, t);
-    ref.current.style.opacity = String(o);
-    ref.current.style.visibility = o < 0.01 ? 'hidden' : 'visible';
-  });
-  return (
-    <div ref={ref} className="credit">
-      {creditLine()}
-    </div>
   );
 }

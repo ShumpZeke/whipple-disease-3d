@@ -42,9 +42,14 @@ sources, medical terms and credits (the page scrolls on into it after the summar
 - **Uncluttered.** The 3D subject sits to the right, clear of the caption; at most two or three 3D
   labels at a time; the depth rail names only the current section; no dashboards, card grids or
   full-body figures.
-- **History first, then 3D.** The 1907 pages use the real public-domain scans (article, naming
-  paragraph, Fig. 9 photomicrograph) over an AI-generated, clearly labelled laboratory film. The
-  modern model then appears as an engraved 1907-style plate that “develops” into full colour.
+- **A home screen that guides the viewer.** The first screen gives the eponym’s correct and modern
+  spelling, how to say it, a one-line definition, the student’s name and class, and a “What’s inside”
+  menu of the five parts (History · The disease · Four facts · Quick check · Sources) that jumps
+  straight to each one.
+- **History first, then 3D.** A profile card of George Hoyt Whipple (1934 portrait and four dates:
+  1878, 1905, 1907, 1934, from the Nobel Prize biography), then the real public-domain scans of the
+  1907 article, naming paragraph and Fig. 9 photomicrograph. The modern model then appears as an
+  engraved 1907-style plate that “develops” into full colour.
 
 ### Content accuracy
 
@@ -69,18 +74,18 @@ labelled as an illustration, not a patient image.
 
 | Asset | Size |
 | --- | --- |
-| Main bundle (history pages, captions, UI) | 293 kB (92 kB gzip) |
+| Main bundle (home screen, history pages, captions, UI) | 296 kB (93 kB gzip) |
 | 3D bundle, loaded in the background while 1907 is on screen | 1.16 MB (320 kB gzip) |
-| CSS | 41 kB (9.5 kB gzip) |
+| CSS | 44 kB (10 kB gzip) |
 | Organ models (4 files, meshopt-compressed) | 1.08 MB |
-| Laboratory film (MP4) + poster | 1.4 MB |
+| Home-screen picture (WebP with transparency) | 76 kB |
 | Archive scans (WebP) | 0.3 MB |
 
 - The 3D code starts downloading on idle while the visitor reads the 1907 pages.
 - Each 3D world is mounted ahead of need and its shaders compiled in the background
   (`compileAsync`); a fixed light rig and a 3D noise texture keep shader compile time short.
 - The canvas renders only while something moves; resolution adapts to the device.
-- `prefers-reduced-motion`: stops jump instead of flying, the lab film pauses on its poster.
+- `prefers-reduced-motion`: stops jump instead of flying.
 - Without WebGL the page shows still renders of each scene with all captions, quiz and sources.
 
 ## Verification
@@ -90,7 +95,7 @@ labelled as an illustration, not a patient image.
 | `npm run build` (type-check + build) | passes |
 | `npm run lint` (oxlint) | 0 warnings |
 | `npm test` — 37 unit tests | all pass: story order, caption length, a presenter script for every stop, key terms with word parts, 4 numbered facts, citations resolve, every fact cited, name correction, quiz answers, zoom maths (world switch at the veil peak, in/out direction), camera poses move consistently through every transition |
-| `npm run test:e2e` — 14 browser tests | all pass: 1907 opening and student credit; clicker walk through all 17 stops on one scrolling page; mouse-wheel zoom; **smart board 1920×1080 touch**: text size, Back/Next taps (two quick taps = two stops), swipe settles on the next stop, a tiny swipe falls back, full-screen button; summary → list of sources; printable presenter guide; small-intestine marker; self-check (tapping the organ on the 3D model + choices, wrong-then-right feedback); Sources/Terms panels, definitions and source markers; name correction; reduced motion; no-WebGL fallback; laptop 1366×768 and phone 390×844 layouts |
+| `npm run test:e2e` — 15 browser tests | all pass: home screen (name, modern spelling, definition, student name and period, “What’s inside” menu jumps); Whipple profile card; clicker walk through all 17 stops on one scrolling page; mouse-wheel zoom; **smart board 1920×1080 touch**: text size, Back/Next taps (two quick taps = two stops), swipe settles on the next stop, a tiny swipe falls back, full-screen button; summary → list of sources; printable presenter guide; small-intestine marker; self-check (tapping the organ on the 3D model + choices, wrong-then-right feedback); Sources/Terms panels, definitions and source markers; name correction; reduced motion; no-WebGL fallback; laptop 1366×768 and phone 390×844 layouts |
 | Console | no errors or warnings during a full scroll-through |
 | Visual review | screenshots of every stop at 1920×1080, 1366×768 and 390×844, and of each zoom transition |
 
@@ -107,8 +112,6 @@ labelled as an illustration, not a patient image.
   the 3D scenes are demanding on older phones.
 - Smart boards with a very old built-in browser (no WebGL 2) show still pictures instead of the 3D;
   plugging a laptop into the board avoids this.
-- The laboratory background film is an AI-generated illustration (labelled on screen); all other
-  historical images are real archival scans.
 - Screenshots and tests were produced with Chromium on Windows (ANGLE/Direct3D 11); other GPUs may
   shade slightly differently.
 

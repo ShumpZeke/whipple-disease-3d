@@ -26,8 +26,8 @@ licenses:
 
 - public/models/*.glb — modified from BodyParts3D (c) The Database Center for
   Life Science, CC BY-SA 2.1 Japan. See public/models/LICENSE.txt.
+- public/cover/digestive.webp — a picture rendered from those models; same license.
 - public/archive/* — 1907 journal scans and the 1934 Nobel portrait, public domain.
-- public/media/lab-1907-* — AI-generated illustration made for this project.
 - Fonts (Newsreader, Instrument Sans) — SIL Open Font License 1.1.
 
 See CREDITS.md for details.

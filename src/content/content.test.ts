@@ -119,7 +119,7 @@ describe('citations', () => {
     expect(text).toMatch(/CC BY-SA/);
     expect(text).toMatch(/Nobel Foundation/);
     expect(text).toMatch(/Internet Archive/);
-    expect(text).toMatch(/AI-generated/);
+    expect(text).toMatch(/AI assistant/);
   });
 });
 

@@ -37,8 +37,16 @@ export function Guide() {
           </li>
           <li>Drag the 3D picture to turn it. Tap any underlined word to show its definition.</li>
           <li>
-            There are {STOPS.length} stops. Spend about 20–30 seconds on each: read the headline, then say the lines
-            below in your own words.
+            Aim for <b>about 5 minutes</b>: {STOPS.length} stops at roughly 15 seconds each, a little longer on the four
+            facts. Read the headline, then say the lines below in your own words.
+          </li>
+          <li>
+            On the first screen, show how it is organized: the <b>What’s inside</b> menu lists the five parts, and
+            tapping one jumps straight there.
+          </li>
+          <li>
+            For questions afterwards, every fact has a small number like [1] that points to the list of sources at the
+            end.
           </li>
         </ul>
       </section>
@@ -96,6 +104,18 @@ export function Guide() {
           ))}
         </ol>
         <p>Named after George Hoyt Whipple, who first described it in 1907 — not Allen O. Whipple (a surgeon).</p>
+      </section>
+
+      <section className="guide__how">
+        <h2>Submission checklist</h2>
+        <ul className="guide__check">
+          <li>Shareable link that opens without asking for access (deploy it, then test the link in a private window)</li>
+          <li>Only Whipple’s disease is presented, with all the required content</li>
+          <li>All interactive features work: menu, ‹ › buttons, underlined words, [1] markers, the ＋ marker, the healthy/infected switch, the quiz</li>
+          <li>Reference page included: it is at the end of the exhibit</li>
+          <li>Student name and class period appear on the home screen and at the end ({creditLine()})</li>
+          <li>Proofread, and practiced out loud with this guide (aim for about 5 minutes)</li>
+        </ul>
       </section>
     </main>
   );

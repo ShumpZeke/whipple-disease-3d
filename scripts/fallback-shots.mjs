@@ -22,7 +22,7 @@ await withPreview(async (base) => {
     await page.waitForFunction(() => !!window.__whipple, null, { timeout: 60000 });
     await page.waitForTimeout(4000);
     await page.addStyleTag({
-      content: `.hud-top,.rail,.scroll-cue,.caption,.scale-note,.credit,.anchor-label,.lab-credit,.grain,.loading,.veil{display:none!important}`,
+      content: `.hud-top,.rail,.pnav,.caption,.scale-note,.anchor-label,.grain,.loading,.veil{display:none!important}`,
     });
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${out}/${name}.png` });

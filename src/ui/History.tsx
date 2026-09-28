@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { creditLine } from '../app/config';
-import { smoothstep } from '../app/journey';
+import { useRef, type CSSProperties, type ReactNode } from 'react';
+import { periodLabel, SUBMISSION } from '../app/config';
+import { scrollToStop, smoothstep } from '../app/journey';
 import { useStory } from '../app/store';
 import { NAMING_MARKS, SUMMARY_MARKS, type Box } from '../content/archive';
-import { STOP_INDEX, type World } from '../content/story';
-import { Cites, TermButton } from './RichText';
+import { SECTIONS, STOP_INDEX, STOPS, type World } from '../content/story';
+import { Cites, RichText, TermButton } from './RichText';
 import { useJourney } from './useJourney';
 
 /* ------------------------------------------------------------------ backdrops */
@@ -12,64 +12,24 @@ import { useJourney } from './useJourney';
 const DEEP: World[] = ['tissue', 'villi', 'micro', 'diagnosis'];
 
 /**
- * Backdrops cross-fade with the scroll: dark (1907 title) → the laboratory film (history) →
+ * Backdrops cross-fade with the scroll: the home screen → a warm archive tone (history) →
  * paper (the engraved plate) → studio graphite (anatomy) or deep plum (tissue and cells).
  */
 export function Backdrops() {
-  const reduced = useStory((s) => s.reducedMotion);
   const world = useStory((s) => s.displayWorld);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const dark = useRef<HTMLDivElement>(null);
-  const lab = useRef<HTMLDivElement>(null);
-  const credit = useRef<HTMLParagraphElement>(null);
-  const [videoOk, setVideoOk] = useState(true);
-  const [labVisible, setLabVisible] = useState(true);
-
+  const cover = useRef<HTMLDivElement>(null);
+  const archive = useRef<HTMLDivElement>(null);
   useJourney((t) => {
-    const labOpacity = smoothstep(0.15, 0.6, t) * (1 - smoothstep(STOP_INDEX.name + 0.02, STOP_INDEX.name + 0.3, t));
-    if (dark.current) dark.current.style.opacity = String(1 - smoothstep(0.25, 0.7, t));
-    if (lab.current) {
-      lab.current.style.opacity = String(labOpacity);
-      // slow push-in: the laboratory drifts closer as we scroll into the story
-      lab.current.style.transform = `scale(${1.02 + 0.045 * Math.min(t, 3.5)})`;
-    }
-    if (credit.current) {
-      credit.current.style.opacity = String(labOpacity);
-      credit.current.style.visibility = labOpacity < 0.01 ? 'hidden' : 'visible';
-    }
-    const on = labOpacity > 0.01;
-    setLabVisible((v) => (v === on ? v : on));
+    if (cover.current) cover.current.style.opacity = String(1 - smoothstep(0.2, 0.7, t));
+    if (archive.current)
+      archive.current.style.opacity = String(
+        smoothstep(0.1, 0.55, t) * (1 - smoothstep(STOP_INDEX.name + 0.02, STOP_INDEX.name + 0.3, t)),
+      );
   });
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (labVisible && !reduced) v.play().catch(() => setVideoOk(false));
-    else v.pause();
-  }, [labVisible, reduced]);
-
   return (
     <>
-      <div ref={dark} className="backdrop backdrop--dark is-on" />
-      <div ref={lab} className="backdrop backdrop--lab is-on is-driven" aria-hidden="true">
-        {/* Poster keeps the plate visible for reduced motion or if autoplay is blocked */}
-        <img src="/media/lab-1907-poster.jpg" alt="" />
-        {videoOk && (
-          <video
-            ref={videoRef}
-            src="/media/lab-1907-reconstruction.mp4"
-            poster="/media/lab-1907-poster.jpg"
-            muted
-            loop
-            playsInline
-            preload="auto"
-            onError={() => setVideoOk(false)}
-          />
-        )}
-      </div>
-      <p ref={credit} className="lab-credit">
-        Background: AI-generated reconstruction (Google Vids) · not a historical photo
-      </p>
+      <div ref={cover} className="backdrop backdrop--cover is-on is-driven" />
+      <div ref={archive} className="backdrop backdrop--archive is-on is-driven" style={{ opacity: 0 }} />
       <div className={`backdrop backdrop--studio${world === 'anatomy' ? ' is-on' : ''}`} />
       <div className={`backdrop backdrop--deep${DEEP.includes(world) ? ' is-on' : ''}`} />
       {/* Paper for the engraved 1907-style plate; the scroll "develops" it away (HingeController). */}
@@ -122,62 +82,117 @@ function flyThrough(el: HTMLElement | null, t: number, k: number, grow = 1.4) {
   el.style.pointerEvents = opacity > 0.6 ? 'auto' : 'none';
 }
 
-/* ------------------------------------------------------------------ 1907 title */
+/* ------------------------------------------------------------------ home screen */
 
-function Title() {
-  const ref = useRef<HTMLDivElement>(null);
-  const year = useRef<HTMLDivElement>(null);
+/**
+ * The home screen: the eponym's name, how to say it, a one-line definition, who made the project,
+ * and a menu of the five parts (each one jumps there). It zooms away as the story starts.
+ */
+function Cover() {
+  const ref = useRef<HTMLElement>(null);
   useJourney((t) => {
     const el = ref.current;
-    if (el) {
-      const o = 1 - smoothstep(0.08, 0.42, t);
-      el.style.opacity = String(o);
-      el.style.visibility = o < 0.01 ? 'hidden' : 'visible';
-      el.style.pointerEvents = o > 0.6 ? 'auto' : 'none';
-    }
-    // zoom straight through the year
-    if (year.current) year.current.style.transform = `scale(${(1 + t * 3.2).toFixed(4)})`;
+    if (!el) return;
+    const o = 1 - smoothstep(0.06, 0.4, t);
+    el.style.opacity = String(o);
+    el.style.visibility = o < 0.01 ? 'hidden' : 'visible';
+    el.style.pointerEvents = o > 0.6 ? 'auto' : 'none';
+    el.style.transform = `scale(${(1 + t * 0.35).toFixed(4)})`;
   });
   return (
-    <section ref={ref} className="intro" aria-labelledby="intro-title">
-      <div className="intro__inner">
-        <div ref={year} className="intro__year" aria-hidden="true">
-          1907
-        </div>
-        <p className="intro__eyebrow">Medical Terminology · Eponym #26</p>
-        <h1 id="intro-title" className="intro__title">
+    <section ref={ref} className="cover fly" aria-labelledby="cover-title">
+      <div className="cover__text">
+        <p className="cover__eyebrow">Medical Terminology · Eponym #26</p>
+        <h1 id="cover-title" className="cover__title">
           Whipple’s Disease
         </h1>
-        <p className="intro__sub">A zoom from the first case in 1907 down to the germ that causes it.</p>
-        <button type="button" className="begin-btn intro__begin" onClick={() => useStory.getState().next()}>
-          Start the zoom
-          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-            <path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <p className="cover__say">
+          say “WIP-ulz dih-ZEEZ” · modern spelling: <b>Whipple disease</b> <Cites ids={[1, 3]} />
+        </p>
+        <p className="cover__def">
+          <RichText text={STOPS[0].text} />
+        </p>
+        <p className="cover__by">
+          By <b>{SUBMISSION.studentName}</b> · {SUBMISSION.course} · {periodLabel()}
+        </p>
+        <button type="button" className="pill pill--primary cover__start" onClick={() => scrollToStop(1)}>
+          Start
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="intro__meta">Say it “WIP-ulz” · also written “Whipple disease”</p>
+        <nav className="cover__toc" aria-label="What’s inside">
+          <p className="cover__toc-title">What’s inside</p>
+          <ol>
+            {SECTIONS.map((sec, i) => (
+              <li key={sec.title}>
+                <button type="button" onClick={() => scrollToStop(sec.stop)}>
+                  <span className="cover__n">{i + 1}</span>
+                  <span className="cover__sec">
+                    <b>{sec.title}</b>
+                    <small>{sec.sub}</small>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
       </div>
-      <p className="sr-only">{creditLine()}</p>
+      <figure className="cover__art">
+        <img
+          src="/cover/digestive.webp"
+          width={688}
+          height={1300}
+          alt="3D model of the digestive system: liver, stomach, small intestine and large intestine."
+        />
+        <figcaption>The digestive system, where Whipple’s disease strikes</figcaption>
+      </figure>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ Whipple */
+/* ------------------------------------------------------------------ who was Whipple */
 
-function Doctor() {
+const LIFE = [
+  { year: '1878', text: 'Born in Ashland, New Hampshire, USA' },
+  { year: '1905', text: 'Became a doctor (M.D.) at Johns Hopkins and joined its pathology department' },
+  { year: '1907', text: 'First to describe this disease' },
+  { year: '1934', text: 'Shared the Nobel Prize in Medicine for his work on anemia' },
+];
+
+/** A profile card: the 1934 portrait and the four dates to know. */
+function Profile() {
   const ref = useRef<HTMLDivElement>(null);
   useJourney((t) => flyThrough(ref.current, t, STOP_INDEX.doctor));
   return (
     <div ref={ref} className="archive-stage fly">
-      <figure className="print portrait" style={{ margin: 0 }}>
-        <img
-          src="/archive/whipple-portrait-1934.webp"
-          width={280}
-          height={396}
-          alt="Black-and-white portrait photograph of George Hoyt Whipple in a suit, 1934."
-        />
-        <figcaption className="print__caption">George Hoyt Whipple (1878–1976). Photo 1934, public domain.</figcaption>
-      </figure>
+      <article className="print profile" aria-label="Profile of George Hoyt Whipple">
+        <figure className="profile__photo">
+          <img
+            src="/archive/whipple-portrait-1934.webp"
+            width={280}
+            height={396}
+            alt="Black-and-white portrait photograph of George Hoyt Whipple in a suit, 1934."
+          />
+          <figcaption>Photo 1934 · public domain</figcaption>
+        </figure>
+        <div className="profile__body">
+          <p className="profile__kicker">The disease is named after</p>
+          <h2 className="profile__name">George Hoyt Whipple</h2>
+          <p className="profile__life">1878–1976 · American pathologist</p>
+          <ol className="profile__timeline">
+            {LIFE.map((l) => (
+              <li key={l.year}>
+                <b>{l.year}</b>
+                <span>{l.text}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="profile__src">
+            Sources <Cites ids={[7, 5, 6]} />
+          </p>
+        </div>
+      </article>
     </div>
   );
 }
@@ -360,8 +375,8 @@ export function PlateLabel() {
 export function HistoryLayer() {
   return (
     <div className="history">
-      <Title />
-      <Doctor />
+      <Cover />
+      <Profile />
       <Case />
       <Naming />
     </div>

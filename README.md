@@ -7,7 +7,7 @@ digestive system, through the wall of the small intestine and its villi, down to
 *Tropheryma whipplei* — then back out to how the disease spreads, how it is diagnosed and how it is
 treated, ending with a short self-check and the sources.
 
-![The digestive system stop](docs/preview.jpg)
+![The home screen](docs/preview.jpg)
 
 ![The whole journey, top-left to bottom-right](docs/journey.jpg)
 
@@ -63,18 +63,44 @@ Tip: to open straight at a stop, add `?stop=` to the address, e.g. `…/?stop=vi
 records the whole zoom as an MP4 (needs ffmpeg). Without WebGL the page itself still works, with
 still pictures instead of 3D.
 
-## Assignment checklist
+## Assignment checklist (from the project handout)
 
-| Requirement | Where it is |
+**Required content**
+
+| The handout asks for | Where it is in the exhibit |
 | --- | --- |
-| Chronological story: 1907 → Whipple → case → name → body system → organ → facts | Stops 1–15, in that order |
-| At least 4 clinical facts | Fact 1 cause · Fact 2 symptoms · Fact 3 diagnosis · Fact 4 treatment |
-| At least 3 medical terms, explained | a **Key term** on 9 of the stops, split into word parts; 14 terms in all with pronunciation (**Terms** button, underlined words, and the list at the end) |
-| At least 3 credible sources, cited inline | 17 references (Merck Manuals, MedlinePlus, StatPearls/NCBI, CDC, OpenStax, the 1907 paper…) — every fact carries a `[n]` marker; the full APA list is at the end of the page (and behind the **Sources** button) |
-| Media credits | End of the page, the Sources panel, and [CREDITS.md](CREDITS.md) |
-| At least 3 kinds of interaction | turn the 3D model · hotspot/marker and term pop-ups · healthy-vs-disease toggle · self-check quiz (tap the organ on the model + multiple choice) |
-| Student name and class period | Title screen and summary (edit the period in `src/app/config.ts`) |
-| Correct eponym | George Hoyt Whipple (1907). The class list’s “Allen Whipple” is corrected on stop 4 — Allen O. Whipple was the surgeon behind the Whipple procedure. |
+| Correct name and spelling, and the modern term | Home screen: **Whipple’s Disease**, “modern spelling: Whipple disease”, and how to say it |
+| Origin: the person it is named for | Stop 2: profile card of **George Hoyt Whipple** (1878–1976) |
+| Brief historical profile and why the name stuck | Stops 2–4: his life in four dates, the 1907 case, and why the disease carries his name — with the class-list correction (“Allen Whipple” → George Hoyt Whipple; Allen O. Whipple was a surgeon) |
+| A clear definition in your own words | Home screen and stop 5, “What is Whipple’s disease?” |
+| Body system or medical specialty | Stop 5: Body system — digestive system · Specialty — gastroenterology |
+| At least four clinical facts | Fact 1 cause · Fact 2 symptoms · Fact 3 diagnosis · Fact 4 treatment (and outlook) |
+| At least three terms, word parts, abbreviations or pronunciation tips | A **Key term** box on 9 stops (e.g. *arthr-* joint + *-algia* pain), pronunciation for each, abbreviations PCR, PAS and IV; all 14 terms in the **Terms** panel and at the end |
+| At least two visuals with captions or labels | Labeled 3D models (digestive system, intestine wall, villi, cells, microscope, DNA), captioned 1907 scans and portrait |
+| Purposeful interactive elements | Menu, Back/Next buttons, ＋ marker, highlighted 1907 phrases, term pop-ups, healthy/infected switch, 3D model you can turn, quiz |
+| Source numbers that connect to the reference list | Every fact has a `[n]` marker; the full list is at the end |
+
+**Design, research and presenting**
+
+| The handout asks for | Where it is |
+| --- | --- |
+| Clear title, consistent colors and fonts, readable text, logical sections | Five parts (History · The disease · Four facts · Quick check · Sources); one set of fonts and colors; text sized for a smart board |
+| A home screen that introduces the eponym and guides the viewer | Home screen with the definition and a **What’s inside** menu that jumps to each part |
+| At least three interaction types | Navigation (menu, ‹ › buttons, rail) · hotspots (＋ marker, highlighted phrases, labels, term pop-ups) · self-check quiz — plus the 3D model and the healthy/infected switch |
+| School-appropriate visuals, patient privacy | No patient photos; the stained slide is an illustration; archival images are public domain |
+| At least three credible sources (not Wikipedia or AI) | 17: Merck Manuals, MedlinePlus (NIH), NCBI StatPearls, CDC, OpenStax, NHGRI, NobelPrize.org, peer-reviewed articles, and Whipple’s 1907 paper |
+| Paraphrased, numbered citations and a full APA reference page | Yes — the reference page is the end of the exhibit (and [SOURCES.md](SOURCES.md)) |
+| Cite all media you did not create | “Images, 3D models and media” at the end, and [CREDITS.md](CREDITS.md) |
+| 3–5 minute presentation that explains the organization and features | The presenter guide (`?guide`) is paced for about 5 minutes and starts with the “What’s inside” menu |
+
+**Submission checklist**
+
+- [ ] Shareable link that opens without requesting access — deploy it (see *Deploying*), then test the link in a private window
+- [x] Only the assigned eponym, with all required content
+- [x] All interactive features work (checked by the browser tests)
+- [x] Reference page included (end of the exhibit)
+- [ ] Student name **and class period** — the name is on the home screen and at the end; fill in the period in `src/app/config.ts`
+- [ ] Proofread and practiced — use the presenter guide
 
 ## Running it
 
@@ -129,7 +155,7 @@ works the same way — upload the contents of `dist/`.
 world is mounted and its shaders compiled ahead of time; frames render only while something moves;
 resolution adapts to the device.
 **Accessibility:** full keyboard and clicker control, visible focus, captions announced to screen
-readers, `prefers-reduced-motion` (jumps instead of flying; the lab film stays still), and a still-image
+readers, `prefers-reduced-motion` (jumps instead of flying), and a still-image
 version with all the text, quiz and sources when WebGL is unavailable.
 
 ## Project layout
@@ -141,7 +167,7 @@ src/
   three/      Stage, Director (camera), presets (poses), anatomy/ tissue/ micro/ diagnosis/ worlds
   ui/         captions, 1907 history layer, HUD and rail, quiz, overlays, term pop-over
   styles/     app.css
-public/       models (.glb), archive scans, lab film, textures, fallback stills
+public/       models (.glb), home-screen picture, archive scans, textures, fallback stills
 e2e/          Playwright tests
 scripts/      model/image processing and screenshot helpers
 ```
@@ -152,8 +178,6 @@ scripts/      model/image processing and screenshot helpers
 - **3D organ models:** modified from BodyParts3D © DBCLS, licensed **CC BY-SA 2.1 Japan**; the modified
   models in `public/models/` are shared under the same license (see `public/models/LICENSE.txt`).
 - **1907 article scans and the 1934 portrait:** public domain.
-- **Laboratory background film:** AI-generated for this project (Google Vids); an illustration, not a
-  historical record.
 - **Fonts:** SIL Open Font License 1.1.
 
 Full details in [CREDITS.md](CREDITS.md) and [SOURCES.md](SOURCES.md). This exhibit is for education

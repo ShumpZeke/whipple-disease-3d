@@ -43,6 +43,23 @@ function Extras({ id }: { id: string }) {
   const restart = useStory((s) => s.restart);
 
   switch (id) {
+    case 'body':
+      return (
+        <dl className="chips">
+          <div>
+            <dt>Body system</dt>
+            <dd>Digestive system</dd>
+          </div>
+          <div>
+            <dt>Specialty</dt>
+            <dd>Gastroenterology</dd>
+          </div>
+          <div>
+            <dt>Modern spelling</dt>
+            <dd>Whipple disease</dd>
+          </div>
+        </dl>
+      );
     case 'symptoms':
       return (
         <>
