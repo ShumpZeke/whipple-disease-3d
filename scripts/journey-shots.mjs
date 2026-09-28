@@ -15,8 +15,7 @@ await withPreview(async (base) => {
     if (m.type() === 'error' || m.type() === 'warning') logs.push(`[${m.type()}] ${m.text().slice(0, 200)}`);
   });
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
-  await page.goto(`${base}?e2e`);
-  await page.evaluate(() => document.documentElement.classList.add('is-tweening')); // no snapping while probing
+  await page.goto(`${base}?e2e&nosettle`); // nosettle: let the page rest between stops
   // warm up: visit the deep scenes so every world mounts and compiles
   for (const t of [4, 6, 7, 8, 11, 12, 13, 0]) {
     await page.evaluate((t) => window.scrollTo(0, t * innerHeight), t);

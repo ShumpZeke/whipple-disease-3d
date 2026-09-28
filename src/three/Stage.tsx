@@ -197,14 +197,20 @@ function Worlds() {
   );
 }
 
+/**
+ * Pixel budget: big screens (a 4K smart board, a projector) would otherwise draw millions of
+ * pixels per frame. Keep the canvas at most ~2600 device pixels wide.
+ */
+const DPR_CAP = Math.min(1.5, Math.max(0.75, 2600 / Math.max(1, window.innerWidth)));
+
 export default function Stage() {
   const setWebgl = useStory((s) => s.setWebgl);
-  const [dpr, setDpr] = useState(1.5);
+  const [dpr, setDpr] = useState(DPR_CAP);
   return (
     <Canvas
       className="stage-canvas"
       frameloop="demand"
-      dpr={[1, dpr]}
+      dpr={[Math.min(1, DPR_CAP), dpr]}
       camera={{ position: [0, 0.05, 7.4], fov: 16, near: 0.05, far: 80 }}
       gl={{
         antialias: true,
@@ -219,10 +225,17 @@ export default function Stage() {
         gl.localClippingEnabled = true;
         // the picture is described by the captions; its labels and buttons stay reachable
         gl.domElement.setAttribute('aria-hidden', 'true');
+        // if the graphics card drops the 3D and doesn't bring it back, switch to the still images
+        let lost: ReturnType<typeof setTimeout> | undefined;
+        gl.domElement.addEventListener('webglcontextlost', (e) => {
+          e.preventDefault();
+          lost = setTimeout(() => setWebgl('failed'), 5000);
+        });
+        gl.domElement.addEventListener('webglcontextrestored', () => clearTimeout(lost));
         setWebgl('ok');
       }}
     >
-      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} flipflops={3} />
+      <PerformanceMonitor onDecline={() => setDpr(Math.max(0.75, DPR_CAP * 0.7))} onIncline={() => setDpr(DPR_CAP)} flipflops={3} />
       <AdaptiveDpr pixelated={false} />
       <LoopControl />
       <LightRig />

@@ -148,14 +148,14 @@ function Title() {
         <h1 id="intro-title" className="intro__title">
           Whipple’s Disease
         </h1>
-        <p className="intro__sub">From a 1907 autopsy to the germ that causes it — one continuous zoom.</p>
+        <p className="intro__sub">A zoom from the first case in 1907 down to the germ that causes it.</p>
         <button type="button" className="begin-btn intro__begin" onClick={() => useStory.getState().next()}>
-          Scroll to zoom in
+          Start the zoom
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
             <path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
-        <p className="intro__meta">Also written “Whipple disease” · say “WIP-ul” · arrow keys or a clicker also work</p>
+        <p className="intro__meta">Say it “WIP-ulz” · also written “Whipple disease”</p>
       </div>
       <p className="sr-only">{creditLine()}</p>
     </section>

@@ -3,7 +3,7 @@ import { periodLabel, SUBMISSION } from '../app/config';
 import { MEDIA_CREDITS, SOURCES, SOURCE_BY_ID } from './citations';
 import { GLOSSARY, TERM_BY_KEY } from './glossary';
 import { QUESTIONS } from './quiz';
-import { STOPS, STOP_INDEX } from './story';
+import { FACTS, STOPS, STOP_INDEX } from './story';
 
 const allCaptionText = STOPS.flatMap((s) => [s.title, s.text, s.note ?? '']);
 const citeRefs = (t: string) => [...t.matchAll(/\{c:([\d,\s]+)\}/g)].flatMap((m) => m[1].split(',').map((n) => Number(n.trim())));
@@ -40,11 +40,32 @@ describe('the one-page journey (storyboard order)', () => {
     }
   });
 
-  it('keeps every caption short enough to teach from', () => {
+  it('keeps every caption short enough to read out from the board', () => {
     for (const s of STOPS) {
       const words = s.text.replace(/\{c:[^}]+\}/g, '').split(/\s+/).filter(Boolean).length;
-      expect(words, s.id).toBeLessThanOrEqual(32);
+      expect(words, s.id).toBeLessThanOrEqual(26);
+      expect(s.title.split(/\s+/).length, s.id).toBeLessThanOrEqual(6);
     }
+  });
+
+  it('gives the presenter a script for every stop', () => {
+    for (const s of STOPS) expect(s.say.split(/\s+/).length, s.id).toBeGreaterThanOrEqual(12);
+  });
+
+  it('features a key term, split into word parts, on most stops', () => {
+    const featured = STOPS.filter((s) => s.term);
+    expect(featured.length).toBeGreaterThanOrEqual(6);
+    for (const s of featured) {
+      const t = TERM_BY_KEY.get(s.term!);
+      expect(t, s.id).toBeDefined();
+      expect(t!.short.length, s.id).toBeGreaterThan(0);
+    }
+    expect(featured.filter((s) => (TERM_BY_KEY.get(s.term!)?.parts?.length ?? 0) > 0).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('sums up the four facts on the last stop', () => {
+    expect(FACTS.map((f) => f.label)).toEqual(['Cause', 'Symptoms', 'Diagnosis', 'Treatment']);
+    for (const f of FACTS) expect(f.cites.length, f.label).toBeGreaterThan(0);
   });
 
   it('teaches four numbered clinical facts: cause, symptoms, diagnosis, treatment', () => {
@@ -82,7 +103,7 @@ describe('citations', () => {
       ...GLOSSARY.flatMap((t) => t.cites),
       ...QUESTIONS.flatMap((q) => q.cites),
     ];
-    for (const id of cited) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
+    for (const id of [...cited, ...FACTS.flatMap((f) => f.cites)]) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
   });
 
   it('puts a source marker on every stop that states a fact', () => {
@@ -108,7 +129,8 @@ describe('medical terms', () => {
   });
 
   it('uses at least three medical terms in the captions', () => {
-    expect(new Set(allCaptionText.flatMap(termRefs)).size).toBeGreaterThanOrEqual(3);
+    const used = new Set([...allCaptionText.flatMap(termRefs), ...STOPS.flatMap((s) => (s.term ? [s.term] : []))]);
+    expect(used.size).toBeGreaterThanOrEqual(3);
   });
 
   it('explains at least three terms with word parts and pronunciation', () => {
@@ -126,7 +148,8 @@ describe('history accuracy', () => {
   it('attributes the disease to George Hoyt Whipple (1907) and corrects the class list', () => {
     expect(text).toMatch(/George Hoyt Whipple/);
     expect(text).toMatch(/1907/);
-    expect(text).toMatch(/lipodystrophy/);
+    // his 1907 name for it, shown as the key term on the “name” stop
+    expect(STOPS[STOP_INDEX.name].term).toBe('lipodystrophy');
     const note = STOPS[STOP_INDEX.name].note ?? '';
     expect(note).toMatch(/Allen Whipple/);
     expect(note).toMatch(/Allen O\. Whipple/);

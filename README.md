@@ -11,6 +11,8 @@ treated, ending with a short self-check and the sources.
 
 ![The whole journey, top-left to bottom-right](docs/journey.jpg)
 
+![The list of sources at the end of the page](docs/sources.jpg)
+
 ---
 
 ## Before you submit
@@ -23,45 +25,43 @@ classPeriod: '3',   // shows as “Period 3” on the title and summary
 
 While it is empty the exhibit shows a visible **Period ___** placeholder. Nothing else needs editing.
 
-## Presenting it
+## Presenting it (smart board, projector or laptop)
+
+1. Open the exhibit in Chrome or Edge on the board and press **F** (or the full-screen button, top
+   right) so it fills the screen. Everything the class reads — headlines, text, key terms, buttons —
+   grows with the screen, so it stays readable from the back of the room.
+2. Move with the big **‹ ›** buttons in the bottom-right corner (they show “5 / 17”), a clicker, the
+   arrow keys, or by swiping up and down on the board. Every move is a smooth zoom, and it always
+   comes to rest on a stop.
+3. At each stop, read the big headline and say the one or two lines under it. The gold **Key term**
+   box splits the medical word into its parts (e.g. *arthr-* joint + *-algia* pain = joint pain).
 
 | Do this | To |
 | --- | --- |
-| **Clicker**, **→ / ↓ / Page Down / Space** | zoom smoothly to the next stop |
-| **← / ↑ / Page Up** | go back one stop |
-| **Scroll wheel, trackpad or swipe** | zoom continuously (it settles on the nearest stop) |
+| **‹ ›** buttons, clicker, **→ / ↓ / Page Down / Space** | zoom to the next stop |
+| **‹** button, **← / ↑ / Page Up** | go back one stop |
+| **Swipe**, scroll wheel or trackpad | zoom continuously; it settles on the next stop |
+| **F** | full screen on / off |
 | **Home / End** | jump to 1907 / the summary |
-| **Drag** the 3D picture | turn it (double-click or **R** resets it) |
-| **Right-hand rail** | hover to see the sections, click one to jump there |
-| **Underlined words** | open a definition with pronunciation and word parts |
-| **[1] [2] …** markers | open the source behind that fact |
+| **Drag** the 3D picture | turn it (double-tap or **R** resets it) |
+| Tap an **underlined word** | its definition, pronunciation and word parts |
+| Tap a **[1] [2] …** marker | the source behind that fact |
 
-Tip: to open straight at a stop, add `?stop=` to the address, e.g. `…/?stop=villi` or `…/#villi`.
+After the summary, one more **›** (or swipe) scrolls into the full list of sources, the medical
+terms and the image credits.
+
+### Presenter guide (printable)
+
+Open the exhibit’s address with **`?guide`** on the end (e.g. `http://localhost:4173/?guide`) for a
+printable script: what to say at each stop, each key term with its pronunciation, and the answers to
+the quiz. Print it or keep it on your phone while you present. There is also a link at the very end
+of the exhibit.
+
+Tip: to open straight at a stop, add `?stop=` to the address, e.g. `…/?stop=villi`.
 
 **Backup video.** If the classroom computer can’t run 3D, `node scripts/record-tour.mjs tour.mp4`
-records the whole zoom as a 1280×720 MP4 (needs ffmpeg).
-
-### One sentence per stop (a presenter’s cheat sheet)
-
-| # | Stop | Say |
-| --- | --- | --- |
-| 1 | 1907 | “We’ll zoom from a 1907 autopsy all the way down to the germ behind Whipple’s disease.” |
-| 2 | The doctor | “George Hoyt Whipple was a young pathologist at Johns Hopkins — a doctor who studies diseased tissue.” |
-| 3 | The case | “His patient, a 36-year-old doctor, had weight loss, fatty diarrhea and joint pain; at autopsy the villi were packed with fat.” |
-| 4 | The name | “He called it *intestinal lipodystrophy*, even saw rod-shaped germs, and because he described it first it carries his name.” *(Our class list says “Allen Whipple” — that is a different Whipple, a surgeon.)* |
-| 5 | Body system | “Today we know it is a rare bacterial infection of the digestive system.” |
-| 6 | Small intestine | “It damages the lining of the small intestine, so nutrients are not absorbed — *malabsorption*.” |
-| 7 | The wall | “The wall has four layers; the inner lining, the mucosa, rises into folds.” |
-| 8 | Villi | “The folds are covered in villi — tiny fingers 0.5–1 mm tall with blood vessels and a lacteal for fats.” |
-| 9 | **Fact 1 · Cause** | “The cause is *Tropheryma whipplei*, a rod-shaped bacterium; immune cells called macrophages fill up with it.” |
-| 10 | **Fact 2 · Symptoms** | “Crowded villi flatten and can’t absorb food: diarrhea, belly pain, weight loss.” *(Click Healthy / Whipple’s to compare.)* |
-| 11 | Beyond the gut | “Joint pain often comes first, sometimes years earlier; it can also reach the heart and brain.” |
-| 12 | **Fact 3 · Diagnosis** | “Through an endoscope, a doctor takes a biopsy of the small intestine…” |
-| 13 | | “…a PAS stain makes the bacteria-filled macrophages stand out…” |
-| 14 | | “…and PCR copies the bacterium’s DNA so even a trace can be found.” |
-| 15 | **Fact 4 · Treatment** | “About 2–4 weeks of IV antibiotics, then about a year of pills — and follow-up, because it can come back.” |
-| 16 | Self-check | “Quick check: click the organ it damages most.” |
-| 17 | Summary | “Named for George Hoyt Whipple, caused by *T. whipplei*, damages the small intestine, treated with long-term antibiotics.” |
+records the whole zoom as an MP4 (needs ffmpeg). Without WebGL the page itself still works, with
+still pictures instead of 3D.
 
 ## Assignment checklist
 
@@ -69,10 +69,10 @@ records the whole zoom as a 1280×720 MP4 (needs ffmpeg).
 | --- | --- |
 | Chronological story: 1907 → Whipple → case → name → body system → organ → facts | Stops 1–15, in that order |
 | At least 4 clinical facts | Fact 1 cause · Fact 2 symptoms · Fact 3 diagnosis · Fact 4 treatment |
-| At least 3 medical terms, explained | 14 terms with pronunciation and word parts (**Terms** button, or click an underlined word) |
-| At least 3 credible sources, cited inline | 17 references (Merck Manuals, MedlinePlus, StatPearls/NCBI, CDC, OpenStax, the 1907 paper…) — every fact carries a `[n]` marker; **Sources** button lists them in APA style |
-| Media credits | End of the Sources panel, and [CREDITS.md](CREDITS.md) |
-| At least 3 kinds of interaction | turn the 3D model · hotspot/marker and term pop-ups · healthy-vs-disease toggle · self-check quiz (click the organ on the model + multiple choice) |
+| At least 3 medical terms, explained | a **Key term** on 9 of the stops, split into word parts; 14 terms in all with pronunciation (**Terms** button, underlined words, and the list at the end) |
+| At least 3 credible sources, cited inline | 17 references (Merck Manuals, MedlinePlus, StatPearls/NCBI, CDC, OpenStax, the 1907 paper…) — every fact carries a `[n]` marker; the full APA list is at the end of the page (and behind the **Sources** button) |
+| Media credits | End of the page, the Sources panel, and [CREDITS.md](CREDITS.md) |
+| At least 3 kinds of interaction | turn the 3D model · hotspot/marker and term pop-ups · healthy-vs-disease toggle · self-check quiz (tap the organ on the model + multiple choice) |
 | Student name and class period | Title screen and summary (edit the period in `src/app/config.ts`) |
 | Correct eponym | George Hoyt Whipple (1907). The class list’s “Allen Whipple” is corrected on stop 4 — Allen O. Whipple was the surgeon behind the Whipple procedure. |
 
@@ -94,8 +94,8 @@ Opens a local server with hot reload (Vite). Other scripts:
 | --- | --- |
 | `npm run build` | type-check and build the static site into `dist/` |
 | `npm run preview` | serve the built site at http://localhost:4173 |
-| `npm test` | unit tests (Vitest): story order, facts, sources, terms, quiz, zoom logic, camera poses |
-| `npm run test:e2e` | browser tests (Playwright): full scroll/clicker walk, organ click, quiz, overlays, reduced motion, no-WebGL fallback, laptop and phone sizes |
+| `npm test` | unit tests (Vitest): story order, caption length, presenter scripts, key terms, facts, sources, quiz, zoom logic, camera poses |
+| `npm run test:e2e` | browser tests (Playwright): full clicker walk, smart-board touch (Back/Next taps, swipes, text size), sources page, presenter guide, organ click, quiz, overlays, reduced motion, no-WebGL fallback, laptop and phone sizes |
 | `npm run lint` | oxlint |
 
 First time running the browser tests: `npx playwright install chromium`.

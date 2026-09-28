@@ -439,8 +439,8 @@ export function VilliWorld({ visible }: { visible: boolean }) {
           </span>
         </div>
       </Label3D>
-      <Label3D visible={visible && id === 'villi'} position={[HERO.x - 0.085, heroY + 0.38, HERO.z]} interactive>
-        <div className="leader leader--left" style={{ animation: 'rise 700ms 700ms both' }}>
+      <Label3D visible={visible && id === 'villi'} position={[HERO.x + 0.085, heroY + 0.3, HERO.z]} interactive>
+        <div className="leader" style={{ animation: 'rise 700ms 700ms both' }}>
           <span className="leader__line" style={{ width: 80 }} />
           <span className="tag">
             Capillaries <small>blood vessels</small> <Cites ids={[11]} />

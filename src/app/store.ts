@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { QUESTIONS } from '../content/quiz';
 import { STOPS, STOP_INDEX, type StopId, type World } from '../content/story';
 import type { OrganId } from '../three/anatomy/organs';
-import { scrollToStop } from './journey';
+import { currentTargetStop, scrollToStop } from './journey';
 
 export interface TermAnchor {
   key: string;
@@ -92,8 +92,8 @@ export const useStory = create<State>((set, get) => ({
     set({ stop: i, term: null, historyNote: null, quizFeedback: null, ...(leftSymptoms ? { mechanism: 'disease' as const } : {}) });
   },
   goToId: (id) => scrollToStop(STOP_INDEX[id]),
-  next: () => scrollToStop(Math.round(window.scrollY / window.innerHeight) + 1),
-  back: () => scrollToStop(Math.round(window.scrollY / window.innerHeight) - 1),
+  next: () => scrollToStop(currentTargetStop() + 1),
+  back: () => scrollToStop(currentTargetStop() - 1),
   restart: () => {
     set({
       quizIndex: 0,

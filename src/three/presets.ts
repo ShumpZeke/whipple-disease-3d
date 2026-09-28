@@ -21,8 +21,43 @@ export interface AnatomyRefs {
 const add = (a: THREE.Vector3, d: V3): V3 => [a.x + d[0], a.y + d[1], a.z + d[2]];
 const along = (a: THREE.Vector3, n: THREE.Vector3, k: number): V3 => [a.x + n.x * k, a.y + n.y * k, a.z + n.z * k];
 
+/**
+ * Where each stop's subject sits on a landscape screen, as a fraction of half the screen
+ * (x: + moves it right, y: + moves it up): clear of the big caption in the bottom-left corner.
+ */
+const LAYOUT: Partial<Record<StopId, [number, number]>> = {
+  body: [0.3, 0],
+  intestine: [0.4, 0.04],
+  wall: [0.22, 0.12],
+  villi: [0.3, 0],
+  cause: [0.12, 0.04],
+  symptoms: [0.25, 0],
+  stain: [0.36, 0.04],
+  quiz: [0.3, 0],
+  end: [0.3, 0],
+};
+
+/** Slide the camera sideways/up so the subject lands at (fx, fy) of the half-screen. */
+function frameAt(p: Pose, fx: number, fy: number, aspect: number): Pose {
+  const pos = new THREE.Vector3(...p.pos);
+  const target = new THREE.Vector3(...p.target);
+  const fwd = target.clone().sub(pos);
+  const halfH = Math.tan(THREE.MathUtils.degToRad(p.fov / 2)) * fwd.length();
+  fwd.normalize();
+  const right = new THREE.Vector3().crossVectors(fwd, THREE.Object3D.DEFAULT_UP).normalize();
+  const up = new THREE.Vector3().crossVectors(right, fwd);
+  const off = right.multiplyScalar(-fx * halfH * aspect).addScaledVector(up, -fy * halfH);
+  return { pos: pos.add(off).toArray() as V3, target: target.add(off).toArray() as V3, fov: p.fov };
+}
+
 /** The pose the camera rests at for each stop (`aspect` = viewport width / height). */
 export function stopPose(id: StopId, r: AnatomyRefs, aspect = 16 / 9): Pose {
+  const p = basePose(id, r, aspect);
+  const at = aspect >= 1 ? LAYOUT[id] : undefined;
+  return at ? frameAt(p, at[0], at[1], aspect) : p;
+}
+
+function basePose(id: StopId, r: AnatomyRefs, aspect: number): Pose {
   switch (id) {
     case 'body':
       return { pos: [0.55, 0.25, 4.15], target: [0, -0.04, 0], fov: 30 };
@@ -39,11 +74,12 @@ export function stopPose(id: StopId, r: AnatomyRefs, aspect = 16 / 9): Pose {
     case 'spread':
       // on a phone held upright there is no room beside the gut: frame the column of other organs
       if (aspect < 0.8) return { pos: [2.24, -0.5, 7.35], target: [2.24, -0.65, 0], fov: 30 };
-      return { pos: [0.72, 0.18, 5.6], target: [0.72, 0.02, 0], fov: 30 };
+      // the gut and the other organs sit in the top two-thirds, above the caption
+      return { pos: [0.55, -0.5, 7.2], target: [0.55, -0.66, 0], fov: 30 };
     case 'biopsy':
       return { pos: [2.55, 1.5, 1.05], target: [0.2, 0.02, 0.12], fov: 42 };
     case 'stain':
-      return { pos: [20, -0.1, 7.6], target: [20, -0.25, 0], fov: 34 };
+      return { pos: [20, -0.1, 9.4], target: [20, -0.25, 0], fov: 34 };
     case 'pcr':
       return { pos: [40.3, 0.45, 7.75], target: [39.55, 0.15, 0], fov: 36 };
     case 'treatment':

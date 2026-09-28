@@ -1,4 +1,4 @@
-import { LAST_STOP, STOPS, type Stop, type World } from '../content/story';
+import { LAST_STOP, SOURCES_PAGE, STOPS, type Stop, type World } from '../content/story';
 
 /**
  * The scroll-driven zoom. `journey.t` is a continuous position along the story:
@@ -98,26 +98,35 @@ export const stopPresence = (t: number, index: number) => 1 - smoothstep(0.16, 0
 /* ------------------------------------------------------------------ scroll driver */
 
 const vh = () => window.innerHeight;
-let tween: { from: number; to: number; start: number; dur: number } | null = null;
+let tween: { index: number; from: number; to: number; start: number; dur: number } | null = null;
 
-/** Smoothly scroll the page to a stop (keyboard, presenter clicker, rail, buttons). */
+/**
+ * Smoothly scroll the page to a stop (keyboard, presenter clicker, Back/Next buttons, rail).
+ * Index SOURCES_PAGE (one past the last stop) is the list of sources below the summary.
+ */
 export function scrollToStop(index: number, instant = false) {
-  const i = Math.min(LAST_STOP, Math.max(0, index));
+  const i = Math.min(SOURCES_PAGE, Math.max(0, index));
   const to = i * vh();
   if (instant || journey.reduced) {
     tween = null;
+    document.documentElement.classList.remove('is-tweening');
     window.scrollTo(0, to);
     return;
   }
   const from = window.scrollY;
   const dist = Math.abs(to - from) / vh();
-  tween = { from, to, start: performance.now(), dur: Math.min(2600, 900 + 700 * Math.sqrt(dist)) };
+  tween = { index: i, from, to, start: performance.now(), dur: Math.min(2600, 900 + 700 * Math.sqrt(dist)) };
   document.documentElement.classList.add('is-tweening');
 }
 
+/** The stop the page is at, or heading to (so pressing Next twice quickly moves two stops). */
 export function currentTargetStop() {
-  return Math.round(window.scrollY / vh());
+  if (tween) return tween.index;
+  return Math.min(SOURCES_PAGE, Math.round(window.scrollY / vh()));
 }
+
+/** `?nosettle` turns settling off, so the screenshot scripts can stop between two stops. */
+const settling = typeof location === 'undefined' || !new URLSearchParams(location.search).has('nosettle');
 
 let running = false;
 export function startJourney(onStop: (i: number) => void, onWorld: (w: World) => void) {
@@ -132,8 +141,67 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
       document.documentElement.classList.remove('is-tweening');
     }
   };
+  // a wheel turn or a finger dragging the page takes over from a running zoom (a tap does not,
+  // so tapping Next twice on a touch screen moves two stops)
   window.addEventListener('wheel', cancelTween, { passive: true });
-  window.addEventListener('touchstart', cancelTween, { passive: true });
+  window.addEventListener('touchmove', cancelTween, { passive: true });
+  // Entering full screen (or rotating a tablet) changes the screen height, which would move every
+  // stop's scroll position: stay on the same spot of the journey instead.
+  let lastVh = vh();
+  let lastRatio = window.scrollY / vh();
+  const onResize = () => {
+    if (vh() === lastVh) return;
+    lastVh = vh();
+    if (tween) {
+      const i = tween.index;
+      tween = null;
+      document.documentElement.classList.remove('is-tweening');
+      window.scrollTo(0, i * vh());
+    } else {
+      dir = 0;
+      window.scrollTo(0, lastRatio * vh());
+    }
+  };
+  window.addEventListener('resize', onResize);
+
+  // Always come to rest on a stop (that is where the captions are). When a wheel, trackpad or
+  // finger scroll ends between two stops, finish the zoom in the direction it was going; a small
+  // nudge falls back. The list of sources after the last stop scrolls freely.
+  let touching = false;
+  let lastY = window.scrollY;
+  let dir = 0;
+  let settleTimer: ReturnType<typeof setTimeout> | undefined;
+  const settle = () => {
+    settleTimer = undefined;
+    if (tween || touching || !settling) return;
+    const r = window.scrollY / vh();
+    if (r >= SOURCES_PAGE - 0.01) return;
+    const near = Math.round(r);
+    if (Math.abs(r - near) < 0.01) return;
+    scrollToStop(dir > 0 ? Math.ceil(r - 0.15) : dir < 0 ? Math.floor(r + 0.15) : near);
+  };
+  const scheduleSettle = () => {
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(settle, 220);
+  };
+  const onScroll = () => {
+    const y = window.scrollY;
+    if (y !== lastY) dir = Math.sign(y - lastY);
+    lastY = y;
+    if (!tween && !touching) scheduleSettle();
+  };
+  const onTouchStart = () => {
+    touching = true;
+    clearTimeout(settleTimer);
+  };
+  const onTouchEnd = () => {
+    touching = false;
+    scheduleSettle();
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('touchstart', onTouchStart, { passive: true });
+  window.addEventListener('touchend', onTouchEnd, { passive: true });
+  window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
   const loop = (now: number) => {
     if (!running) return;
@@ -148,7 +216,8 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
         document.documentElement.classList.remove('is-tweening');
       }
     }
-    journey.target = Math.min(LAST_STOP, Math.max(0, window.scrollY / vh()));
+    lastRatio = window.scrollY / vh();
+    journey.target = Math.min(LAST_STOP, Math.max(0, lastRatio));
     const prev = journey.t;
     if (journey.reduced) journey.t = journey.target;
     else journey.t += (journey.target - journey.t) * (1 - Math.exp(-dt * 7));
@@ -176,7 +245,13 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
   return () => {
     running = false;
     window.removeEventListener('wheel', cancelTween);
-    window.removeEventListener('touchstart', cancelTween);
+    window.removeEventListener('touchmove', cancelTween);
+    window.removeEventListener('resize', onResize);
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
+    clearTimeout(settleTimer);
   };
 }
 

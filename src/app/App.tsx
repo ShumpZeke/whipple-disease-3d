@@ -1,10 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { LAST_STOP, STOPS, STOP_INDEX, type StopId } from '../content/story';
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { LAST_STOP, SOURCES_PAGE, STOPS, STOP_INDEX, type StopId } from '../content/story';
 import { ORGANS } from '../three/anatomy/organs';
 import { Caption } from '../ui/Caption';
 import { Fallback, StageLoading } from '../ui/Fallback';
 import { Backdrops, HistoryLayer, PlateLabel } from '../ui/History';
-import { Credit, DepthRail, HudTop, ScrollCue } from '../ui/Hud';
+import { EndSources } from '../ui/EndSources';
+import { Credit, DepthRail, HudTop, PresenterNav, ScrollCue, toggleFullscreen } from '../ui/Hud';
 import { GlossaryOverlay, SourcesOverlay } from '../ui/Overlays';
 import { TermPopover } from '../ui/TermPopover';
 import { useJourney } from '../ui/useJourney';
@@ -13,12 +14,26 @@ import { useStory } from './store';
 
 const Stage = lazy(() => import('../three/Stage'));
 
+/** three.js needs WebGL 2; older smart-board or kiosk browsers without it get the still images. */
 function webglAvailable() {
   try {
-    const c = document.createElement('canvas');
-    return !!(c.getContext('webgl2') || c.getContext('webgl'));
+    return !!document.createElement('canvas').getContext('webgl2');
   } catch {
     return false;
+  }
+}
+
+/** If the 3D stage fails to start on some device, show the still images instead of a blank page. */
+class StageBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch() {
+    useStory.getState().setWebgl('failed');
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
   }
 }
 
@@ -46,6 +61,22 @@ function useKeyboard() {
       const onButton = tag === 'BUTTON' || tag === 'A';
       const forward = ['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key) || (e.key === ' ' && !e.shiftKey && !onButton);
       const backward = ['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key) || (e.key === ' ' && e.shiftKey && !onButton);
+      if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+        return;
+      }
+      // the list of sources scrolls like a normal page; stepping back from its top returns to the summary
+      const sourcesTop = SOURCES_PAGE * window.innerHeight;
+      if (window.scrollY > sourcesTop - 4) {
+        if (backward && window.scrollY < sourcesTop + 4) {
+          scrollToStop(LAST_STOP);
+          e.preventDefault();
+        } else if (e.key === 'Home') {
+          scrollToStop(0);
+          e.preventDefault();
+        }
+        return;
+      }
       if (forward) {
         scrollToStop(currentTargetStop() + 1);
         e.preventDefault();
@@ -205,9 +236,11 @@ export default function App() {
         <Backdrops />
         {!fallback && loadStage && (
           <div className="canvas-layer" style={{ opacity: 0 }}>
-            <Suspense fallback={null}>
-              <Stage />
-            </Suspense>
+            <StageBoundary>
+              <Suspense fallback={null}>
+                <Stage />
+              </Suspense>
+            </StageBoundary>
           </div>
         )}
         {fallback && worldNeeded && <Fallback />}
@@ -219,6 +252,7 @@ export default function App() {
         <ScaleNote />
         <HudTop />
         <DepthRail />
+        <PresenterNav />
         <ScrollCue />
         <Credit />
         <HoverTip />
@@ -227,6 +261,7 @@ export default function App() {
         <GlossaryOverlay />
         <div className="grain" aria-hidden="true" />
       </main>
+      <EndSources />
     </>
   );
 }

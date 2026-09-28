@@ -20,7 +20,7 @@ const waitForStage = (page: Page) => page.waitForFunction(() => !!window.__whipp
 test('opens in 1907 with the student credit', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /Scroll to zoom in/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Start the zoom/ })).toBeVisible();
   await expect(page.locator('.credit')).toContainText('Vardhmansinh Rathod');
   await expect(page.locator('.credit')).toContainText('Period');
   expect(errors).toEqual([]);
@@ -71,7 +71,7 @@ test('self-check: pick the organ on the 3D model, then answer the questions', as
   const errors = collectErrors(page);
   await page.goto('/?stop=quiz&e2e');
   await waitForStage(page);
-  await expect(page.locator('.quiz__prompt')).toContainText('select the organ');
+  await expect(page.locator('.quiz__prompt')).toContainText('tap the organ');
   await page.waitForTimeout(800);
   const pt = await page.evaluate(() => window.__whipple!.organPoint('SmallIntestine'));
   expect(pt).not.toBeNull();
@@ -161,3 +161,78 @@ for (const vp of [
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(vp.width);
   });
 }
+
+test.describe('on a smart board (1920×1080 touch screen)', () => {
+  test.use({ viewport: { width: 1920, height: 1080 }, hasTouch: true });
+
+  test('big text, big Back/Next buttons and swiping', async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto('/?e2e');
+    await waitForStage(page);
+    // text sized for the back of a classroom
+    await page.getByRole('button', { name: 'Next', exact: true }).tap();
+    await expect.poll(async () => (await state(page))?.id).toBe('doctor');
+    const title = page.locator('section.caption[data-step="doctor"] .caption__title');
+    await expect(title).toBeVisible();
+    expect(parseFloat(await title.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(56);
+    const body = page.locator('section.caption[data-step="doctor"] .caption__body');
+    expect(parseFloat(await body.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(24);
+    await expect(page.locator('section.caption[data-step="doctor"] .keyterm')).toContainText('Pathology');
+    // two quick taps move two stops
+    const next = page.getByRole('button', { name: 'Next', exact: true });
+    await next.tap();
+    await next.tap();
+    await expect.poll(async () => (await state(page))?.id).toBe('name');
+    await page.getByRole('button', { name: 'Back', exact: true }).tap();
+    await expect.poll(async () => (await state(page))?.id).toBe('case');
+    await expect(page.locator('.pnav__count')).toContainText(`3 / ${STOPS.length}`);
+    // big enough to hit with a finger
+    const box = (await next.boundingBox())!;
+    expect(box.width).toBeGreaterThanOrEqual(56);
+    // a finger swipe up zooms on to the next stop and comes to rest there; a tiny swipe falls back
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 2)).toBeLessThan(0.01);
+    const cdp = await page.context().newCDPSession(page);
+    const swipe = async (x: number, y: number, dy: number) => {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+      for (let i = 1; i <= 12; i++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y + (dy * i) / 12 }] });
+        await page.waitForTimeout(16);
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    };
+    await swipe(1300, 900, -420);
+    await expect.poll(async () => (await state(page))?.id).toBe('name');
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 3)).toBeLessThan(0.01);
+    await swipe(1300, 500, 60);
+    await page.waitForTimeout(1500);
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 3)).toBeLessThan(0.01);
+    await expect(page.getByRole('button', { name: /Full screen/ })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('the summary leads on to the list of sources', async ({ page }) => {
+    await page.goto('/?stop=end&e2e');
+    await waitForStage(page);
+    await expect(page.locator('section.caption[data-step="end"] .facts li')).toHaveCount(4);
+    await page.getByRole('button', { name: 'Next: sources' }).tap();
+    const sources = page.locator('#sources');
+    await expect.poll(async () => Math.abs((await sources.boundingBox())?.y ?? 999)).toBeLessThan(4);
+    await expect(sources.getByRole('heading', { name: 'Sources' })).toBeVisible();
+    expect(await sources.locator('.endnotes__refs li').count()).toBe(17);
+    await expect(sources.locator('.endnotes__terms')).toContainText('Malabsorption');
+    await expect(sources.locator('.endnotes__credits')).toContainText('BodyParts3D');
+    await expect(sources).toContainText('Vardhmansinh Rathod');
+    // stepping back from the top of the list returns to the summary
+    await page.keyboard.press('PageUp');
+    await expect.poll(async () => Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(STOPS.length - 1);
+  });
+});
+
+test('the printable presenter guide has a script for every stop and the quiz answers', async ({ page }) => {
+  await page.goto('/?guide');
+  await expect(page.getByRole('heading', { name: 'Whipple’s Disease', level: 1 })).toBeVisible();
+  await expect(page.locator('.guide__stop')).toHaveCount(STOPS.length);
+  await expect(page.locator('.guide__say')).toHaveCount(STOPS.length);
+  await expect(page.locator('.guide__answers li')).toHaveCount(QUESTIONS.length);
+  await expect(page.locator('.guide__answers')).toContainText('the small intestine');
+});

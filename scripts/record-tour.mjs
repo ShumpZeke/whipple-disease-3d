@@ -21,12 +21,10 @@ await withPreview(async (base) => {
   await page.goto(`${base}?e2e`);
   await page.waitForFunction(() => !!window.__whipple, null, { timeout: 60000 });
   // visit every scene once so all shaders are compiled before the tour starts
-  await page.evaluate(() => document.documentElement.classList.add('is-tweening'));
   for (const t of [4, 6, 7, 8, 10, 11, 12, 13, 15, 0]) {
     await page.evaluate((t) => window.scrollTo(0, t * innerHeight), t);
     await page.waitForTimeout(t === 4 ? 5000 : 1500);
   }
-  await page.evaluate(() => document.documentElement.classList.remove('is-tweening'));
   await page.reload();
   await page.waitForTimeout(3500);
   skip = (Date.now() - t0) / 1000 - 3.2;

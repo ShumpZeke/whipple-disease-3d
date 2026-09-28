@@ -24,7 +24,7 @@ export const QUESTIONS: Question[] = [
   {
     id: 'organ',
     kind: 'organ',
-    prompt: 'On the model, select the organ Whipple’s disease damages most directly.',
+    prompt: 'On the model, tap the organ that Whipple’s disease damages most.',
     answer: 'SmallIntestine',
     correct: 'Yes — the small intestine, where villi absorb nutrients.',
     retry: 'That’s the {organ}. Look for the long, coiled tube in the middle.',
