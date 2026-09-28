@@ -1,12 +1,12 @@
 /**
  * The whole exhibit is ONE continuous zoom. Scrolling moves a camera through these stops in order:
- * 1907 → Whipple → the case → the name → today's digestive system → small intestine → its wall →
+ * home → Whipple → the case → the name → the disease (definition) → small intestine → its wall →
  * villi → the bacterium (cause) → malabsorption (symptoms) → the whole body → diagnosis → treatment →
  * a quick check → summary (then the list of sources).
  *
- * Written to be presented: one idea per stop, a big headline, one or two short sentences, and at
- * most one "key term" broken into its word parts. `say` is the presenter's script for that stop
- * (shown on the printable presenter guide, not on the big screen).
+ * Written to be presented, not read: a short label for the part of the story, a headline of a few
+ * words, one short line, and at most one key term. `say` is the presenter's line for that stop
+ * (on the printable presenter guide, not on the big screen); `demo` is what to tap there.
  *
  * Caption markup (ui/RichText.tsx):  {t:key|label} term · {c:1,2} source markers · *italics*
  */
@@ -35,11 +35,15 @@ export type World = 'none' | 'anatomy' | 'tissue' | 'villi' | 'micro' | 'diagnos
 /** A scene is what the camera is looking at; moving between scenes is a zoom "through" a surface. */
 export type Scene = 'history' | 'anatomy' | 'tissue' | 'villi' | 'micro' | 'biopsy' | 'stain' | 'pcr';
 
+/** The part of the story a stop belongs to; each has its own colour and icon. */
+export type Category = 'intro' | 'history' | 'disease' | 'cause' | 'symptoms' | 'diagnosis' | 'treatment' | 'check' | 'summary';
+
 export interface Stop {
   id: StopId;
   scene: Scene;
   world: World;
-  /** Short label on the zoom rail (only some stops show one). */
+  cat: Category;
+  /** Section name on the zoom rail (on the first stop of each part). */
   rail?: string;
   eyebrow: string;
   title: string;
@@ -50,8 +54,8 @@ export interface Stop {
   termLabel?: string;
   /** Optional second, smaller line (used for the class-list correction). */
   note?: string;
-  /** What the presenter can tap or do here. */
-  hint?: string;
+  /** What the presenter taps here to show an interactive feature (presenter guide only). */
+  demo?: string;
   /** Presenter script: what to say out loud at this stop. */
   say: string;
 }
@@ -61,175 +65,196 @@ export const STOPS: Stop[] = [
     id: 'title',
     scene: 'history',
     world: 'none',
+    cat: 'intro',
     rail: 'Home',
     eyebrow: 'Medical Terminology · Eponym #26',
     title: 'Whipple’s Disease',
-    text: 'A rare infection, caused by bacteria, that damages the small intestine so the body can’t absorb food. {c:1,2}',
-    hint: 'Introduce yourself, then tap Start (or tap a section to jump to it)',
-    say: 'My eponym is Whipple’s disease. An eponym is a medical term named after a person. My project is one page that zooms in, in five parts: the history, the disease, four facts, a quick check, and my sources. You can tap any underlined word for its meaning and the small numbers for my sources.',
+    text: 'A rare bacterial infection that damages the small intestine, so the body can’t absorb food. {c:1,2}',
+    demo: 'Point to “What’s inside” to show the five parts, then tap Start',
+    say: 'My eponym is Whipple’s disease — a medical term named after a person. It’s one zooming page in five parts: the history, the disease, four facts, a quick check, and my sources.',
   },
   {
     id: 'doctor',
     scene: 'history',
     world: 'none',
+    cat: 'history',
     rail: 'History',
-    eyebrow: 'History · Who was Whipple?',
+    eyebrow: 'History',
     title: 'Dr. George Hoyt Whipple',
-    text: 'The disease is named after him. He was a pathologist: a doctor who studies diseased tissue to find out what went wrong. {c:5,7}',
+    text: 'The disease is named after him. He was a pathologist: a doctor who studies diseased tissue. {c:5,7}',
     term: 'pathology',
-    say: 'The disease is named after Dr. George Hoyt Whipple. He was born in 1878 in New Hampshire and became a doctor at Johns Hopkins. He was a pathologist — “path-” means disease and “-ology” means study of — so he studied diseased tissue. In 1934 he even shared a Nobel Prize for his work on anemia.',
+    demo: 'Tap the word “Pathology” to show its pop-up definition',
+    say: 'It’s named after Dr. George Hoyt Whipple. He was a pathologist — “path” means disease and “-ology” means study of — and in 1934 he won a Nobel Prize.',
   },
   {
     id: 'case',
     scene: 'history',
     world: 'none',
-    eyebrow: 'History · The first case, 1907',
-    title: 'A mystery illness',
-    text: 'A 36-year-old doctor lost weight and had diarrhea and joint pain. After he died, Whipple found his intestine lining packed with fat. {c:5}',
-    hint: 'Tap a highlighted phrase to see what it means today',
-    say: 'His patient was a 36-year-old doctor who kept losing weight and had diarrhea and joint pain. Nobody knew why. After the patient died, Whipple did an autopsy and found the lining of the small intestine packed with fat.',
+    cat: 'history',
+    eyebrow: 'History',
+    title: 'The first case, 1907',
+    text: 'A 36-year-old doctor had weight loss, diarrhea and joint pain. At his autopsy, the intestine was packed with fat. {c:5}',
+    demo: 'Tap a highlighted phrase in the 1907 article to see what it means today',
+    say: 'In 1907 Whipple studied a 36-year-old doctor who was losing weight and had diarrhea and joint pain. At the autopsy, his intestine was full of fat.',
   },
   {
     id: 'name',
     scene: 'history',
     world: 'none',
-    eyebrow: 'History · The name',
-    title: 'Why is it named after him?',
-    text: 'He was the first to describe it, in 1907, so the disease carries his name. That makes it an eponym. {c:5,6}',
+    cat: 'history',
+    eyebrow: 'History',
+    title: 'Why his name?',
+    text: 'He described it first, in 1907, so it carries his name. That makes it an eponym. {c:5,6}',
     term: 'lipodystrophy',
     termLabel: 'His 1907 name for it',
     note: 'Correction: our class list says “Allen Whipple.” It is George Hoyt Whipple. Allen O. Whipple was a different doctor, a surgeon. {c:6,8}',
-    say: 'Whipple was the first to describe it, so the disease carries his name. That’s what makes it an eponym. He called it intestinal lipodystrophy: “lipo” means fat, “dys” means abnormal, “trophy” means growth. One correction: our class list says Allen Whipple, but that’s a different doctor, a surgeon. The disease is named after George Hoyt Whipple.',
+    say: 'He described it first, so it carries his name. He called it intestinal lipodystrophy — abnormal fat. Our class list says Allen Whipple, but that’s a different doctor, a surgeon.',
   },
   {
     id: 'body',
     scene: 'anatomy',
     world: 'anatomy',
+    cat: 'disease',
     rail: 'The disease',
-    eyebrow: 'The disease · Definition',
+    eyebrow: 'The disease',
     title: 'What is Whipple’s disease?',
-    text: 'A rare infection, caused by bacteria, that damages the small intestine so the body can’t absorb food. {c:1,2,3}',
-    hint: 'Tap ＋ on the small intestine to zoom in',
-    say: 'Here is my definition, in my own words: Whipple’s disease is a rare infection, caused by bacteria, that damages the small intestine so the body can’t absorb food. It belongs to the digestive system, so the doctors who handle it are digestive-system specialists — gastroenterology.',
+    text: 'A rare bacterial infection that damages the small intestine, so food isn’t absorbed. {c:1,2,3}',
+    demo: 'Drag the model to turn it, then tap ＋ on the small intestine',
+    say: 'In my own words: it’s a rare bacterial infection that damages the small intestine, so the body can’t absorb food. It belongs to the digestive system.',
   },
   {
     id: 'intestine',
     scene: 'anatomy',
     world: 'anatomy',
-    eyebrow: 'The disease · The organ',
+    cat: 'disease',
+    eyebrow: 'The disease',
     title: 'The small intestine',
-    text: 'This is where food is absorbed into the body. The infection damages its lining, so food is not absorbed well. {c:1,3}',
+    text: 'This is where food is absorbed. The infection damages its lining. {c:1,3}',
     term: 'malabsorption',
-    say: 'The small intestine is where nutrients from food get absorbed into the body. The infection damages its lining, so food isn’t absorbed well. That’s called malabsorption: “mal-” means bad, so it literally means bad absorption.',
+    say: 'The small intestine is where food gets absorbed. The infection damages its lining — that’s malabsorption. “Mal” means bad.',
   },
   {
     id: 'wall',
     scene: 'tissue',
     world: 'tissue',
-    eyebrow: 'The disease · Zoom in',
+    cat: 'disease',
+    eyebrow: 'The disease',
     title: 'Inside the wall',
-    text: 'The wall has four layers. The inner lining (the mucosa) has folds that give it more surface to absorb food. {c:17,11}',
-    say: 'Let’s zoom into the wall. It has four layers. The inside layer, the mucosa, is folded, which gives it more surface for absorbing food.',
+    text: 'Four layers. The inner lining, the mucosa, is folded to give it more surface. {c:17,11}',
+    say: 'Zooming into the wall: it has four layers, and the inner lining, the mucosa, is folded to make more surface.',
   },
   {
     id: 'villi',
     scene: 'villi',
     world: 'villi',
-    eyebrow: 'The disease · Zoom in closer',
+    cat: 'disease',
+    eyebrow: 'The disease',
     title: 'Villi',
-    text: 'Tiny finger-like bumps, 0.5–1 mm tall, that soak up food. Inside each one: blood vessels and a {t:lacteal} for fat. {c:11}',
+    text: 'Tiny fingers, 0.5–1 mm tall, that soak up food. Each has blood vessels and a {t:lacteal} inside. {c:11}',
     term: 'villi',
-    say: 'The lining is covered in villi: tiny finger-like bumps, less than a millimeter tall, that soak up nutrients. Inside each one are tiny blood vessels and a lacteal, which carries away fat. Remember the villi — this is where the disease does its damage.',
+    say: 'The lining is covered in villi — tiny fingers that soak up food. This is exactly where the disease does its damage.',
   },
   {
     id: 'cause',
     scene: 'micro',
     world: 'micro',
+    cat: 'cause',
     rail: '4 facts',
     eyebrow: 'Fact 1 · Cause',
     title: '*Tropheryma whipplei*',
-    text: 'A rod-shaped bacterium causes the disease. Immune cells called macrophages fill up with it. {c:1,2,6}',
+    text: 'A rod-shaped bacterium. Immune cells called macrophages fill up with it. {c:1,2,6}',
     term: 'macrophage',
-    say: 'Fact one, the cause: a rod-shaped bacterium called Tropheryma whipplei — say it “tro-FER-ih-muh WIP-uh-lee-eye.” Immune cells called macrophages — “macro” means large, “phage” means eating — swallow the bacteria and end up packed full of them.',
+    say: 'Fact one, the cause: a rod-shaped bacterium called Tropheryma whipplei. Immune cells called macrophages — “big eaters” — fill up with it.',
   },
   {
     id: 'symptoms',
     scene: 'villi',
     world: 'villi',
+    cat: 'symptoms',
     eyebrow: 'Fact 2 · Symptoms',
-    title: 'Food is not absorbed',
-    text: 'Damaged villi flatten and can’t absorb food. The result: diarrhea, weight loss and belly pain. {c:1,2,9}',
-    hint: 'Tap to compare healthy and infected villi',
-    say: 'Fact two, symptoms. The infected villi flatten, so food passes straight through instead of being absorbed. That causes diarrhea, weight loss and belly pain. Compare them here: healthy villi absorb most of the food, infected villi absorb very little.',
+    title: 'Food isn’t absorbed',
+    text: 'Damaged villi flatten, so food passes straight through: diarrhea, weight loss, belly pain. {c:1,2,9}',
+    demo: 'Tap “Healthy villi”, then “Whipple’s disease”, to compare',
+    say: 'Fact two, symptoms: the villi flatten, so food passes straight through. That causes diarrhea, weight loss and belly pain.',
   },
   {
     id: 'spread',
     scene: 'anatomy',
     world: 'anatomy',
+    cat: 'symptoms',
     eyebrow: 'Fact 2 · Symptoms',
     title: 'Beyond the gut',
-    text: 'Joint pain is often the first sign, sometimes years earlier. The infection can also reach the heart and brain. {c:1,2,3}',
+    text: 'Joint pain often comes first, sometimes years earlier. It can also reach the heart and brain. {c:1,2,3}',
     term: 'arthralgia',
-    say: 'It doesn’t stay in the gut. Joint pain — arthralgia: “arthr-” means joint and “-algia” means pain — is often the very first symptom, sometimes years before the stomach problems. It can also spread to the heart and the brain.',
+    say: 'Joint pain — arthralgia — is often the very first symptom, sometimes years before the stomach problems. It can also reach the heart and brain.',
   },
   {
     id: 'biopsy',
     scene: 'biopsy',
     world: 'diagnosis',
+    cat: 'diagnosis',
     eyebrow: 'Fact 3 · Diagnosis',
-    title: 'Step 1: Take a sample',
-    text: 'Through an {t:endoscopy|endoscope} (a thin tube with a camera), a doctor takes a tiny piece of the small intestine. {c:2,14}',
+    title: 'Step 1: take a sample',
+    text: 'An {t:endoscopy|endoscope}, a thin tube with a camera, takes a tiny piece of the small intestine. {c:2,14}',
     term: 'biopsy',
-    say: 'Fact three: how doctors find it. Step one: a doctor passes an endoscope — a thin tube with a camera — into the small intestine and takes a tiny sample. That sample is a biopsy: “bio-” means life, “-opsy” means viewing.',
+    demo: 'Tap a small source number like [2] to show where the fact comes from',
+    say: 'Fact three, diagnosis. Step one: an endoscope — a thin tube with a camera — takes a biopsy, a tiny sample of the small intestine.',
   },
   {
     id: 'stain',
     scene: 'stain',
     world: 'diagnosis',
+    cat: 'diagnosis',
     eyebrow: 'Fact 3 · Diagnosis',
-    title: 'Step 2: Stain it',
-    text: 'A PAS stain turns the germ-filled macrophages bright magenta under the microscope. {c:2,9}',
+    title: 'Step 2: stain it',
+    text: 'A PAS stain turns the germ-filled macrophages bright magenta. {c:2,9}',
     term: 'pas',
-    say: 'Step two: the sample gets a PAS stain. Under the microscope, the macrophages full of bacteria show up bright magenta. That’s the classic sign of Whipple’s disease.',
+    say: 'Step two: a PAS stain makes the germ-filled cells bright magenta under the microscope.',
   },
   {
     id: 'pcr',
     scene: 'pcr',
     world: 'diagnosis',
+    cat: 'diagnosis',
     eyebrow: 'Fact 3 · Diagnosis',
-    title: 'Step 3: Find its DNA',
-    text: 'PCR copies the germ’s DNA again and again, so even a tiny trace can be found. {c:10,2}',
+    title: 'Step 3: find its DNA',
+    text: 'PCR copies the germ’s DNA again and again, so even a trace shows up. {c:10,2}',
     term: 'pcr',
-    say: 'Step three: PCR, the polymerase chain reaction. It copies the bacterium’s DNA again and again — 1, 2, 4, 8, 16 copies — so even a tiny trace becomes enough to detect.',
+    say: 'Step three: PCR copies the germ’s DNA — one, two, four, eight, sixteen — so even a tiny trace can be found.',
   },
   {
     id: 'treatment',
     scene: 'villi',
     world: 'villi',
+    cat: 'treatment',
     eyebrow: 'Fact 4 · Treatment',
     title: 'Long-term antibiotics',
-    text: 'About 2–4 weeks of IV antibiotics, then about a year of antibiotic pills. Without treatment, it can be fatal. {c:1,2,3}',
-    say: 'Fact four, treatment. Patients get about two to four weeks of antibiotics through an IV, then about a year of antibiotic pills. With treatment the villi heal and people get better; without treatment it can be fatal. It can come back, so doctors keep checking on patients.',
+    text: 'About 2–4 weeks of IV antibiotics, then about a year of pills. Untreated, it can be fatal. {c:1,2,3}',
+    say: 'Fact four, treatment: about two to four weeks of IV antibiotics, then about a year of pills. Without treatment it can be fatal, and it can come back.',
   },
   {
     id: 'quiz',
     scene: 'anatomy',
     world: 'anatomy',
+    cat: 'check',
     rail: 'Quick check',
     eyebrow: 'Quick check',
     title: 'What do you remember?',
     text: '',
-    say: 'Quick check! Ask the class each question and let someone come up and tap the answer.',
+    demo: 'Ask the class; let a classmate tap the answer on the board',
+    say: 'Quick check! I’ll read each question and someone can come up and tap the answer.',
   },
   {
     id: 'end',
     scene: 'anatomy',
     world: 'anatomy',
+    cat: 'summary',
     rail: 'Summary',
     eyebrow: 'Summary',
-    title: 'Whipple’s disease in 4 facts',
-    text: 'Named after George Hoyt Whipple, who first described it in 1907. {c:5,6}',
-    say: 'To sum up: it’s caused by the bacterium Tropheryma whipplei. It causes diarrhea, weight loss, belly pain and joint pain. It’s diagnosed with a biopsy, a PAS stain and PCR. And it’s treated with about a year of antibiotics. My sources are listed at the end.',
+    title: 'The 4 facts',
+    text: 'Named after George Hoyt Whipple, who described it first in 1907. {c:5,6}',
+    demo: 'Tap “Sources” to show the reference list',
+    say: 'So: a bacterium causes it, it stops food being absorbed, a biopsy, a stain and PCR find it, and a year of antibiotics treats it. My sources are listed at the end.',
   },
 ];
 
@@ -239,20 +264,31 @@ export const LAST_STOP = STOPS.length - 1;
 export const SOURCES_PAGE = LAST_STOP + 1;
 
 /** The home screen's “What's inside” menu: the five parts of the exhibit. */
-export const SECTIONS: { title: string; sub: string; stop: number }[] = [
-  { title: 'History', sub: 'Who Whipple was and the first case (1907)', stop: STOP_INDEX.doctor },
-  { title: 'The disease', sub: 'Definition, body system, the small intestine', stop: STOP_INDEX.body },
-  { title: 'Four facts', sub: 'Cause · symptoms · diagnosis · treatment', stop: STOP_INDEX.cause },
-  { title: 'Quick check', sub: 'Four questions for the class', stop: STOP_INDEX.quiz },
-  { title: 'Sources', sub: 'References, medical terms and credits', stop: SOURCES_PAGE },
+export const SECTIONS: { title: string; sub: string; stop: number; cat: Category }[] = [
+  { title: 'History', sub: 'Who Whipple was and the first case (1907)', stop: STOP_INDEX.doctor, cat: 'history' },
+  { title: 'The disease', sub: 'Definition, body system, the small intestine', stop: STOP_INDEX.body, cat: 'disease' },
+  { title: 'Four facts', sub: 'Cause · symptoms · diagnosis · treatment', stop: STOP_INDEX.cause, cat: 'cause' },
+  { title: 'Quick check', sub: 'Four questions for the class', stop: STOP_INDEX.quiz, cat: 'check' },
+  { title: 'Sources', sub: 'References, medical terms and credits', stop: SOURCES_PAGE, cat: 'summary' },
 ];
 
 /** The four facts, for the summary and the presenter guide. */
-export const FACTS: { label: string; text: string; cites: number[] }[] = [
-  { label: 'Cause', text: 'the bacterium *Tropheryma whipplei*', cites: [1, 2] },
-  { label: 'Symptoms', text: 'diarrhea, weight loss, belly pain and joint pain', cites: [1, 3] },
-  { label: 'Diagnosis', text: 'biopsy of the small intestine, PAS stain, PCR', cites: [2, 3] },
-  { label: 'Treatment', text: 'about a year of antibiotics', cites: [1, 2] },
+export const FACTS: { label: string; cat: Category; text: string; cites: number[] }[] = [
+  { label: 'Cause', cat: 'cause', text: 'the bacterium *Tropheryma whipplei*', cites: [1, 2] },
+  { label: 'Symptoms', cat: 'symptoms', text: 'diarrhea, weight loss, belly pain, joint pain', cites: [1, 3] },
+  { label: 'Diagnosis', cat: 'diagnosis', text: 'biopsy, PAS stain and PCR', cites: [2, 3] },
+  { label: 'Treatment', cat: 'treatment', text: 'about a year of antibiotics', cites: [1, 2] },
+];
+
+/** Likely questions from the class, answered only from the sources (presenter guide). */
+export const QA: { q: string; a: string; cites: number[] }[] = [
+  { q: 'Who gets it?', a: 'It is rare. It most often affects middle-aged white men.', cites: [3, 1] },
+  { q: 'Can it be cured?', a: 'Yes, with long-term antibiotics — but it can come back, so doctors keep checking.', cites: [1, 3] },
+  { q: 'What happens without treatment?', a: 'It keeps getting worse and can be fatal.', cites: [1, 3] },
+  { q: 'How do people catch it?', a: 'My sources don’t say how people catch it — only that the bacterium Tropheryma whipplei causes it.', cites: [1] },
+  { q: 'When was the germ found?', a: 'Whipple saw rod-shaped germs in 1907, but the bacterium was only identified in 1992.', cites: [5, 4] },
+  { q: 'What does “Tropheryma” mean?', a: 'Greek for “nourishment barrier” — because it blocks absorbing food.', cites: [6] },
+  { q: 'Is it the same as the Whipple procedure?', a: 'No. That pancreas operation is named after a different doctor, the surgeon Allen O. Whipple.', cites: [8, 15] },
 ];
 
 export type Backdrop = 'dark' | 'lab' | 'paper' | 'studio' | 'deep';

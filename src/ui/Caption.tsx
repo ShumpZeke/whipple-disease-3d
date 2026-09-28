@@ -4,11 +4,12 @@ import { scrollToStop, stopPresence } from '../app/journey';
 import { useStory } from '../app/store';
 import { TERM_BY_KEY } from '../content/glossary';
 import { FACTS, SOURCES_PAGE, STOPS } from '../content/story';
+import { CatIcon } from './CatIcon';
 import { Quiz } from './Quiz';
 import { Cites, RichText, TermButton } from './RichText';
 import { useJourney } from './useJourney';
 
-/** The stop's key medical term, broken into its word parts: “arthr- joint + -algia pain = joint pain”. */
+/** The stop's key medical term, broken into its word parts: “arthr joint + algia pain = joint pain”. */
 function KeyTerm({ termKey, label = 'Key term' }: { termKey: string; label?: string }) {
   const t = TERM_BY_KEY.get(termKey);
   if (!t) return null;
@@ -18,7 +19,7 @@ function KeyTerm({ termKey, label = 'Key term' }: { termKey: string; label?: str
       <p className="keyterm__head">
         <span className="keyterm__label">{label}</span>
         <TermButton termKey={t.key}>{t.key === 'tropheryma' ? <i>{name}</i> : name}</TermButton>
-        {t.say && <span className="keyterm__say">say “{t.say}”</span>}
+        {t.say && <span className="keyterm__say">“{t.say}”</span>}
       </p>
       <p className="keyterm__parts">
         {t.parts?.map((p, i) => (
@@ -89,39 +90,33 @@ function Extras({ id }: { id: string }) {
       );
     case 'treatment':
       return (
-        <div className="timeline" aria-label="Typical treatment timeline">
-          <div className="timeline__step">
-            <span className="timeline__bar" />
-            <span>
-              <b>IV antibiotics</b>
-              <br />
-              2–4 weeks
-            </span>
-          </div>
-          <div className="timeline__step">
-            <span className="timeline__bar" />
-            <span>
-              <b>Antibiotic pills</b>
-              <br />≈ 1 year
-            </span>
-          </div>
-          <div className="timeline__step">
-            <span className="timeline__bar" />
-            <span>
-              <b>Check-ups</b>
-              <br />
-              it can come back
-            </span>
-          </div>
-        </div>
+        <ol className="timeline" aria-label="Typical treatment timeline">
+          <li className="timeline__step">
+            <b>2–4 weeks</b>
+            <span>IV antibiotics</span>
+          </li>
+          <li className="timeline__step">
+            <b>≈ 1 year</b>
+            <span>antibiotic pills</span>
+          </li>
+          <li className="timeline__step">
+            <b>After</b>
+            <span>check-ups: it can come back</span>
+          </li>
+        </ol>
       );
     case 'end':
       return (
         <>
           <ol className="facts">
-            {FACTS.map((f) => (
-              <li key={f.label}>
-                <b>{f.label}:</b> <RichText text={f.text} /> <Cites ids={f.cites} />
+            {FACTS.map((f, i) => (
+              <li key={f.label} className={`facts__tile cat-${f.cat}`}>
+                <CatIcon cat={f.cat} className="facts__icon" />
+                <span className="facts__n">Fact {i + 1}</span>
+                <b className="facts__label">{f.label}</b>
+                <span className="facts__text">
+                  <RichText text={f.text} /> <Cites ids={f.cites} />
+                </span>
               </li>
             ))}
           </ol>
@@ -130,7 +125,7 @@ function Extras({ id }: { id: string }) {
               Sources ↓
             </button>
             <button type="button" className="pill" onClick={restart}>
-              Back to 1907
+              Back to the start
             </button>
           </div>
           <p className="caption__credit">{creditLine()}</p>
@@ -141,7 +136,10 @@ function Extras({ id }: { id: string }) {
   }
 }
 
-/** The caption of the nearest stop. It fades and drifts with the scroll, so it never feels like a slide change. */
+/**
+ * The information panel of the nearest stop, on the left like the info panel of a map or an
+ * anatomy app. It fades and drifts with the scroll, so moving on never feels like a slide change.
+ */
 export function Caption() {
   const stop = useStory((s) => s.stop);
   const s = STOPS[stop];
@@ -158,31 +156,42 @@ export function Caption() {
     [stop],
   );
   if (s.id === 'title') return null;
-  if (s.id === 'quiz')
-    return (
-      <section ref={ref} className="caption caption--quiz" data-step="quiz">
-        <Quiz />
-      </section>
-    );
   return (
-    <section ref={ref} key={s.id} className="caption" aria-live="polite" aria-label={s.title.replace(/\*/g, '')} data-step={s.id}>
-      <p className="caption__eyebrow">{s.eyebrow}</p>
-      <h1 className="caption__title">
-        <RichText text={s.title} />
-      </h1>
-      {s.text && (
-        <p className="caption__body">
-          <RichText text={s.text} />
-        </p>
+    <div className="caption-dock">
+      {s.id === 'quiz' ? (
+        <section ref={ref} className={`caption caption--quiz cat-${s.cat}`} data-step="quiz">
+          <Quiz />
+        </section>
+      ) : (
+        <section
+          ref={ref}
+          key={s.id}
+          className={`caption cat-${s.cat}`}
+          aria-live="polite"
+          aria-label={s.title.replace(/\*/g, '')}
+          data-step={s.id}
+        >
+          <p className="caption__eyebrow">
+            <CatIcon cat={s.cat} />
+            {s.eyebrow}
+          </p>
+          <h1 className="caption__title">
+            <RichText text={s.title} />
+          </h1>
+          {s.text && (
+            <p className="caption__body">
+              <RichText text={s.text} />
+            </p>
+          )}
+          {s.note && (
+            <p className="caption__note">
+              <RichText text={s.note} />
+            </p>
+          )}
+          {s.term && <KeyTerm termKey={s.term} label={s.termLabel} />}
+          <Extras id={s.id} />
+        </section>
       )}
-      {s.note && (
-        <p className="caption__note">
-          <RichText text={s.note} />
-        </p>
-      )}
-      {s.term && <KeyTerm termKey={s.term} label={s.termLabel} />}
-      <Extras id={s.id} />
-      {s.hint && <p className="caption__hint">{s.hint}</p>}
-    </section>
+    </div>
   );
 }

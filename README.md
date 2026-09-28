@@ -31,16 +31,19 @@ Nothing else needs editing.
 1. Open the exhibit in Chrome or Edge on the board and press **F** (or the full-screen button, top
    right) so it fills the screen. Everything the class reads — headlines, text, key terms, buttons —
    grows with the screen, so it stays readable from the back of the room.
-2. Move with the big **‹ ›** buttons in the bottom-right corner (they show “5 / 17”), a clicker, the
-   arrow keys, or by swiping up and down on the board. Every move is a smooth zoom, and it always
-   comes to rest on a stop.
-3. At each stop, read the big headline and say the one or two lines under it. The gold **Key term**
-   box splits the medical word into its parts (e.g. *arthr-* joint + *-algia* pain = joint pain).
+2. Move with the **↓ / ↑** arrows on the right (beside the zoom gauge), a clicker, the arrow keys,
+   or by swiping up and down on the board. Every move is a smooth zoom that always comes to rest on
+   a stop — there are no slide numbers. The gauge shows which part of the story you are in; tap a
+   part’s name to jump there.
+3. The screen only shows short labels: a coloured tag for the part of the story, a headline, one
+   line, and a **Key term** that splits the medical word into its parts (e.g. *arthr-* joint +
+   *-algia* pain = joint pain). You do the explaining — the presenter guide has one or two lines to
+   say at each stop.
 
 | Do this | To |
 | --- | --- |
-| **‹ ›** buttons, clicker, **→ / ↓ / Page Down / Space** | zoom to the next stop |
-| **‹** button, **← / ↑ / Page Up** | go back one stop |
+| **↓** arrow, clicker, **→ / ↓ / Page Down / Space** | zoom to the next stop |
+| **↑** arrow, **← / ↑ / Page Up** | go back one stop |
 | **Swipe**, scroll wheel or trackpad | zoom continuously; it settles on the next stop |
 | **F** | full screen on / off |
 | **Home / End** | jump to 1907 / the summary |
@@ -48,7 +51,7 @@ Nothing else needs editing.
 | Tap an **underlined word** | its definition, pronunciation and word parts |
 | Tap a **[1] [2] …** marker | the source behind that fact |
 
-After the summary, one more **›** (or swipe) scrolls into the full list of sources, the medical
+After the summary, one more **↓** (or swipe) scrolls into the full list of sources, the medical
 terms and the image credits.
 
 ### Presenter guide (printable)
@@ -78,7 +81,7 @@ still pictures instead of 3D.
 | At least four clinical facts | Fact 1 cause · Fact 2 symptoms · Fact 3 diagnosis · Fact 4 treatment (and outlook) |
 | At least three terms, word parts, abbreviations or pronunciation tips | A **Key term** box on 9 stops (e.g. *arthr-* joint + *-algia* pain), pronunciation for each, abbreviations PCR, PAS and IV; all 14 terms in the **Terms** panel and at the end |
 | At least two visuals with captions or labels | Labeled 3D models (digestive system, intestine wall, villi, cells, microscope, DNA), captioned 1907 scans and portrait |
-| Purposeful interactive elements | Menu, Back/Next buttons, ＋ marker, highlighted 1907 phrases, term pop-ups, healthy/infected switch, 3D model you can turn, quiz |
+| Purposeful interactive elements | Menu, ↑ ↓ arrows and zoom gauge, ＋ marker, highlighted 1907 phrases, term pop-ups, healthy/infected switch, 3D model you can turn, quiz |
 | Source numbers that connect to the reference list | Every fact has a `[n]` marker; the full list is at the end |
 
 **Design, research and presenting**
@@ -87,7 +90,7 @@ still pictures instead of 3D.
 | --- | --- |
 | Clear title, consistent colors and fonts, readable text, logical sections | Five parts (History · The disease · Four facts · Quick check · Sources); one set of fonts and colors; text sized for a smart board |
 | A home screen that introduces the eponym and guides the viewer | Home screen with the definition and a **What’s inside** menu that jumps to each part |
-| At least three interaction types | Navigation (menu, ‹ › buttons, rail) · hotspots (＋ marker, highlighted phrases, labels, term pop-ups) · self-check quiz — plus the 3D model and the healthy/infected switch |
+| At least three interaction types | Navigation (menu, ↑ ↓ arrows, zoom gauge) · hotspots (＋ marker, highlighted phrases, labels, term pop-ups) · self-check quiz — plus the 3D model and the healthy/infected switch |
 | School-appropriate visuals, patient privacy | No patient photos; the stained slide is an illustration; archival images are public domain |
 | At least three credible sources (not Wikipedia or AI) | 17: Merck Manuals, MedlinePlus (NIH), NCBI StatPearls, CDC, OpenStax, NHGRI, NobelPrize.org, peer-reviewed articles, and Whipple’s 1907 paper |
 | Paraphrased, numbered citations and a full APA reference page | Yes — the reference page is the end of the exhibit (and [SOURCES.md](SOURCES.md)) |
@@ -122,7 +125,7 @@ Opens a local server with hot reload (Vite). Other scripts:
 | `npm run build` | type-check and build the static site into `dist/` |
 | `npm run preview` | serve the built site at http://localhost:4173 |
 | `npm test` | unit tests (Vitest): story order, caption length, presenter scripts, key terms, facts, sources, quiz, zoom logic, camera poses |
-| `npm run test:e2e` | browser tests (Playwright): full clicker walk, smart-board touch (Back/Next taps, swipes, text size), sources page, presenter guide, organ click, quiz, overlays, reduced motion, no-WebGL fallback, laptop and phone sizes |
+| `npm run test:e2e` | browser tests (Playwright): full clicker walk, smart-board touch (↑ ↓ taps, swipes, text size), sources page, presenter guide, organ click, quiz, overlays, reduced motion, no-WebGL fallback, laptop and phone sizes |
 | `npm run lint` | oxlint |
 
 First time running the browser tests: `npx playwright install chromium`.

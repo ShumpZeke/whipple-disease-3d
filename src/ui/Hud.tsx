@@ -78,9 +78,9 @@ export function HudTop() {
 }
 
 /**
- * A slim zoom rail on the right: where we are in the dive (1907 → body → organ → wall → villi →
- * germ → …), ending with the sources. It moves continuously with the scroll. Only the current
- * section is named, so it never competes with the picture; hovering the rail shows every label.
+ * The zoom gauge on the right: the parts of the story from top (home) to bottom (sources), a
+ * marker that slides as the camera zooms, and arrows to go on or back (a clicker, the arrow keys
+ * or a swipe do the same). Tap a part's name to jump there.
  */
 export function DepthRail() {
   const marker = useRef<HTMLSpanElement>(null);
@@ -90,14 +90,27 @@ export function DepthRail() {
   });
   let section = stop;
   while (section > 0 && !STOPS[section].rail) section--;
+  const atEnd = stop === LAST_STOP;
   return (
-    <nav className="rail" aria-label="Zoom depth">
+    <nav className="rail" aria-label="Move through the exhibit">
+      <button
+        type="button"
+        className="rail__arrow"
+        aria-label="Back"
+        title="Back (↑)"
+        disabled={stop === 0}
+        onClick={() => scrollToStop(currentTargetStop() - 1)}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
       <div className="rail__track">
         {STOPS.map((s, i) => (
           <button
             key={s.id}
             type="button"
-            className={`rail__stop${s.rail ? ' has-label' : ''}${i === stop ? ' is-current' : ''}${i === section ? ' is-section' : ''}`}
+            className={`rail__stop cat-${s.cat}${s.rail ? ' has-label' : ''}${i === stop ? ' is-current' : ''}${i === section ? ' is-section' : ''}`}
             style={{ top: `${(i / SOURCES_PAGE) * 100}%` }}
             aria-label={`Go to: ${s.title.replace(/\*/g, '')}`}
             aria-current={i === stop ? 'location' : undefined}
@@ -106,47 +119,26 @@ export function DepthRail() {
             {s.rail && <span className="rail__label">{s.rail}</span>}
           </button>
         ))}
-        <button type="button" className="rail__stop has-label" style={{ top: '100%' }} aria-label="Go to: Sources" onClick={() => scrollToStop(SOURCES_PAGE)}>
+        <button
+          type="button"
+          className="rail__stop cat-summary has-label"
+          style={{ top: '100%' }}
+          aria-label="Go to: Sources"
+          onClick={() => scrollToStop(SOURCES_PAGE)}
+        >
           <span className="rail__label">Sources</span>
         </button>
         <span ref={marker} className="rail__marker" aria-hidden="true" />
       </div>
-    </nav>
-  );
-}
-
-/**
- * Big Back / Next buttons for a smart board or touch screen (a clicker or the arrow keys do the
- * same). Each press zooms smoothly to the neighbouring stop; after the summary comes the sources.
- */
-export function PresenterNav() {
-  const stop = useStory((s) => s.stop);
-  const atEnd = stop === LAST_STOP;
-  return (
-    <nav className="pnav" aria-label="Presenter controls">
       <button
         type="button"
-        className="pnav__btn"
-        aria-label="Back"
-        disabled={stop === 0}
-        onClick={() => scrollToStop(currentTargetStop() - 1)}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      <span className="pnav__count" aria-hidden="true">
-        {stop + 1}
-        <span className="pnav__of"> / {STOPS.length}</span>
-      </span>
-      <button
-        type="button"
-        className="pnav__btn pnav__btn--next"
+        className="rail__arrow rail__arrow--next"
         aria-label={atEnd ? 'Next: sources' : 'Next'}
+        title="Next (↓)"
         onClick={() => scrollToStop(currentTargetStop() + 1)}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
     </nav>

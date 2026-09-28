@@ -125,7 +125,7 @@ function Cover() {
           <p className="cover__toc-title">What’s inside</p>
           <ol>
             {SECTIONS.map((sec, i) => (
-              <li key={sec.title}>
+              <li key={sec.title} className={`cat-${sec.cat}`}>
                 <button type="button" onClick={() => scrollToStop(sec.stop)}>
                   <span className="cover__n">{i + 1}</span>
                   <span className="cover__sec">

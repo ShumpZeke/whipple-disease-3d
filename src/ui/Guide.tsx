@@ -2,12 +2,24 @@ import { useEffect } from 'react';
 import { creditLine } from '../app/config';
 import { TERM_BY_KEY } from '../content/glossary';
 import { QUESTIONS } from '../content/quiz';
-import { FACTS, STOPS } from '../content/story';
+import { FACTS, QA, STOPS } from '../content/story';
 import { plainText } from './RichText';
 
+/** When to reach each stop in a five-minute talk (same order as STOPS). */
+const TIMES = ['0:00', '0:30', '0:50', '1:10', '1:30', '1:50', '2:05', '2:20', '2:35', '2:55', '3:15', '3:30', '3:45', '3:55', '4:05', '4:20', '4:50'];
+
+const PARTS = [
+  { time: '0:00–0:30', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
+  { time: '0:30–1:30', name: 'History', what: 'Who Whipple was, the 1907 case, why it has his name' },
+  { time: '1:30–2:35', name: 'The disease', what: 'Definition, then zoom: intestine → wall → villi' },
+  { time: '2:35–4:20', name: 'Four facts', what: 'Cause · symptoms · diagnosis · treatment' },
+  { time: '4:20–4:50', name: 'Quick check', what: 'Four questions; classmates tap the answers' },
+  { time: '4:50–5:00', name: 'Summary', what: 'The four facts, then show the sources' },
+];
+
 /**
- * Printable presenter guide (open with ?guide): what is on screen at each stop, what to say, and
- * the key term — plus the quiz answers. Made to be printed or kept on a phone while presenting.
+ * Printable presenter guide (open with ?guide): a five-minute plan with what to say and what to
+ * tap at each stop, the likely questions with answers from the sources, and the checklist.
  */
 export function Guide() {
   useEffect(() => {
@@ -27,39 +39,55 @@ export function Guide() {
       </header>
 
       <section className="guide__how">
-        <h2>How to present it</h2>
+        <h2>Before you start</h2>
         <ul>
           <li>
-            Open the exhibit and press <b>F</b> (or the full-screen button, top right) so it fills the board.
+            Open the link on the board and press <b>F</b> (or the full-screen button, top right).
           </li>
           <li>
-            Move with the big <b>‹ ›</b> buttons (bottom right), a clicker, the arrow keys, or by swiping up and down.
+            To move on, tap the <b>↓ arrow</b> on the right (or use a clicker, the arrow keys, or swipe up). <b>↑</b>{' '}
+            goes back. You never have to say “next slide” — it zooms.
           </li>
-          <li>Drag the 3D picture to turn it. Tap any underlined word to show its definition.</li>
+          <li>Keep this guide on your phone or printed. Say the lines in your own words — you don’t need to read the screen out.</li>
           <li>
-            Aim for <b>about 5 minutes</b>: {STOPS.length} stops at roughly 15 seconds each, a little longer on the four
-            facts. Read the headline, then say the lines below in your own words.
-          </li>
-          <li>
-            On the first screen, show how it is organized: the <b>What’s inside</b> menu lists the five parts, and
-            tapping one jumps straight there.
-          </li>
-          <li>
-            For questions afterwards, every fact has a small number like [1] that points to the list of sources at the
-            end.
+            Speak to the class, not the board: the screen only shows short labels, so <b>you</b> are the explanation.
           </li>
         </ul>
       </section>
 
+      <section className="guide__plan">
+        <h2>The five-minute plan</h2>
+        <table>
+          <tbody>
+            {PARTS.map((p) => (
+              <tr key={p.name}>
+                <td className="guide__time">{p.time}</td>
+                <th>{p.name}</th>
+                <td>{p.what}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <h2 className="guide__h">Stop by stop</h2>
       <ol className="guide__stops">
         {STOPS.map((s, i) => {
           const t = s.term ? TERM_BY_KEY.get(s.term) : undefined;
           return (
             <li key={s.id} className="guide__stop">
-              <div className="guide__num">{i + 1}</div>
+              <div className="guide__num">
+                {i + 1}
+                <small>{TIMES[i]}</small>
+              </div>
               <div>
                 <p className="guide__eyebrow">{s.eyebrow}</p>
                 <h3>{plainText(s.title)}</h3>
+                {s.demo && (
+                  <p className="guide__do">
+                    <b>Tap:</b> {s.demo}
+                  </p>
+                )}
                 <p className="guide__say">
                   <b>Say:</b> {s.say}
                 </p>
@@ -69,11 +97,6 @@ export function Guide() {
                     {t.say && <> (say “{t.say}”)</>} —{' '}
                     {t.parts?.length ? <>{t.parts.map((p) => `${p.part} ${p.meaning}`).join(' + ')} = </> : null}
                     {t.short}
-                  </p>
-                )}
-                {s.hint && (
-                  <p className="guide__do">
-                    <b>Do:</b> {s.hint}
                   </p>
                 )}
                 {s.id === 'quiz' && (
@@ -95,6 +118,21 @@ export function Guide() {
       </ol>
 
       <section className="guide__facts">
+        <h2>If someone asks…</h2>
+        <p>Answer from your sources; say the source number if you want to show it on the list at the end.</p>
+        <dl className="guide__qa">
+          {QA.map((x) => (
+            <div key={x.q}>
+              <dt>{x.q}</dt>
+              <dd>
+                {x.a} <span className="guide__src">[{x.cites.join('], [')}]</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="guide__facts">
         <h2>If you remember only four things</h2>
         <ol>
           {FACTS.map((f) => (
@@ -109,12 +147,12 @@ export function Guide() {
       <section className="guide__how">
         <h2>Submission checklist</h2>
         <ul className="guide__check">
-          <li>Shareable link that opens without asking for access (deploy it, then test the link in a private window)</li>
+          <li>Shareable link that opens without asking for access (test it in a private window)</li>
           <li>Only Whipple’s disease is presented, with all the required content</li>
-          <li>All interactive features work: menu, ‹ › buttons, underlined words, [1] markers, the ＋ marker, the healthy/infected switch, the quiz</li>
+          <li>All interactive features work: menu, ↑ ↓ arrows, underlined words, [1] numbers, the ＋ marker, the healthy/infected switch, the quiz</li>
           <li>Reference page included: it is at the end of the exhibit</li>
           <li>Student name and class period appear on the home screen and at the end ({creditLine()})</li>
-          <li>Proofread, and practiced out loud with this guide (aim for about 5 minutes)</li>
+          <li>Proofread, and practiced out loud with this guide (about 5 minutes)</li>
         </ul>
       </section>
     </main>

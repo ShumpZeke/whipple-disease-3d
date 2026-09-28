@@ -5,7 +5,7 @@ import { Caption } from '../ui/Caption';
 import { Fallback, StageLoading } from '../ui/Fallback';
 import { Backdrops, HistoryLayer, PlateLabel } from '../ui/History';
 import { EndSources } from '../ui/EndSources';
-import { DepthRail, HudTop, PresenterNav, toggleFullscreen } from '../ui/Hud';
+import { DepthRail, HudTop, toggleFullscreen } from '../ui/Hud';
 import { GlossaryOverlay, SourcesOverlay } from '../ui/Overlays';
 import { TermPopover } from '../ui/TermPopover';
 import { useJourney } from '../ui/useJourney';
@@ -252,7 +252,6 @@ export default function App() {
         <ScaleNote />
         <HudTop />
         <DepthRail />
-        <PresenterNav />
         <HoverTip />
         <TermPopover />
         <SourcesOverlay />

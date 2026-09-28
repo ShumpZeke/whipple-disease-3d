@@ -203,7 +203,8 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await expect.poll(async () => (await state(page))?.id).toBe('name');
     await page.getByRole('button', { name: 'Back', exact: true }).tap();
     await expect.poll(async () => (await state(page))?.id).toBe('case');
-    await expect(page.locator('.pnav__count')).toContainText(`3 / ${STOPS.length}`);
+    // no slide numbers: the zoom gauge shows which part of the story we are in
+    await expect(page.locator('.rail__stop.is-section .rail__label')).toHaveText('History');
     // big enough to hit with a finger
     const box = (await next.boundingBox())!;
     expect(box.width).toBeGreaterThanOrEqual(56);

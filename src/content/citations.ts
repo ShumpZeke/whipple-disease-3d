@@ -245,8 +245,8 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     note: 'Every fact is paraphrased from the references above.',
   },
   {
-    what: 'Typefaces: Newsreader and Instrument Sans',
-    creator: 'The Newsreader Project Authors; The Instrument Sans Project Authors',
+    what: 'Typefaces: Archivo and Atkinson Hyperlegible Next',
+    creator: 'Omnibus-Type (Archivo); Braille Institute of America (Atkinson Hyperlegible Next)',
     license: 'SIL Open Font License 1.1',
   },
 ];
