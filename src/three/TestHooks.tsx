@@ -8,7 +8,7 @@ import { MODEL_SCALE, useAnatomy } from './anatomy/useAnatomy';
 
 declare global {
   interface Window {
-    __whipple?: {
+    __exhibit?: {
       organPoint: (organ: string) => { x: number; y: number } | null;
       state: () => { stop: number; id: string; t: number; world: string; quality: string };
       renderInfo: () => { calls: number; triangles: number; programs: number; geometries: number; textures: number };
@@ -28,7 +28,7 @@ export function TestHooks() {
   const data = useAnatomy();
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('e2e')) return;
-    window.__whipple = {
+    window.__exhibit = {
       organPoint: (organ) => {
         const a = data.anchors[`label_${organ}`];
         if (!a) return null;

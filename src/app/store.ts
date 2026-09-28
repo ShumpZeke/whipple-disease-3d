@@ -21,7 +21,6 @@ interface State {
   glossaryOpen: boolean;
   term: TermAnchor | null;
   hoveredOrgan: OrganId | null;
-  mechanism: 'healthy' | 'disease';
   quizIndex: number;
   quizAnswers: Record<string, QuizAnswer | undefined>;
   quizFeedback: { text: string; correct: boolean } | null;
@@ -49,7 +48,6 @@ interface State {
   closeOverlays: () => void;
   closeTerm: () => void;
   setHovered: (o: OrganId | null) => void;
-  setMechanism: (m: 'healthy' | 'disease') => void;
   answerOrgan: (organ: OrganId, organName: string) => void;
   answerChoice: (optionIndex: number) => void;
   nextQuestion: () => void;
@@ -76,7 +74,6 @@ export const useStory = create<State>((set, get) => ({
   glossaryOpen: false,
   term: null,
   hoveredOrgan: null,
-  mechanism: 'disease',
   quizIndex: 0,
   quizAnswers: {},
   quizFeedback: null,
@@ -92,8 +89,7 @@ export const useStory = create<State>((set, get) => ({
 
   setStop: (i) => {
     if (i === get().stop) return;
-    const leftSymptoms = STOPS[get().stop]?.id === 'symptoms' && STOPS[i]?.id !== 'symptoms';
-    set({ stop: i, term: null, historyNote: null, quizFeedback: null, ...(leftSymptoms ? { mechanism: 'disease' as const } : {}) });
+    set({ stop: i, term: null, historyNote: null, quizFeedback: null });
   },
   goToId: (id) => scrollToStop(STOP_INDEX[id]),
   next: () => scrollToStop(currentTargetStop() + 1),
@@ -106,8 +102,7 @@ export const useStory = create<State>((set, get) => ({
       sourcesOpen: false,
       glossaryOpen: false,
       term: null,
-      mechanism: 'disease',
-      historyNote: null,
+          historyNote: null,
     });
     scrollToStop(0);
   },
@@ -117,11 +112,10 @@ export const useStory = create<State>((set, get) => ({
   closeOverlays: () => set({ sourcesOpen: false, glossaryOpen: false, term: null, sourceFocus: null }),
   closeTerm: () => set({ term: null }),
   setHovered: (o) => set({ hoveredOrgan: o }),
-  setMechanism: (m) => set({ mechanism: m }),
   answerOrgan: (organ, organName) => {
     const q = QUESTIONS[get().quizIndex];
     if (!q || q.kind !== 'organ') return;
-    const correct = organ === q.answer;
+    const correct = q.answer.includes(organ);
     set((s) => ({
       quizAnswers: { ...s.quizAnswers, [q.id]: record(s.quizAnswers[q.id], correct) },
       quizFeedback: { correct, text: correct ? q.correct : q.retry.replace('{organ}', organName) },
@@ -134,7 +128,7 @@ export const useStory = create<State>((set, get) => ({
     const correct = !!opt.correct;
     set((s) => ({
       quizAnswers: { ...s.quizAnswers, [q.id]: record(s.quizAnswers[q.id], correct) },
-      quizFeedback: { correct, text: correct ? q.correct : opt.why ?? 'Not quite — try another answer.' },
+      quizFeedback: { correct, text: correct ? q.correct : opt.why ?? 'Not quite. Try another answer.' },
     }));
   },
   nextQuestion: () => set((s) => ({ quizIndex: Math.min(QUESTIONS.length, s.quizIndex + 1), quizFeedback: null })),

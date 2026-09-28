@@ -1,4 +1,5 @@
-3D models in this folder (digestive.glb, heart.glb, brain.glb, knee.glb)
+3D model in this folder (urinary.glb: kidneys, ureters, bladder, adrenal glands, aorta with the
+renal arteries, and the inferior vena cava)
 
 Source: BodyParts3D, (c) The Database Center for Life Science (DBCLS)
 https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
@@ -7,5 +8,5 @@ https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en
 
 Changes: selected parts were combined, hole-filled, voxel-remeshed, smoothed, simplified,
 given baked ambient-occlusion shading and label anchors in Blender, then compressed with
-meshopt (glTF Transform). These modified models are distributed under the same license,
+meshopt (glTF Transform). The modified model is distributed under the same license,
 CC BY-SA 2.1 JP.

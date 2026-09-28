@@ -27,12 +27,19 @@ export function Director() {
   const refs: AnatomyRefs = useMemo(() => {
     const a = anatomy.anchors;
     const w = (n: string, fb: THREE.Vector3) => (a[n] ? a[n].position.clone().multiplyScalar(MODEL_SCALE) : fb);
-    const si = w('anchor_si_center', new THREE.Vector3(0, -0.15, 0.15));
-    const enter = w('anchor_enter', si);
-    let n = a.anchor_enter?.normal.clone() ?? new THREE.Vector3(0, 0, 1);
-    // the dive must head into the visible (front) face of the loop
-    if (n.z < 0.3) n = new THREE.Vector3(0.1, 0.15, 1);
-    return { si, enter, n: n.normalize() };
+    // the dives must head into the visible (front) face of the kidney
+    const front = (v?: THREE.Vector3) => {
+      const n = v?.clone() ?? new THREE.Vector3(0, 0, 1);
+      return (n.z < 0.3 ? new THREE.Vector3(0.1, 0.15, 1) : n).normalize();
+    };
+    const kidney = w('anchor_kidney_center', new THREE.Vector3(0.3, 0.38, -0.07));
+    return {
+      kidney,
+      enter: w('anchor_enter', kidney),
+      n: front(a.anchor_enter?.normal),
+      tumor: w('anchor_tumor', kidney),
+      tn: front(a.anchor_tumor?.normal),
+    };
   }, [anatomy]);
 
   const orbit = useRef({ yaw: 0, pitch: 0, dragging: false, lastX: 0, lastY: 0 });
@@ -98,7 +105,7 @@ export function Director() {
     const B = STOPS[Math.min(STOPS.length - 1, fs.i + 1)].id;
     const aspect = camera.aspect;
     if (fs.hinge) {
-      // 1907 plate → modern model: hold the flat plate framing, then glide to the studio view
+      // engraved plate → 3D model: hold the flat plate framing, then glide to the studio view
       fov = lerpPose(PLATE, stopPose('body', refs, aspect), easeInOut(Math.max(0, (fs.f - 0.5) / 0.5)), tmp);
     } else if (fs.i < 3) {
       fov = lerpPose(PLATE, PLATE, 0, tmp);

@@ -8,24 +8,11 @@ import { RichText } from './RichText';
 import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
 
-/** The few stops where the viewer can do something besides read. */
+/** The last stop: links to the sources and back to the start, and who made the exhibit. */
 function Extras({ id }: { id: string }) {
-  const mechanism = useStory((s) => s.mechanism);
-  const setMechanism = useStory((s) => s.setMechanism);
   const restart = useStory((s) => s.restart);
 
   switch (id) {
-    case 'symptoms':
-      return (
-        <div className="caption__links" role="group" aria-label="Compare villi">
-          <button type="button" className="text-link" aria-pressed={mechanism === 'healthy'} onClick={() => setMechanism('healthy')}>
-            Healthy villi
-          </button>
-          <button type="button" className="text-link" aria-pressed={mechanism === 'disease'} onClick={() => setMechanism('disease')}>
-            Infected villi
-          </button>
-        </div>
-      );
     case 'end':
       return (
         <>

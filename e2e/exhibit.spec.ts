@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { QUESTIONS } from '../src/content/quiz';
-import { LAST_STOP, STOPS } from '../src/content/story';
+import { LAST_STOP, SECTIONS, SOURCES_PAGE, STOPS } from '../src/content/story';
+import { SOURCES } from '../src/content/citations';
 
 // Known noise from three.js / the GPU driver, not from the exhibit.
 const IGNORED = /THREE\.Clock|X4122|GPU stall|software WebGL|GL Driver Message|WebGL: too many errors/;
@@ -14,16 +15,17 @@ function collectErrors(page: Page) {
   return errors;
 }
 
-const state = (page: Page) => page.evaluate(() => window.__whipple?.state());
-const waitForStage = (page: Page) => page.waitForFunction(() => !!window.__whipple, null, { timeout: 60_000 });
+const state = (page: Page) => page.evaluate(() => window.__exhibit?.state());
+const waitForStage = (page: Page) => page.waitForFunction(() => !!window.__exhibit, null, { timeout: 60_000 });
 
 test('opens on a home screen that introduces the eponym and guides the viewer', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?e2e');
-  await expect(page.getByRole('heading', { name: 'Whipple’s Disease', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Wilms Tumor', level: 1 })).toBeVisible();
   const cover = page.locator('.cover');
-  await expect(cover).toContainText('Whipple disease'); // the modern spelling
-  await expect(cover.locator('.cover__def')).toContainText('small intestine');
+  await expect(cover).toContainText('nephroblastoma'); // the other name
+  await expect(cover).toContainText('wilmz TOO-mer'); // how to say it
+  await expect(cover.locator('.cover__def')).toContainText('kidney cancer');
   await expect(cover.locator('.cover__brand')).toContainText('Vardhmansinh Rathod');
   await expect(cover.locator('.cover__brand')).toContainText('3rd Block');
   await expect(cover).toContainText('Scroll down to explore');
@@ -31,19 +33,33 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   await expect(page.getByRole('button', { name: /^(Next|Back|Start)$/ })).toHaveCount(0);
   // the list of parts jumps straight to one
   const menu = page.getByRole('navigation', { name: 'What’s inside' });
-  await expect(menu.getByRole('button')).toHaveCount(8);
+  await expect(menu.getByRole('button')).toHaveCount(SECTIONS.length);
   await waitForStage(page);
   await menu.getByRole('button', { name: /The cause/ }).click();
   await expect.poll(async () => (await state(page))?.id).toBe('cause');
   expect(errors).toEqual([]);
 });
 
-test('the history begins with a profile of George Hoyt Whipple', async ({ page }) => {
+test('the history begins with a profile of Max Wilms, then his 1899 book', async ({ page }) => {
   await page.goto('/?stop=doctor');
-  const card = page.getByRole('article', { name: 'Profile of George Hoyt Whipple' });
+  const card = page.getByRole('article', { name: 'Profile of Max Wilms' });
   await expect(card).toBeVisible();
-  for (const year of ['1878', '1905', '1907', '1934']) await expect(card).toContainText(year);
-  await expect(page.locator('section.caption[data-step="doctor"] .caption__body')).toContainText('pathologist');
+  for (const year of ['1867', '1899', '1904', '1918']) await expect(card).toContainText(year);
+  await expect(page.locator('section.caption[data-step="doctor"] .caption__body')).toContainText('German surgeon');
+
+  await page.goto('/?stop=book');
+  const book = page.getByRole('article', { name: 'Max Wilms’s 1899 book' });
+  await expect(book).toBeVisible();
+  await expect(book).toContainText('Die Mischgeschwülste der Niere');
+  await expect(book).toContainText('The Mixed Tumors of the Kidney');
+});
+
+test('the name stop splits nephroblastoma into its word parts', async ({ page }) => {
+  await page.goto('/?stop=name');
+  const card = page.getByRole('article', { name: 'The word parts of nephroblastoma' });
+  await expect(card).toBeVisible();
+  for (const part of ['kidney', 'bud', 'tumor']) await expect(card).toContainText(part);
+  await expect(page.locator('section.caption[data-step="name"] .caption__note')).toContainText('Nephr means kidney');
 });
 
 test('one continuous page: a presenter clicker walks every stop in order', async ({ page }) => {
@@ -76,14 +92,14 @@ test('the mouse wheel zooms in', async ({ page }) => {
   await expect.poll(async () => (await state(page))?.t ?? 0).toBeGreaterThan(2);
 });
 
-test('the small-intestine marker zooms into the organ', async ({ page }) => {
+test('the kidney marker zooms in on the kidneys', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?stop=body&e2e');
   await waitForStage(page);
-  const marker = page.getByRole('button', { name: 'Zoom into the small intestine' });
+  const marker = page.getByRole('button', { name: 'Zoom in on the kidneys' });
   await expect(marker).toBeVisible();
   await marker.click();
-  await expect.poll(async () => (await state(page))?.id).toBe('intestine');
+  await expect.poll(async () => (await state(page))?.id).toBe('kidneys');
   expect(errors).toEqual([]);
 });
 
@@ -93,7 +109,12 @@ test('self-check: pick the organ on the 3D model, then answer the questions', as
   await waitForStage(page);
   await expect(page.locator('.quiz__prompt')).toContainText('tap the organ');
   await page.waitForTimeout(800);
-  const pt = await page.evaluate(() => window.__whipple!.organPoint('SmallIntestine'));
+  // a wrong organ first, then a kidney
+  const bladder = await page.evaluate(() => window.__exhibit!.organPoint('Bladder'));
+  expect(bladder).not.toBeNull();
+  await page.mouse.click(bladder!.x, bladder!.y);
+  await expect(page.locator('.quiz__feedback')).toHaveClass(/is-wrong/);
+  const pt = await page.evaluate(() => window.__exhibit!.organPoint('LeftKidney'));
   expect(pt).not.toBeNull();
   await page.mouse.click(pt!.x, pt!.y);
   await expect(page.locator('.quiz__feedback')).toHaveClass(/is-right/);
@@ -112,11 +133,11 @@ test('self-check: pick the organ on the 3D model, then answer the questions', as
 });
 
 test('sources, medical terms and inline definitions', async ({ page }) => {
-  await page.goto('/?stop=doctor');
+  await page.goto('/?stop=name');
   await page.locator('.hud-links').getByRole('button', { name: 'Sources' }).click();
   const sources = page.getByRole('dialog', { name: 'Sources' });
   await expect(sources).toBeVisible();
-  expect(await sources.locator('.ref').count()).toBeGreaterThanOrEqual(3);
+  expect(await sources.locator('.ref').count()).toBe(SOURCES.length);
   await page.keyboard.press('Escape');
   await expect(sources).toBeHidden();
 
@@ -124,38 +145,32 @@ test('sources, medical terms and inline definitions', async ({ page }) => {
   await expect(page.getByRole('dialog', { name: 'Medical terms' })).toBeVisible();
   await page.keyboard.press('Escape');
 
-  const caption = page.locator('section.caption[data-step="doctor"]');
+  const caption = page.locator('section.caption[data-step="name"]');
   await caption.locator('.term').first().click();
   await expect(page.locator('.popover')).toBeVisible();
+  await expect(page.locator('.popover')).toContainText('kidney');
   await page.keyboard.press('Escape');
   await caption.locator('.cite').first().click();
   await expect(page.locator('.ref.is-focus')).toBeVisible();
 });
 
-test('the history stop shows the name correction', async ({ page }) => {
-  await page.goto('/?stop=name');
-  const note = page.locator('section.caption[data-step="name"] .caption__note');
-  await expect(note).toContainText('Allen O. Whipple');
-  await expect(note).toContainText('George Hoyt Whipple');
-});
-
 test('reduced motion jumps between stops without the zoom animation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/?stop=wall&e2e');
+  await page.goto('/?stop=inside&e2e');
   await waitForStage(page);
   await page.keyboard.press('PageDown');
   await page.waitForTimeout(150);
-  expect((await state(page))?.id).toBe('villi');
-  expect(Math.abs(((await state(page))?.t ?? 0) - STOPS.findIndex((s) => s.id === 'villi'))).toBeLessThan(0.001);
+  expect((await state(page))?.id).toBe('nephron');
+  expect(Math.abs(((await state(page))?.t ?? 0) - STOPS.findIndex((s) => s.id === 'nephron'))).toBeLessThan(0.001);
 });
 
 test('lite mode (?lite) runs the same exhibit', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.goto('/?e2e&lite&stop=villi');
+  await page.goto('/?e2e&lite&stop=nephron');
   await waitForStage(page);
   expect((await state(page))?.quality).toBe('lite');
   await expect(page.locator('html')).toHaveClass(/lite/);
-  await expect(page.locator('section.caption[data-step="villi"]')).toBeVisible();
+  await expect(page.locator('section.caption[data-step="nephron"]')).toBeVisible();
   await page.keyboard.press('PageDown');
   await expect.poll(async () => (await state(page))?.id).toBe('cause');
   expect(errors).toEqual([]);
@@ -170,21 +185,21 @@ test('falls back to still images when WebGL is unavailable', async ({ page }) =>
       return orig.call(this, type, ...rest);
     };
   });
-  await page.goto('/?stop=villi');
+  await page.goto('/?stop=nephron');
   await expect(page.locator('.fallback-img img')).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Interactive 3D isn’t available' })).toBeVisible();
-  await expect(page.locator('section.caption[data-step="villi"]')).toBeVisible();
+  await expect(page.locator('section.caption[data-step="nephron"]')).toBeVisible();
 });
 
 for (const vp of [
   { name: 'laptop 1366×768', width: 1366, height: 768 },
-  { name: 'phone 390×844', width: 390, height: 844 },
+  { name: 'board 1920×1080', width: 1920, height: 1080 },
 ]) {
   test(`fits the screen on a ${vp.name}`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto('/?stop=symptoms&e2e');
+    await page.goto('/?stop=signs&e2e');
     await waitForStage(page);
-    const caption = page.locator('section.caption[data-step="symptoms"]');
+    const caption = page.locator('section.caption[data-step="signs"]');
     await expect(caption).toBeVisible();
     const box = (await caption.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
@@ -199,13 +214,13 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
 
   test('readable text, and swiping moves through the scene', async ({ page }) => {
     const errors = collectErrors(page);
-    await page.goto('/?e2e&stop=case');
+    await page.goto('/?e2e&stop=book');
     await waitForStage(page);
     // text sized for the back of a classroom
-    const title = page.locator('section.caption[data-step="case"] .caption__title');
+    const title = page.locator('section.caption[data-step="book"] .caption__title');
     await expect(title).toBeVisible();
     expect(parseFloat(await title.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(40);
-    const body = page.locator('section.caption[data-step="case"] .caption__body');
+    const body = page.locator('section.caption[data-step="book"] .caption__body');
     expect(parseFloat(await body.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(24);
     // no slide furniture on screen
     await expect(page.getByRole('button', { name: /^(Next|Back)$/ })).toHaveCount(0);
@@ -228,7 +243,7 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 3)).toBeLessThan(0.01);
     // swiping down goes back
     await swipe(1300, 400, 420);
-    await expect.poll(async () => (await state(page))?.id).toBe('case');
+    await expect.poll(async () => (await state(page))?.id).toBe('book');
     await expect(page.getByRole('button', { name: /Full screen/ })).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -237,15 +252,17 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await page.goto('/?stop=end&e2e');
     await waitForStage(page);
     const end = page.locator('section.caption[data-step="end"]');
-    await expect(end.locator('.caption__body')).toContainText('antibiotics');
+    await expect(end.locator('.caption__body')).toContainText('chemotherapy');
     await end.getByRole('button', { name: 'Sources' }).tap();
     const sources = page.locator('#sources');
     await expect.poll(async () => Math.abs((await sources.boundingBox())?.y ?? 999)).toBeLessThan(4);
     await expect(sources.getByRole('heading', { name: 'Sources' })).toBeVisible();
-    expect(await sources.locator('.endnotes__refs li').count()).toBe(17);
-    await expect(sources.locator('.endnotes__terms')).toContainText('Malabsorption');
+    expect(await sources.locator('.endnotes__refs li').count()).toBe(SOURCES.length);
+    await expect(sources.locator('.endnotes__terms')).toContainText('Nephroblastoma');
     await expect(sources.locator('.endnotes__credits')).toContainText('BodyParts3D');
+    await expect(sources.locator('.endnotes__credits')).toContainText('Wellcome Collection');
     await expect(sources).toContainText('Vardhmansinh Rathod');
+    expect(Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(SOURCES_PAGE);
     // stepping back from the top of the list returns to the summary
     await page.keyboard.press('PageUp');
     await expect.poll(async () => Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(STOPS.length - 1);
@@ -254,9 +271,9 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
 
 test('the printable presenter guide has a script for every stop and the quiz answers', async ({ page }) => {
   await page.goto('/?guide');
-  await expect(page.getByRole('heading', { name: 'Whipple’s Disease', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Wilms Tumor', level: 1 })).toBeVisible();
   await expect(page.locator('.guide__stop')).toHaveCount(STOPS.length);
   await expect(page.locator('.guide__say')).toHaveCount(STOPS.length);
   await expect(page.locator('.guide__answers li')).toHaveCount(QUESTIONS.length);
-  await expect(page.locator('.guide__answers')).toContainText('the small intestine');
+  await expect(page.locator('.guide__answers')).toContainText('a kidney');
 });

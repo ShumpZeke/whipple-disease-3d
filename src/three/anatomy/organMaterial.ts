@@ -4,7 +4,7 @@ import type { OrganLook } from './organs';
 
 /**
  * Uniforms shared by every organ (one object, referenced by all materials):
- * the 1907 "engraving" look and the develop sweep used in the history → modern transition.
+ * the old "engraving" look and the develop sweep used in the history → 3D transition.
  */
 export const sharedOrganUniforms = {
   uEngrave: { value: 0 },
@@ -192,6 +192,6 @@ export function createOrganMaterial(look: OrganLook, scale = 1, hasAO = true): O
       );
   };
   // one program for all organs (all differences live in uniforms)
-  mat.customProgramCacheKey = () => 'whipple-organ-v1';
+  mat.customProgramCacheKey = () => 'organ-v1';
   return mat;
 }

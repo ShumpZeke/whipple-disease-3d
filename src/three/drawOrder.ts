@@ -3,13 +3,15 @@ import * as THREE from 'three';
 import type { StopId } from '../content/story';
 import { stopPose, type AnatomyRefs } from './presets';
 
-// the tissue, villi and biopsy poses don't use the anatomy anchors
-const NO_REFS: AnatomyRefs = { si: new THREE.Vector3(), enter: new THREE.Vector3(), n: new THREE.Vector3(0, 0, 1) };
+// the zoomed-in scenes' poses don't use the anatomy anchors
+const ZERO = new THREE.Vector3();
+const Z = new THREE.Vector3(0, 0, 1);
+const NO_REFS: AnatomyRefs = { kidney: ZERO, enter: ZERO, n: Z, tumor: ZERO, tn: Z };
 
 /**
  * Reorder an opaque InstancedMesh so the copies nearest the camera are drawn first. The picture
  * is exactly the same, but the graphics card can skip shading everything hidden behind what it
- * has already drawn (the early depth test). In the dense fields of villi most of the screen is
+ * has already drawn (the early depth test). Where many copies overlap, most of the screen is
  * covered several times over, so this saves a lot of work on slower computers.
  * Per-instance attributes on the geometry are reordered together with the matrices.
  */

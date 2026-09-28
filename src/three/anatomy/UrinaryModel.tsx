@@ -4,28 +4,34 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useStopId, useStory } from '../../app/store';
 import { QUESTIONS } from '../../content/quiz';
-import { ORGANS, type OrganId } from './organs';
+import type { StopId } from '../../content/story';
+import { isKidney, ORGANS, type OrganId } from './organs';
 import { MODEL_SCALE, useAnatomy } from './useAnatomy';
 
-/** Which organs are emphasised / pickable for the current step. */
-function emphasis(stepId: string, hovered: OrganId | null, quizOrgan: boolean): {
-  dim: (o: OrganId) => number;
-  highlight: (o: OrganId) => number;
-  pickable: boolean;
-} {
-  const focusSI = stepId === 'intestine' || stepId === 'spread';
+/** How much each organ is highlighted (warm rim) or dimmed (greyed) at each stop. */
+function emphasis(id: StopId, hovered: OrganId | null, quizOrgan: boolean) {
+  const pickable = id === 'body' || id === 'end' || quizOrgan;
   return {
-    dim: (o) => (focusSI && o !== 'SmallIntestine' ? 1 : 0),
-    highlight: (o) => {
-      if (hovered === o && (stepId === 'body' || stepId === 'end' || quizOrgan)) return 1;
-      if (focusSI && o === 'SmallIntestine') return 0.55;
+    pickable,
+    dim: (o: OrganId): number => {
+      if (id === 'kidneys') return isKidney(o) || o === 'Ureters' || o === 'Adrenals' ? 0 : 0.35;
+      if (id === 'lump') return o === 'LeftKidney' ? 0 : 0.45;
+      if (id === 'treatment') return o === 'LeftKidney' ? 0 : 0.3;
+      if (id === 'outlook') return o === 'RightKidney' ? 0 : 0.25;
       return 0;
     },
-    pickable: stepId === 'body' || stepId === 'end' || quizOrgan,
+    highlight: (o: OrganId): number => {
+      if (pickable && hovered === o) return 1;
+      if (id === 'kidneys' && isKidney(o)) return 0.4;
+      if (id === 'treatment' && o === 'LeftKidney') return 0.8;
+      if (id === 'outlook' && o === 'RightKidney') return 0.55;
+      return 0;
+    },
   };
 }
 
-export function DigestiveModel() {
+/** The kidneys, ureters, bladder, adrenal glands and the big blood vessels, pickable by organ. */
+export function UrinaryModel() {
   const data = useAnatomy();
   const invalidate = useThree((s) => s.invalidate);
   const gl = useThree((s) => s.gl);
@@ -83,7 +89,7 @@ export function DigestiveModel() {
     if (!organ) return;
     const st = useStory.getState();
     st.markInteracted();
-    if (stepId === 'body' && organ === 'SmallIntestine') st.goToId('intestine');
+    if (stepId === 'body' && isKidney(organ)) st.goToId('kidneys');
     else if (quizOrgan) st.answerOrgan(organ, ORGANS[organ].name);
     else st.setHovered(organ);
   };
@@ -103,6 +109,7 @@ export function DigestiveModel() {
   );
 }
 
+/** World position of an anchor empty (or null if the model doesn't have it). */
 export function useAnchorWorld(name: string): THREE.Vector3 | null {
   const data = useAnatomy();
   const a = data.anchors[name];

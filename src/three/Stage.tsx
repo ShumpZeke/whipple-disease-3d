@@ -7,19 +7,19 @@ import { LITE, rememberLite } from '../app/quality';
 import { useStory } from '../app/store';
 import { STOPS, type World } from '../content/story';
 import { AnatomyWorld } from './anatomy/AnatomyWorld';
+import { CellsWorld } from './cells/CellsWorld';
 import { DiagnosisWorld } from './diagnosis/DiagnosisWorld';
 import { Director } from './Director';
-import { MicroWorld } from './micro/MicroWorld';
+import { KidneyWorld } from './kidney/KidneyWorld';
+import { NephronWorld } from './nephron/NephronWorld';
 import { TestHooks } from './TestHooks';
-import { TissueWorld } from './tissue/TissueWorld';
-import { VilliWorld } from './tissue/VilliWorld';
 
-const ANIMATED: World[] = ['villi', 'micro', 'diagnosis'];
-const ORDER: World[] = ['anatomy', 'tissue', 'villi', 'micro', 'diagnosis'];
+const ANIMATED: World[] = ['nephron', 'cells', 'diagnosis'];
+const ORDER: World[] = ['anatomy', 'kidney', 'nephron', 'cells', 'diagnosis'];
 
 /**
  * Rendering only happens when something changes: while scrolling, and while a scene that moves by
- * itself (villi, cells, the biopsy, PCR) is on screen. Those scenes are paced at 60 frames a
+ * itself (the filter, the dividing cells, the scans) is on screen. Those scenes are paced at 60 frames a
  * second at most (screens that refresh 120 times a second would otherwise draw twice as often),
  * and at 30 on slower devices.
  */
@@ -62,10 +62,10 @@ const OFF: PointCfg = { pos: [0, 0, 0], i: 0, d: 1, color: '#ffffff' };
 const RIG: Record<World, LightCfg> = {
   none: { hemi: 0, key: 1.55, point: OFF },
   anatomy: { hemi: 0.08, key: 1.55, point: OFF },
-  tissue: { hemi: 0.6, key: 1.55, point: { pos: [0.6, 0.15, 0.25], i: 2.2, d: 5, color: '#ffe4d6' } },
-  villi: { hemi: 0.35, key: 2.1, point: { pos: [0.9, 1.3, 2.6], i: 2.6, d: 5, color: '#ffe2d2' } },
-  micro: { hemi: 0.25, key: 1.2, point: { pos: [2, 3, 5], i: 2.6, d: 14, color: '#ffe9f2' } },
-  diagnosis: { hemi: 0.3, key: 1.9, point: { pos: [-0.25, 0.39, -0.08], i: 3.2, d: 2.6, color: '#fff3e2' } },
+  kidney: { hemi: 0.5, key: 1.6, point: { pos: [1.2, 1.4, 2.6], i: 2.2, d: 7, color: '#ffe8da' } },
+  nephron: { hemi: 0.35, key: 1.9, point: { pos: [0.9, 1.3, 2.6], i: 2.4, d: 6, color: '#ffe2d2' } },
+  cells: { hemi: 0.25, key: 1.2, point: { pos: [2, 3, 5], i: 2.6, d: 14, color: '#ffe9f2' } },
+  diagnosis: { hemi: 0.35, key: 1.7, point: { pos: [0.6, 1.6, 2.4], i: 2.0, d: 7, color: '#eef3ff' } },
 };
 
 /**
@@ -204,9 +204,9 @@ function Worlds() {
         return (
           <WorldShell key={w} name={w}>
             {w === 'anatomy' && <AnatomyWorld visible={vis} />}
-            {w === 'tissue' && <TissueWorld visible={vis} />}
-            {w === 'villi' && <VilliWorld visible={vis} />}
-            {w === 'micro' && <MicroWorld visible={vis} />}
+            {w === 'kidney' && <KidneyWorld visible={vis} />}
+            {w === 'nephron' && <NephronWorld visible={vis} />}
+            {w === 'cells' && <CellsWorld visible={vis} />}
             {w === 'diagnosis' && <DiagnosisWorld visible={vis} />}
           </WorldShell>
         );

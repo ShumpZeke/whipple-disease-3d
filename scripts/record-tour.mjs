@@ -8,9 +8,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { withPreview } from './serve.mjs';
 
-const [out = 'whipple-tour.mp4', w = '1280', h = '720', hold = '2.2'] = process.argv.slice(2);
+const [out = 'wilms-tour.mp4', w = '1280', h = '720', hold = '2.2'] = process.argv.slice(2);
 const size = { width: +w, height: +h };
-const dir = mkdtempSync(join(tmpdir(), 'whipple-tour-'));
+const dir = mkdtempSync(join(tmpdir(), 'exhibit-tour-'));
 let skip = 0;
 
 await withPreview(async (base) => {
@@ -19,7 +19,7 @@ await withPreview(async (base) => {
   const page = await context.newPage();
   const t0 = Date.now();
   await page.goto(`${base}?e2e`);
-  await page.waitForFunction(() => !!window.__whipple, null, { timeout: 60000 });
+  await page.waitForFunction(() => !!window.__exhibit, null, { timeout: 60000 });
   // visit every scene once so all shaders are compiled before the tour starts
   for (const t of [4, 6, 7, 8, 10, 11, 12, 13, 15, 0]) {
     await page.evaluate((t) => window.scrollTo(0, t * innerHeight), t);

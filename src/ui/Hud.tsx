@@ -34,8 +34,8 @@ export function HudTop() {
   return (
     <header className="hud-top">
       <div className={`wordmark${stop === 0 ? ' is-home' : ''}`}>
-        <span className="wordmark__title">Whipple’s Disease</span>
-        <span className="wordmark__meta">// {SUBMISSION.course}, eponym 26</span>
+        <span className="wordmark__title">Wilms Tumor</span>
+        <span className="wordmark__meta">// {SUBMISSION.course}, eponym 27</span>
         <span className="wordmark__meta">
           {SUBMISSION.studentName}, {periodLabel()}.
         </span>

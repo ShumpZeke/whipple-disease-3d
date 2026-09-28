@@ -1,66 +1,68 @@
 # Sources
 
 References in APA 7 style. The numbers match the `[n]` markers beside each fact in the exhibit
-(also listed in the in-app **Sources** panel). Information was paraphrased; the 1907 article is
-quoted only in its original scanned pages.
+(also listed in the in-app **Sources** panel and at the end of the page). All information was put
+in my own words.
 
-1. Malik, Z. (2025, April). Whipple disease. In *Merck Manual Consumer Version*. Merck & Co.
-   https://www.merckmanuals.com/home/digestive-disorders/malabsorption/whipple-disease
-   — *Used for:* definition, cause, the main symptoms, organs affected, treatment, prognosis.
-2. Malik, Z. (2025, March). Whipple disease. In *Merck Manual Professional Version*. Merck & Co.
-   https://www.merckmanuals.com/professional/gastrointestinal-disorders/malabsorption-syndromes/whipple-disease
-   — *Used for:* PAS-positive macrophages in the villi, small-bowel biopsy, PCR, antibiotic regimens, relapse and follow-up.
-3. MedlinePlus. (2026). Whipple disease. In *MedlinePlus Medical Encyclopedia*. U.S. National Library
-   of Medicine. Reviewed April 27, 2026, by T. Eisner & D. C. Dugdale. https://medlineplus.gov/ency/article/000209.htm
-   — *Used for:* who is affected, joint pain as the earliest symptom, tests (endoscopy, biopsy, PCR), treatment length, outlook.
-4. Antunes, C., & Singhal, M. (2023). Whipple disease. In *StatPearls*. StatPearls Publishing (NCBI
-   Bookshelf NBK441937). https://www.ncbi.nlm.nih.gov/books/NBK441937/
-   — *Used for:* history: the 1907 case, the name “intestinal lipodystrophy,” identification of the bacterium in 1992.
-5. Whipple, G. H. (1907). A hitherto undescribed disease characterized anatomically by deposits of fat
-   and fatty acids in the intestinal and mesenteric lymphatic tissues. *Bulletin of the Johns Hopkins
-   Hospital, 18*(198), 382–391. Public-domain scan via the Internet Archive.
-   https://archive.org/details/sim_johns-hopkins-medical-journal_1907-09_18_198
-   — *Used for:* the original description: the patient, the autopsy findings, the “rod-shaped organism (?)”, and the name he proposed.
-6. Centers for Disease Control and Prevention. (2010). Etymologia: *Tropheryma whipplei*. *Emerging
-   Infectious Diseases, 16*(5), 839. https://doi.org/10.3201/eid1605.e11605
-   — *Used for:* pronunciation and word origin of *Tropheryma whipplei*; George Hoyt Whipple first described the syndrome in 1907.
-7. Nobel Prize Outreach. (n.d.). *George H. Whipple – Biographical*. NobelPrize.org.
-   https://www.nobelprize.org/prizes/medicine/1934/whipple/biographical/
-   — *Used for:* Whipple’s birth (1878), training and Johns Hopkins career, the 1934 Nobel Prize.
-8. Gjunkshi, L., Gjunkshi, L., Persaud, N. A., & Gray, S. F. (2025). Allen Oldfather Whipple
-   (1881–1963): A pioneer of general surgery. *Cureus, 17*(7), e88895. https://doi.org/10.7759/cureus.88895
-   — *Used for:* Allen O. Whipple was a surgeon; the Whipple procedure (pancreaticoduodenectomy) is named for him.
-9. Huang, Y., Harrison, S. M., Bali, A., Rangani, R., Ashmila, H., & Badurdeen, D. S. (2023). Whipple’s
-   disease: A textbook disease that is often missed in real life. *ACG Case Reports Journal, 10*(11),
-   e01199. https://doi.org/10.14309/crj.0000000000001199
-   — *Used for:* biopsy findings (flattened villi, PAS-stained macrophages in the lamina propria); ceftriaxone then TMP-SMX.
-10. National Human Genome Research Institute. (2020, August 17). *Polymerase chain reaction (PCR) fact
-    sheet*. Genome.gov. https://www.genome.gov/about-genomics/fact-sheets/Polymerase-Chain-Reaction-Fact-Sheet
-    — *Used for:* what PCR is: a technique that copies (“amplifies”) small segments of DNA.
-11. Betts, J. G., Young, K. A., Wise, J. A., Johnson, E., Poe, B., Kruse, D. H., Korol, O., Johnson,
-    J. E., Womble, M., & DeSaix, P. (2022). *Anatomy and physiology* (2nd ed.), §23.5 The small and large
-    intestines. OpenStax. https://openstax.org/books/anatomy-and-physiology-2e/pages/23-5-the-small-and-large-intestines
-    — *Used for:* circular folds, villi (0.5–1 mm), the capillaries and lacteal inside each villus.
-12. MedlinePlus. (2026). Malabsorption. In *MedlinePlus Medical Encyclopedia*. U.S. National Library of
-    Medicine. https://medlineplus.gov/ency/article/000299.htm
-    — *Used for:* definition of malabsorption.
-13. MedlinePlus. (n.d.). *Appendix A: Word parts and what they mean*. U.S. National Library of Medicine.
+1. National Cancer Institute. (2025, May 12). *Wilms tumor (PDQ®): Patient version*.
+   https://www.cancer.gov/types/kidney/patient/wilms-treatment-pdq
+   *Used for:* what Wilms tumor is, its other name, the ages it affects, signs, tests, and the treatments (nephrectomy, chemotherapy, radiation).
+2. PDQ Pediatric Treatment Editorial Board. (2025, April 15). *Wilms tumor and other childhood kidney tumors treatment (PDQ®): Health professional version*. National Cancer Institute.
+   https://www.cancer.gov/types/kidney/hp/wilms-treatment-pdq
+   *Used for:* how it is usually found (a lump noticed by a parent), how often blood in the urine and high blood pressure occur, and the 93% five-year survival.
+3. American Cancer Society. (2025, January 21). *What are Wilms tumors?*
+   https://www.cancer.org/cancer/types/wilms-tumor/about/what-is-wilms-tumor.html
+   *Used for:* how the tumor starts from young kidney cells that never matured, and how often both kidneys are affected.
+4. American Cancer Society. (2025, January 21). *Key statistics for Wilms tumors*.
+   https://www.cancer.org/cancer/types/wilms-tumor/about/key-statistics.html
+   *Used for:* about 600 children a year in the U.S., about 5% of childhood cancers, average age 3 to 4.
+5. American Cancer Society. (2025, January 21). *Signs and symptoms of Wilms tumors*.
+   https://www.cancer.org/cancer/types/wilms-tumor/detection-diagnosis-staging/signs-and-symptoms.html
+   *Used for:* the first sign is often swelling or a hard lump in the belly, usually not painful, noticed while bathing or dressing the child.
+6. American Cancer Society. (2025, January 21). *Tests for Wilms tumors*.
+   https://www.cancer.org/cancer/types/wilms-tumor/detection-diagnosis-staging/how-diagnosed.html
+   *Used for:* ultrasound usually comes first, then CT or MRI and a check of the lungs; the tumor is usually examined after it is removed.
+7. MedlinePlus. (2026). Wilms tumor. In *MedlinePlus medical encyclopedia*. U.S. National Library of Medicine.
+   https://medlineplus.gov/ency/article/001575.htm
+   *Used for:* usual age (about 3 and a half, most before 5), signs, tests, treatment, and the 90% cure rate when it has not spread.
+8. MedlinePlus. (2023, July 13). *Wilms tumor*. MedlinePlus Genetics.
+   https://medlineplus.gov/genetics/condition/wilms-tumor/
+   *Used for:* the genes involved (such as WT1), and that about 90% of cases come from gene changes that happen by chance, not inherited.
+9. Raffensperger, J. (2015). Max Wilms and his tumor. *Journal of Pediatric Surgery, 50*(2), 356–359.
+   https://doi.org/10.1016/j.jpedsurg.2014.10.054
+   *Used for:* how the name came about: earlier reports, his 1899 book at age 32, his death in World War I, and how surgery, radiation and chemotherapy raised survival to 90%.
+10. Zantinga, A. R., & Coppes, M. J. (1992). Max Wilms (1867–1918): The man behind the eponym. *Medical and Pediatric Oncology, 20*(6), 515–518.
+    https://doi.org/10.1002/mpo.2950200606
+    *Used for:* Max Wilms’s life dates and his place in the history of the tumor.
+11. Morgoshia, T. S., & Kokhanenko, N. Y. (2018). The contribution of the legendary surgeon and oncologist Max Wilms (1867–1918) to clinical medicine. *Russian Journal of Pediatric Hematology and Oncology, 5*(1), 103–105.
+    https://doi.org/10.17650/2311-1267-2018-5-1-103-105
+    *Used for:* his 1899 monograph and his appointment as a professor in 1904.
+12. National Institute of Diabetes and Digestive and Kidney Diseases. (2018). *Your kidneys & how they work*.
+    https://www.niddk.nih.gov/health-information/kidney-disease/kidneys-how-they-work
+    *Used for:* kidney size and place, the 150 quarts of blood filtered a day, the million nephrons, glomerulus and tubule, ureters and bladder.
+13. National Institute of Diabetes and Digestive and Kidney Diseases. (2020). *Solitary or single-functioning kidney*.
+    https://www.niddk.nih.gov/health-information/kidney-disease/solitary-kidney
+    *Used for:* a kidney may be removed to treat cancer (nephrectomy), and people with one kidney can live full, healthy lives.
+14. Betts, J. G., Young, K. A., Wise, J. A., Johnson, E., Poe, B., Kruse, D. H., Korol, O., Johnson, J. E., Womble, M., & DeSaix, P. (2022). *Anatomy and physiology 2e (Section 25.3, Gross anatomy of the kidney)*. OpenStax.
+    https://openstax.org/books/anatomy-and-physiology-2e/pages/25-3-gross-anatomy-of-the-kidney
+    *Used for:* the parts of a kidney: capsule, cortex, medulla, pyramids, renal pelvis and hilum, and the adrenal gland on top.
+15. MedlinePlus. (n.d.). *Appendix A: Word parts and what they mean*. U.S. National Library of Medicine.
     https://medlineplus.gov/appendixa.html
-    — *Used for:* word parts: arthr-, lip-, dys-, -trophy, mal-, bio-, -opsy, endo-, -scopy, macro-, -phagia, cardi-, -itis, path-.
-14. MedlinePlus. (2025). Endoscopy. In *MedlinePlus Medical Encyclopedia*. U.S. National Library of
-    Medicine. Reviewed April 21, 2025. https://medlineplus.gov/ency/article/003338.htm
-    — *Used for:* the endoscope (a flexible tube with a camera and light) and taking biopsies.
-15. Columbia University Department of Surgery. (2015, November 12). *History of medicine: Whipple’s
-    improvised breakthrough*. Columbia Surgery.
-    https://columbiasurgery.org/news/2015/11/12/history-medicine-whipples-improvised-breakthrough
-    — *Used for:* Allen O. Whipple’s 1935 pancreatic operation.
-16. MedlinePlus. (n.d.). *Understanding medical words: A tutorial*. U.S. National Library of Medicine.
+    *Used for:* word parts: nephr- kidney, -blast bud or germ, -oma tumor, -ectomy removal, hemat- blood, -uria in the urine, onco- tumor, chemo- chemistry.
+16. National Cancer Institute. (n.d.). *NCI dictionary of cancer terms*.
+    https://www.cancer.gov/publications/dictionaries/cancer-terms
+    *Used for:* pronunciations and plain definitions: Wilms tumor, nephrectomy, hematuria, ultrasound, CT scan, chemotherapy, pediatric oncologist.
+17. MedlinePlus. (n.d.). *Understanding medical words: A tutorial*. U.S. National Library of Medicine.
     https://medlineplus.gov/medwords/
-    — *Used for:* how medical words are built from parts (e.g., “-ology” = the study of).
-17. Betts, J. G., Young, K. A., Wise, J. A., Johnson, E., Poe, B., Kruse, D. H., Korol, O., Johnson,
-    J. E., Womble, M., & DeSaix, P. (2022). *Anatomy and physiology* (2nd ed.), §23.1 Overview of the
-    digestive system. OpenStax. https://openstax.org/books/anatomy-and-physiology-2e/pages/23-1-overview-of-the-digestive-system
-    — *Used for:* the four layers of the intestinal wall (mucosa, submucosa, muscularis, serosa).
+    *Used for:* how medical words are built from parts, for example -logy means the study of something.
 
-The reference data lives in [`src/content/citations.ts`](src/content/citations.ts); a unit test
-checks that every on-screen marker points to an entry in this list.
+## Notes on accuracy
+
+- **The name.** The tumor is named after Max Wilms (1867 to 1918), a German surgeon. Others had
+  described it before him; after his 1899 book *Die Mischgeschwülste der Niere* (“The Mixed Tumors of
+  the Kidney”) it became known by his name [9]. Its medical name is nephroblastoma [1].
+- **Pronunciation.** “wilmz TOO-mer” is the NCI dictionary’s guide [16]. No official pronunciation
+  was found for nephroblastoma, so the exhibit labels NEF-roh-blas-TOH-muh as a respelling guide,
+  built from the word parts in [15].
+- **The book card** describes the 1899 book in words; it is not a scan of the book.
+- **The scans** (ultrasound and CT) are drawings made for this project, not patient images.

@@ -192,7 +192,8 @@ function ZoomVeil() {
 function ScaleNote() {
   const stop = useStory((s) => s.stop);
   const world = STOPS[stop].world;
-  if (!['tissue', 'villi', 'micro', 'diagnosis'].includes(world)) return null;
+  // (the scans carry their own note: they are drawings, not patient images)
+  if (!['kidney', 'nephron', 'cells'].includes(world)) return null;
   return <p className="scale-note">Illustration, not to scale</p>;
 }
 
@@ -207,7 +208,7 @@ export default function App() {
   const [loadStage, setLoadStage] = useState(false);
   const worldNeeded = STOPS[stop].world !== 'none';
 
-  // start downloading the 3D stage while the visitor is still in 1907
+  // start downloading the 3D stage while the visitor is still on the history pages
   useEffect(() => {
     if (!canWebgl) return;
     if (journey.target > 0.5) {
@@ -232,7 +233,7 @@ export default function App() {
           <div key={s.id} id={`stop-${s.id}`} className="snap" style={{ top: `${i * 100}vh` }} />
         ))}
       </div>
-      <main className={`exhibit${reduced ? ' reduce-motion' : ''}`} aria-label="Whipple's disease interactive exhibit">
+      <main className={`exhibit${reduced ? ' reduce-motion' : ''}`} aria-label="Wilms tumor interactive exhibit">
         <Backdrops />
         {!fallback && loadStage && (
           <div className="canvas-layer" style={{ opacity: 0 }}>

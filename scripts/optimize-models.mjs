@@ -2,7 +2,7 @@
 // dedup -> prune (keeps named anchor nodes) -> reorder -> quantize -> EXT_meshopt_compression.
 //
 // Usage: node scripts/optimize-models.mjs [rawDir]
-//   rawDir defaults to ../whipple-asset-work/out (output of tools/blender/build_models.py)
+//   rawDir defaults to ../wilms-asset-work/out (output of build_urinary.py, see BUILD_REPORT.md)
 import { NodeIO } from '@gltf-transform/core';
 import { ALL_EXTENSIONS, EXTMeshoptCompression } from '@gltf-transform/extensions';
 import { dedup, prune, quantize, reorder } from '@gltf-transform/functions';
@@ -12,7 +12,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const rawDir = resolve(process.argv[2] ?? join(root, '..', 'whipple-asset-work', 'out'));
+const rawDir = resolve(process.argv[2] ?? join(root, '..', 'wilms-asset-work', 'out'));
 const outDir = join(root, 'public', 'models');
 mkdirSync(outDir, { recursive: true });
 
@@ -22,7 +22,7 @@ const io = new NodeIO()
   .registerExtensions(ALL_EXTENSIONS)
   .registerDependencies({ 'meshopt.decoder': MeshoptDecoder, 'meshopt.encoder': MeshoptEncoder });
 
-const models = ['digestive', 'heart', 'brain', 'knee'];
+const models = ['urinary'];
 for (const name of models) {
   const src = join(rawDir, `${name}_raw.glb`);
   if (!existsSync(src)) {

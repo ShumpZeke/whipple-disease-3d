@@ -4,10 +4,13 @@ import { frameState } from '../app/journey';
 import { LAST_STOP, STOPS } from '../content/story';
 import { entryPose, exitPose, PLATE, stopPose, type AnatomyRefs, type Pose } from './presets';
 
+// the anchors as they come out of public/models/urinary.glb (×5)
 const refs: AnatomyRefs = {
-  si: new THREE.Vector3(0, -0.15, 0.15),
-  enter: new THREE.Vector3(0.1, -0.2, 0.45),
-  n: new THREE.Vector3(0.1, 0.15, 1).normalize(),
+  kidney: new THREE.Vector3(0.3, 0.376, -0.075),
+  enter: new THREE.Vector3(0.3, 0.438, 0.002),
+  n: new THREE.Vector3(0.03, 0.43, 0.9).normalize(),
+  tumor: new THREE.Vector3(0.364, 0.27, 0.008),
+  tn: new THREE.Vector3(0.33, 0.05, 0.94).normalize(),
 };
 const dist = (p: Pose, target: Pose['target']) => Math.hypot(p.pos[0] - target[0], p.pos[1] - target[1], p.pos[2] - target[2]);
 

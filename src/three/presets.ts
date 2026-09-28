@@ -9,13 +9,16 @@ export interface Pose {
 }
 
 /**
- * Anatomy anchors are resolved at runtime (the model is scaled ×4 in the world).
- * `enter` is a front-facing point on a loop of small intestine; `n` its outward normal.
+ * Anatomy anchors are resolved at runtime (the model is scaled ×5 in the world).
+ * `enter` is a front-facing point on the left kidney and `n` its outward normal;
+ * `tumor` is where the tumor sits on that kidney's lower half and `tn` its outward normal.
  */
 export interface AnatomyRefs {
-  si: THREE.Vector3;
+  kidney: THREE.Vector3;
   enter: THREE.Vector3;
   n: THREE.Vector3;
+  tumor: THREE.Vector3;
+  tn: THREE.Vector3;
 }
 
 const add = (a: THREE.Vector3, d: V3): V3 => [a.x + d[0], a.y + d[1], a.z + d[2]];
@@ -27,12 +30,17 @@ const along = (a: THREE.Vector3, n: THREE.Vector3, k: number): V3 => [a.x + n.x 
  */
 const LAYOUT: Partial<Record<StopId, [number, number]>> = {
   body: [0.3, 0],
-  intestine: [0.4, 0.04],
-  wall: [0.22, 0.12],
-  villi: [0.3, 0],
-  cause: [0.12, 0.04],
-  symptoms: [0.25, 0],
-  stain: [0.36, 0.04],
+  kidneys: [0.3, 0.02],
+  inside: [0.25, 0.02],
+  nephron: [0.25, 0],
+  cause: [0.12, 0.08],
+  genes: [0.22, 0.05],
+  lump: [0.3, 0.04],
+  signs: [0.3, 0],
+  ultrasound: [0.28, 0.02],
+  scans: [0.26, 0.02],
+  treatment: [0.3, 0],
+  outlook: [0.3, 0],
   quiz: [0.3, 0],
   end: [0.3, 0],
 };
@@ -52,73 +60,73 @@ function frameAt(p: Pose, fx: number, fy: number, aspect: number): Pose {
 
 /** The pose the camera rests at for each stop (`aspect` = viewport width / height). */
 export function stopPose(id: StopId, r: AnatomyRefs, aspect = 16 / 9): Pose {
-  const p = basePose(id, r, aspect);
+  const p = basePose(id, r);
   const at = aspect >= 1 ? LAYOUT[id] : undefined;
   return at ? frameAt(p, at[0], at[1], aspect) : p;
 }
 
-function basePose(id: StopId, r: AnatomyRefs, aspect: number): Pose {
+function basePose(id: StopId, r: AnatomyRefs): Pose {
   switch (id) {
     case 'body':
-      return { pos: [0.55, 0.25, 4.15], target: [0, -0.04, 0], fov: 30 };
-    case 'intestine':
-      return { pos: add(r.si, [-0.5, 0.32, 2.85]), target: add(r.si, [0.02, 0.06, 0]), fov: 30 };
-    case 'wall':
-      return { pos: [3.7, 2.1, 6.3], target: [0.35, -0.1, 0], fov: 34 };
-    case 'villi':
-      return { pos: [1.5, 1.2, 3.45], target: [0.02, 0.5, 0.8], fov: 34 };
+      return { pos: [0.45, 0.2, 4.0], target: [0, -0.02, 0], fov: 30 };
+    case 'kidneys':
+      return { pos: [0.28, 0.5, 2.55], target: [0, 0.2, -0.04], fov: 30 };
+    case 'inside':
+      return { pos: [0.35, 0.15, 4.2], target: [0, 0, 0], fov: 34 };
+    case 'nephron':
+      return { pos: [0.75, 0.3, 6.3], target: [0.45, -0.3, 0], fov: 34 };
     case 'cause':
-      return { pos: [0.6, 0.6, 7.2], target: [0, 0, 0], fov: 36 };
-    case 'symptoms':
-      return { pos: [0.3, 2.4, 4.1], target: [0, 0.5, 0.45], fov: 36 };
-    case 'spread':
-      // on a phone held upright there is no room beside the gut: frame the column of other organs
-      if (aspect < 0.8) return { pos: [2.24, -0.5, 7.35], target: [2.24, -0.65, 0], fov: 30 };
-      // the gut and the other organs sit in the top two-thirds, above the caption
-      return { pos: [0.55, -0.5, 7.2], target: [0.55, -0.66, 0], fov: 30 };
-    case 'biopsy':
-      return { pos: [2.55, 1.5, 1.05], target: [0.2, 0.02, 0.12], fov: 42 };
-    case 'stain':
-      return { pos: [20, -0.1, 9.4], target: [20, -0.25, 0], fov: 34 };
-    case 'pcr':
-      return { pos: [40.3, 0.45, 7.75], target: [39.55, 0.15, 0], fov: 36 };
+      return { pos: [0, 0.25, 6.6], target: [0, 0, 0], fov: 36 };
+    case 'genes':
+      return { pos: [20.2, 0.15, 5.2], target: [20, 0, 0], fov: 34 };
+    case 'lump':
+      return { pos: add(r.tumor, [0.75, 0.22, 2.1]), target: add(r.tumor, [-0.1, 0.08, 0]), fov: 30 };
+    case 'signs':
+      return { pos: [0.6, 0.05, 3.9], target: [0.06, -0.08, 0], fov: 30 };
+    case 'ultrasound':
+      return { pos: [0.35, 0.3, 5.3], target: [0, 0.1, 0], fov: 34 };
+    case 'scans':
+      return { pos: [20.45, 0.35, 7.6], target: [20, -0.05, 0], fov: 34 };
     case 'treatment':
-      return { pos: [-1.2, 2.35, 3.8], target: [0, 0.5, 0.15], fov: 36 };
+      return { pos: [0.75, 0.42, 2.7], target: [0.15, 0.22, 0], fov: 30 };
+    case 'outlook':
+      return { pos: [-0.35, 0.42, 2.7], target: [-0.05, 0.2, 0], fov: 30 };
     case 'quiz':
-      return { pos: [0.45, 0.22, 4.25], target: [0, -0.04, 0], fov: 30 };
+      return { pos: [0.4, 0.18, 4.1], target: [0, -0.02, 0], fov: 30 };
     case 'end':
-      return { pos: [0.9, 0.34, 4.4], target: [0, -0.03, 0], fov: 30 };
+      return { pos: [0.8, 0.28, 4.2], target: [0, -0.02, 0], fov: 30 };
     default:
       // history stops: the engraved-plate framing (telephoto, like a flat atlas plate)
       return PLATE;
   }
 }
 
-/** Flat, telephoto framing used while the model is still a 1907-style engraving. */
-export const PLATE: Pose = { pos: [0, -0.05, 8.7], target: [0, -0.05, 0], fov: 16 };
+/** Flat, telephoto framing used while the model is still an engraving. */
+export const PLATE: Pose = { pos: [0, 0, 8.7], target: [0, 0, 0], fov: 16 };
 
 /** Where the camera dives to when leaving a stop through a surface (end of the zoom-in). */
 export function exitPose(id: StopId, r: AnatomyRefs): Pose | null {
   switch (id) {
-    case 'intestine':
-    case 'spread':
-      return { pos: along(r.enter, r.n, 0.07), target: along(r.enter, r.n, -0.08), fov: 30 };
-    case 'wall':
-      return { pos: [-0.248, -0.226, -0.457], target: [-0.23, -0.305, -0.606], fov: 34 };
-    case 'villi':
-      return { pos: [0.0, 0.5, 1.42], target: [0, 0.5, 1.1], fov: 34 };
+    case 'kidneys':
+      return { pos: along(r.enter, r.n, 0.06), target: along(r.enter, r.n, -0.1), fov: 30 };
+    case 'inside':
+      // into the outer layer, where the filters are
+      return { pos: [0.56, 0.32, 0.26], target: [0.56, 0.32, 0], fov: 34 };
+    case 'nephron':
+      // into the wall of the tube, down to its cells
+      return { pos: [1.28, -0.95, 0.55], target: [1.28, -0.95, 0.1], fov: 34 };
     case 'cause':
-      return { pos: [0.6, 0.6, 18], target: [0, 0, 0], fov: 36 };
-    case 'symptoms':
-      return { pos: [0.3, 5.5, 7.5], target: [0, 0.5, 0.2], fov: 40 };
-    case 'biopsy':
-      return { pos: [0.62, 0.22, 0.34], target: [0.35, -0.02, 0.2], fov: 42 };
-    case 'stain':
-      return { pos: [20.25, 0.35, 0.35], target: [20.25, 0.35, 0], fov: 34 };
-    case 'pcr':
-      return { pos: [40.2, 0.4, 17], target: [39.55, 0.15, 0], fov: 36 };
-    case 'treatment':
-      return { pos: [-1.2, 5.5, 7.5], target: [0, 0.5, 0.2], fov: 40 };
+      // into the nucleus of a young cell
+      return { pos: [1.45, 0.2, 0.9], target: [1.45, 0.2, 0], fov: 36 };
+    case 'genes':
+      return { pos: [20.2, 0.2, 14], target: [20, 0, 0], fov: 36 };
+    case 'signs':
+      return { pos: along(r.tumor, r.tn, 0.1), target: along(r.tumor, r.tn, -0.08), fov: 30 };
+    case 'ultrasound':
+      // into the lump on the scan
+      return { pos: [0.38, -0.55, 0.6], target: [0.38, -0.55, 0], fov: 34 };
+    case 'scans':
+      return { pos: [20.3, 0.3, 17], target: [20, 0, 0], fov: 36 };
     default:
       return null;
   }
@@ -147,25 +155,22 @@ function approach(p: Pose, k: number, yaw = 0.2): Pose {
  */
 export function entryPose(id: StopId, r: AnatomyRefs): Pose | null {
   switch (id) {
-    case 'wall':
+    case 'inside':
       return approach(stopPose(id, r), 1.9);
-    case 'villi':
-      return approach(stopPose(id, r), 1.7, -0.25);
+    case 'nephron':
+      return approach(stopPose(id, r), 2.0, -0.22);
     case 'cause':
       return approach(stopPose(id, r), 2.1);
-    case 'biopsy':
-      return approach(stopPose(id, r), 1.6, -0.2);
-    case 'stain':
-      return approach(stopPose(id, r), 2.3, 0.12);
-    case 'pcr':
-      return approach(stopPose(id, r), 2.1);
-    case 'symptoms':
-      return { pos: [0.0, 0.52, 1.5], target: [0, 0.5, 1.2], fov: 36 };
-    case 'spread':
-    case 'quiz':
-      return { pos: along(r.enter, r.n, 0.12), target: along(r.enter, r.n, -0.02), fov: 30 };
+    case 'genes':
+      return approach(stopPose(id, r), 2.2, 0.12);
+    case 'ultrasound':
+      return approach(stopPose(id, r), 2.0, -0.2);
+    case 'scans':
+      return approach(stopPose(id, r), 2.1, 0.12);
+    case 'lump':
+      return { pos: along(r.tumor, r.tn, 0.14), target: along(r.tumor, r.tn, -0.04), fov: 30 };
     case 'treatment':
-      return { pos: [-0.2, 1.6, 1.6], target: [0, 0.7, 0.4], fov: 36 };
+      return { pos: along(r.enter, r.n, 0.18), target: along(r.enter, r.n, -0.02), fov: 30 };
     default:
       return null;
   }

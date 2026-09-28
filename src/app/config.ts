@@ -7,7 +7,7 @@ export const SUBMISSION = {
   studentName: 'Vardhmansinh Rathod',
   course: 'Medical Terminology',
   classPeriod: '3rd Block',
-  assignedEponym: '#26, Whipple’s disease',
+  assignedEponym: '#27, Wilms tumor',
 } as const;
 
 export function periodLabel(): string {

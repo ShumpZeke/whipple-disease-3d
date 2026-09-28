@@ -3,30 +3,31 @@ import { periodLabel, SUBMISSION } from '../app/config';
 import { MEDIA_CREDITS, SOURCES, SOURCE_BY_ID } from './citations';
 import { GLOSSARY, TERM_BY_KEY } from './glossary';
 import { QUESTIONS } from './quiz';
-import { FACTS, STOPS, STOP_INDEX } from './story';
+import { FACTS, QA, SECTIONS, STOPS, STOP_INDEX } from './story';
 
 const allCaptionText = STOPS.flatMap((s) => [s.title, s.text, s.note ?? '']);
 const citeRefs = (t: string) => [...t.matchAll(/\{c:([\d,\s]+)\}/g)].flatMap((m) => m[1].split(',').map((n) => Number(n.trim())));
 const termRefs = (t: string) => [...t.matchAll(/\{t:([a-z-]+)(?:\|[^}]+)?\}/g)].map((m) => m[1]);
 
 describe('the one-page journey (storyboard order)', () => {
-  it('zooms from 1907 down to the germ, then out to diagnosis, treatment and the self-check', () => {
+  it('goes from Max Wilms into the kidney, down to its cells, then out to signs, scans, treatment and the self-check', () => {
     expect(STOPS.map((s) => s.id)).toEqual([
       'title',
       'doctor',
-      'case',
+      'book',
       'name',
       'body',
-      'intestine',
-      'wall',
-      'villi',
+      'kidneys',
+      'inside',
+      'nephron',
       'cause',
-      'symptoms',
-      'spread',
-      'biopsy',
-      'stain',
-      'pcr',
+      'genes',
+      'lump',
+      'signs',
+      'ultrasound',
+      'scans',
       'treatment',
+      'outlook',
       'quiz',
       'end',
     ]);
@@ -72,27 +73,29 @@ describe('the one-page journey (storyboard order)', () => {
       expect(t, s.id).toBeDefined();
       expect(t!.short.length, s.id).toBeGreaterThan(0);
     }
-    expect(featured.filter((s) => (TERM_BY_KEY.get(s.term!)?.parts?.length ?? 0) > 0).length).toBeGreaterThanOrEqual(5);
-  });
-
-  it('sums up the four facts on the last stop', () => {
-    expect(FACTS.map((f) => f.label)).toEqual(['Cause', 'Symptoms', 'Diagnosis', 'Treatment']);
-    for (const f of FACTS) expect(f.cites.length, f.label).toBeGreaterThan(0);
+    expect(featured.filter((s) => (TERM_BY_KEY.get(s.term!)?.parts?.length ?? 0) > 0).length).toBeGreaterThanOrEqual(3);
   });
 
   it('covers four clinical facts, each with sources: cause, symptoms, diagnosis, treatment', () => {
-    for (const id of ['cause', 'symptoms', 'biopsy', 'treatment'] as const) {
+    expect(FACTS.map((f) => f.label)).toEqual(['Cause', 'Symptoms', 'Diagnosis', 'Treatment']);
+    for (const f of FACTS) expect(f.cites.length, f.label).toBeGreaterThan(0);
+    for (const id of ['cause', 'genes', 'lump', 'signs', 'ultrasound', 'scans', 'treatment'] as const) {
       expect(citeRefs(STOPS[STOP_INDEX[id]].text).length, id).toBeGreaterThan(0);
     }
-    expect(FACTS.map((f) => f.label)).toEqual(['Cause', 'Symptoms', 'Diagnosis', 'Treatment']);
   });
 
   it('tells the history on the page and the modern story in 3D', () => {
-    for (const id of ['title', 'doctor', 'case', 'name'] as const) {
+    for (const id of ['title', 'doctor', 'book', 'name'] as const) {
       expect(STOPS[STOP_INDEX[id]].world).toBe('none');
       expect(STOPS[STOP_INDEX[id]].scene).toBe('history');
     }
     for (const s of STOPS.slice(STOP_INDEX.body)) expect(s.world, s.id).not.toBe('none');
+  });
+
+  it('lists the parts of the talk on the home screen, ending with the sources', () => {
+    expect(SECTIONS[0].title).toBe('History');
+    expect(SECTIONS.at(-1)?.title).toBe('Sources');
+    for (let i = 1; i < SECTIONS.length; i++) expect(SECTIONS[i].stop).toBeGreaterThan(SECTIONS[i - 1].stop);
   });
 });
 
@@ -101,6 +104,7 @@ describe('citations', () => {
     expect(SOURCES.length).toBeGreaterThanOrEqual(3);
     for (const s of SOURCES) expect(s.url).toMatch(/^https:\/\//);
     expect(new Set(SOURCES.map((s) => s.id)).size).toBe(SOURCES.length);
+    SOURCES.forEach((s, i) => expect(s.id).toBe(i + 1));
   });
 
   it('never cites a missing source', () => {
@@ -108,13 +112,27 @@ describe('citations', () => {
       ...allCaptionText.flatMap(citeRefs),
       ...GLOSSARY.flatMap((t) => t.cites),
       ...QUESTIONS.flatMap((q) => q.cites),
+      ...FACTS.flatMap((f) => f.cites),
+      ...QA.flatMap((x) => x.cites),
     ];
-    for (const id of [...cited, ...FACTS.flatMap((f) => f.cites)]) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
+    for (const id of cited) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
+  });
+
+  it('uses every source somewhere', () => {
+    const cited = new Set([
+      ...allCaptionText.flatMap(citeRefs),
+      ...GLOSSARY.flatMap((t) => t.cites),
+      ...QUESTIONS.flatMap((q) => q.cites),
+      ...FACTS.flatMap((f) => f.cites),
+      ...QA.flatMap((x) => x.cites),
+    ]);
+    // the scene labels cite 14 (kidney parts); everything else is cited in the text
+    for (const s of SOURCES) if (s.id !== 14) expect(cited.has(s.id), `source ${s.id}`).toBe(true);
   });
 
   it('puts a source marker on every stop that states a fact', () => {
     for (const s of STOPS) {
-      if (['title', 'quiz', 'end'].includes(s.id)) continue;
+      if (['quiz'].includes(s.id)) continue;
       expect(citeRefs(s.text).length, s.id).toBeGreaterThan(0);
     }
   });
@@ -123,8 +141,8 @@ describe('citations', () => {
     const text = MEDIA_CREDITS.map((c) => `${c.what} ${c.creator} ${c.license}`).join(' ');
     expect(text).toMatch(/BodyParts3D/);
     expect(text).toMatch(/CC BY-SA/);
-    expect(text).toMatch(/Nobel Foundation/);
-    expect(text).toMatch(/Internet Archive/);
+    expect(text).toMatch(/Wellcome Collection/);
+    expect(text).toMatch(/CC BY 4\.0/);
     expect(text).toMatch(/AI assistant/);
   });
 });
@@ -145,21 +163,23 @@ describe('medical terms', () => {
   });
 
   it('includes the key terms from the storyboard', () => {
-    for (const k of ['villi', 'malabsorption', 'biopsy', 'pcr', 'tropheryma']) expect(TERM_BY_KEY.has(k)).toBe(true);
+    for (const k of ['wilms', 'nephroblastoma', 'nephron', 'hematuria', 'nephrectomy', 'ultrasound']) expect(TERM_BY_KEY.has(k), k).toBe(true);
+  });
+
+  it('breaks nephroblastoma into kidney + bud + tumor', () => {
+    const parts = TERM_BY_KEY.get('nephroblastoma')!.parts!.map((p) => p.meaning);
+    expect(parts).toEqual(['kidney', 'bud or germ', 'tumor']);
   });
 });
 
 describe('history accuracy', () => {
   const text = allCaptionText.join(' ');
-  it('attributes the disease to George Hoyt Whipple (1907) and corrects the class list', () => {
-    expect(text).toMatch(/George Hoyt Whipple/);
-    expect(text).toMatch(/1907/);
-    // his 1907 name for it, shown as the key term on the “name” stop
-    expect(STOPS[STOP_INDEX.name].term).toBe('lipodystrophy');
-    const note = STOPS[STOP_INDEX.name].note ?? '';
-    expect(note).toMatch(/Allen Whipple/);
-    expect(note).toMatch(/Allen O\. Whipple/);
-    expect(citeRefs(note).length).toBeGreaterThan(0);
+  it('names Max Wilms, his dates and his 1899 book', () => {
+    expect(text).toMatch(/Max Wilms/);
+    expect(text).toMatch(/1867 to 1918/);
+    expect(text).toMatch(/The Mixed Tumors of the Kidney/);
+    expect(STOPS[STOP_INDEX.name].term).toBe('nephroblastoma');
+    expect(citeRefs(STOPS[STOP_INDEX.name].note ?? '').length).toBeGreaterThan(0);
   });
 });
 
@@ -173,6 +193,11 @@ describe('quiz', () => {
   it('has exactly one correct option per multiple-choice question', () => {
     for (const q of QUESTIONS) if (q.kind === 'choice') expect(q.options.filter((o) => o.correct)).toHaveLength(1);
   });
+
+  it('accepts either kidney for the organ question', () => {
+    const q = QUESTIONS.find((x) => x.kind === 'organ');
+    expect(q?.kind === 'organ' && q.answer).toEqual(['LeftKidney', 'RightKidney']);
+  });
 });
 
 describe('submission details', () => {
@@ -181,5 +206,6 @@ describe('submission details', () => {
     expect(SUBMISSION.course).toBe('Medical Terminology');
     expect(SUBMISSION.classPeriod).toBe('3rd Block');
     expect(periodLabel()).toBe('3rd Block');
+    expect(SUBMISSION.assignedEponym).toMatch(/Wilms tumor/);
   });
 });

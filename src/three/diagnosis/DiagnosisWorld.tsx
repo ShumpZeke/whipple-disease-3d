@@ -1,327 +1,204 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { journey, onJourneyFrame } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
-import { useFrontToBack } from '../drawOrder';
 import { Label3D } from '../Label3D';
-import { mulberry32 } from '../tissue/tissueGeometry';
-import { villusMaterial, villusProfile } from '../tissue/VilliWorld';
-import { makePasTexture } from './pasTexture';
+import { CT, FAN, makeCtTexture, makeSonogramTexture, SONO } from './scanTextures';
 
-/* ----------------------------------------------------------------- A · biopsy (x = 0) */
+const uTime = { value: 0 };
 
-/** The biopsy shows an affected lining: villi partly blunted (fixed, independent of the villi scene). */
-const biopsyUniforms = { uTime: { value: 0 }, uDisease: { value: 0.55 } };
+function Note({ at }: { at: [number, number, number] }) {
+  return (
+    <Label3D visible position={at} center>
+      <span className="tag">
+        <small>Illustration, not a patient image</small>
+      </span>
+    </Label3D>
+  );
+}
 
-function Biopsy({ active }: { active: boolean }) {
-  const reduced = useStory((s) => s.reducedMotion);
+/* ----------------------------------------------------------------- A · ultrasound (x = 0) */
+
+const APEX = new THREE.Vector3(0, 0.75, 0);
+
+function Ultrasound({ active }: { active: boolean }) {
   const built = useMemo(() => {
-    // inside a loop of duodenum: a curved lumen lined with (slightly blunted) villi
-    const rnd = mulberry32(5);
-    const R = 2.25;
-    const axisY = 1.95;
-    const wallPt = (x: number, phi: number, r = R) => new THREE.Vector3(x, axisY - r * Math.cos(phi), r * Math.sin(phi));
-    const nx = 70;
-    const np = 60;
-    const pos: number[] = [];
-    const idx: number[] = [];
-    for (let i = 0; i <= nx; i++) {
-      for (let j = 0; j <= np; j++) {
-        const v = wallPt(-3.9 + (7.8 * i) / nx, THREE.MathUtils.degToRad(-105 + (210 * j) / np));
-        pos.push(v.x, v.y, v.z);
-      }
-    }
-    for (let i = 0; i < nx; i++)
-      for (let j = 0; j < np; j++) {
-        const a = i * (np + 1) + j;
-        idx.push(a, a + np + 1, a + 1, a + 1, a + np + 1, a + np + 2);
-      }
-    const floor = new THREE.BufferGeometry();
-    floor.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    floor.setIndex(idx);
-    floor.computeVertexNormals();
-
-    const vGeo = villusProfile(10, 8);
-    const n = 1400;
-    const rands = new Float32Array(n);
-    const inst = new THREE.InstancedMesh(vGeo, villusMaterial(false, biopsyUniforms), n);
-    const m = new THREE.Matrix4();
-    const q = new THREE.Quaternion();
-    for (let i = 0; i < n; i++) {
-      const x = -3.7 + rnd() * 7.4;
-      const phi = THREE.MathUtils.degToRad(-78 + rnd() * 156);
-      const p = wallPt(x, phi, R - 0.005);
-      const inward = new THREE.Vector3(0, Math.cos(phi), -Math.sin(phi));
-      q.setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
-      const h = 0.24 + rnd() * 0.12;
-      const w = 0.045 + rnd() * 0.015;
-      m.compose(p, q, new THREE.Vector3(w, h, w * 0.85));
-      inst.setMatrixAt(i, m);
-      rands[i] = rnd();
-    }
-    vGeo.setAttribute('aRand', new THREE.InstancedBufferAttribute(rands, 1));
-    inst.instanceMatrix.needsUpdate = true;
-    inst.frustumCulled = false;
-    const floorMat = new THREE.MeshPhysicalMaterial({
-      color: '#8a4440',
-      roughness: 0.55,
-      sheen: 0.6,
-      sheenColor: new THREE.Color('#ffb2a2'),
-      side: THREE.DoubleSide,
+    const start = -Math.PI / 2 - FAN.half;
+    const fan = new THREE.RingGeometry(FAN.inner, FAN.outer, 72, 1, start, FAN.half * 2);
+    const backing = new THREE.RingGeometry(FAN.inner - 0.04, FAN.outer + 0.07, 72, 1, start - 0.035, FAN.half * 2 + 0.07);
+    // the picture, with faint sound pulses running down from the probe
+    const image = new THREE.ShaderMaterial({
+      uniforms: { uMap: { value: makeSonogramTexture(512) }, uTime, uIn: { value: FAN.inner }, uOut: { value: FAN.outer } },
+      vertexShader: /* glsl */ `
+        varying vec2 vUv;
+        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: /* glsl */ `
+        uniform sampler2D uMap; uniform float uTime; uniform float uIn; uniform float uOut;
+        varying vec2 vUv;
+        void main() {
+          vec3 c = texture2D(uMap, vUv).rgb;
+          float r = length((vUv * 2.0 - 1.0) * uOut);
+          float front = uIn + fract(uTime * 0.42) * (uOut - uIn);
+          float wave = exp(-pow((r - front) / 0.04, 2.0)) * (1.0 - smoothstep(uOut * 0.6, uOut, r));
+          gl_FragColor = vec4(c + vec3(0.35, 0.5, 0.7) * wave * 0.16, 1.0);
+          #include <colorspace_fragment>
+        }`,
     });
-    return { floor, floorMat, inst };
+    // the probe: a curved rubber face, a plastic body and a handle, with its cable
+    // a slice of a cylinder whose curved side is the fan's top edge (its axis points at the viewer)
+    const lens = new THREE.CylinderGeometry(FAN.inner, FAN.inner, 0.3, 32, 1, false, -FAN.half, FAN.half * 2);
+    lens.rotateX(Math.PI / 2);
+    const plastic = new THREE.MeshPhysicalMaterial({ color: '#e9e6df', roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.3 });
+    const cable = new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3([new THREE.Vector3(0, 1.0, 0), new THREE.Vector3(0.1, 1.5, -0.05), new THREE.Vector3(0.7, 2.0, -0.3), new THREE.Vector3(1.4, 2.3, -0.5)]),
+      40,
+      0.035,
+      8,
+      false,
+    );
+    return { fan, backing, image, lens, plastic, cable, housing: new RoundedBoxGeometry(0.42, 0.34, 0.3, 4, 0.08) };
   }, []);
-  useFrontToBack(built.inst, 'biopsy');
-
-  // endoscope comes in from upper left-back, pointing at the target on the lining
-  const target = new THREE.Vector3(0.35, -0.05, 0.2);
-  const dir = new THREE.Vector3(0.75, -0.55, 0.35).normalize();
-  const tip = target.clone().sub(dir.clone().multiplyScalar(1.05));
-  const scopeQ = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().negate());
-  const forceps = useRef<THREE.Group>(null);
-  const cupA = useRef<THREE.Mesh>(null);
-  const cupB = useRef<THREE.Mesh>(null);
-  const sample = useRef<THREE.Mesh>(null);
-  const t0 = useRef(0);
-
-  useFrame((_, dt) => {
-    if (!active) return;
-    t0.current += reduced ? 0 : dt;
-    const t = reduced ? 2.1 : t0.current % 5;
-    // 0-1.2 extend, 1.2-1.6 open, 1.6-2.0 close, 2.0-3.4 retract, then hold
-    const ext = t < 1.2 ? t / 1.2 : t < 2.0 ? 1 : t < 3.4 ? 1 - (t - 2.0) / 1.4 : 0;
-    const open = t < 1.2 ? 0 : t < 1.6 ? (t - 1.2) / 0.4 : t < 2.0 ? 1 - (t - 1.6) / 0.4 : 0;
-    const e = ext * ext * (3 - 2 * ext);
-    if (forceps.current) forceps.current.position.copy(tip.clone().add(dir.clone().multiplyScalar(0.12 + e * 0.8)));
-    if (cupA.current) cupA.current.rotation.z = 0.2 + open * 0.8;
-    if (cupB.current) cupB.current.rotation.z = -0.2 - open * 0.8;
-    if (sample.current) sample.current.visible = t > 1.85 && t < 4.9;
-  });
-
+  const img = (x: number, y: number, z = 0.02): [number, number, number] => [APEX.x + x, APEX.y + y, z];
   return (
     <group>
-      <mesh geometry={built.floor} material={built.floorMat} />
-      <primitive object={built.inst} />
-      {/* endoscope */}
-      <group position={tip} quaternion={scopeQ}>
-        <mesh position={[0, 1.9, 0]}>
-          <cylinderGeometry args={[0.24, 0.24, 3.8, 40, 1, false]} />
-          <meshPhysicalMaterial color="#26282c" roughness={0.28} clearcoat={1} clearcoatRoughness={0.15} />
+      <mesh geometry={built.backing} position={APEX} position-z={-0.01}>
+        <meshBasicMaterial color="#0a0c0f" />
+      </mesh>
+      <mesh geometry={built.fan} material={built.image} position={APEX} />
+      <group position={APEX}>
+        <mesh geometry={built.lens}>
+          <meshPhysicalMaterial color="#2b2d31" roughness={0.6} />
         </mesh>
-        <mesh position={[0, -0.005, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.24, 40]} />
-          <meshStandardMaterial color="#141517" roughness={0.4} />
+        <mesh geometry={built.housing} material={built.plastic} position={[0, 0.22, 0]} />
+        <mesh material={built.plastic} position={[0, 0.66, 0]}>
+          <capsuleGeometry args={[0.105, 0.42, 6, 18]} />
         </mesh>
-        <mesh position={[0.08, -0.01, 0.05]} rotation={[Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.06, 24]} />
-          <meshPhysicalMaterial color="#0b1a2a" roughness={0.05} clearcoat={1} />
-        </mesh>
-        {[-1, 1].map((s) => (
-          <mesh key={s} position={[-0.08, -0.012, s * 0.1]} rotation={[Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[0.03, 16]} />
-            <meshBasicMaterial color="#fff7ea" />
-          </mesh>
-        ))}
-      </group>
-      {/* forceps */}
-      <group ref={forceps} quaternion={scopeQ}>
-        <mesh position={[0, 0.5, 0]}>
-          <cylinderGeometry args={[0.014, 0.014, 1, 8]} />
-          <meshStandardMaterial color="#b9bdc3" metalness={0.9} roughness={0.25} />
-        </mesh>
-        <mesh ref={cupA} position={[0, -0.02, 0]}>
-          <sphereGeometry args={[0.05, 12, 8, 0, Math.PI]} />
-          <meshStandardMaterial color="#cfd3d8" metalness={0.9} roughness={0.2} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh ref={cupB} position={[0, -0.02, 0]} rotation={[0, Math.PI, 0]}>
-          <sphereGeometry args={[0.05, 12, 8, 0, Math.PI]} />
-          <meshStandardMaterial color="#cfd3d8" metalness={0.9} roughness={0.2} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh ref={sample} position={[0, -0.05, 0]} visible={false}>
-          <sphereGeometry args={[0.04, 12, 10]} />
-          <meshPhysicalMaterial color="#d77d72" roughness={0.5} sheen={0.8} />
+        <mesh geometry={built.cable}>
+          <meshStandardMaterial color="#3a3c40" roughness={0.5} />
         </mesh>
       </group>
-      <Label3D visible={active} position={tip.clone().addScaledVector(dir, 0.55)} interactive>
-        <div className="leader" style={{ animation: 'rise 700ms 600ms both' }}>
-          <span className="leader__line" style={{ width: 36 }} />
+      <Label3D visible={active} position={[APEX.x + 0.26, APEX.y + 0.5, 0.1]} interactive>
+        <div className="leader" style={{ animation: 'rise 700ms 450ms both' }}>
+          <span className="leader__line" style={{ width: 34 }} />
           <span className="tag">
-            Biopsy forceps <small>through the endoscope</small> <Cites ids={[14]} />
+            Probe <small>sends sound waves in</small> <Cites ids={[6]} />
           </span>
         </div>
       </Label3D>
+      <Label3D visible={active} position={img(SONO.kidney.x - 0.42, SONO.kidney.y + 0.1)} interactive>
+        <div className="leader leader--left" style={{ animation: 'rise 700ms 650ms both' }}>
+          <span className="leader__line" style={{ width: 40 }} />
+          <span className="tag">Kidney</span>
+        </div>
+      </Label3D>
+      <Label3D visible={active} position={img(SONO.tumor.x + 0.3, SONO.tumor.y + 0.12)} interactive>
+        <div className="leader" style={{ animation: 'rise 700ms 850ms both' }}>
+          <span className="leader__line" style={{ width: 40 }} />
+          <span className="tag">
+            Tumor <small>a round lump</small> <Cites ids={[6]} />
+          </span>
+        </div>
+      </Label3D>
+      {active && <Note at={[0, APEX.y - FAN.outer - 0.16, 0]} />}
     </group>
   );
 }
 
-/* ----------------------------------------------------------------- B · microscope (x = 20) */
+/* ----------------------------------------------------------------- B · CT scanner (x = 20) */
 
-function Microscope({ active }: { active: boolean }) {
-  const tex = useMemo(() => makePasTexture(1024), []);
+/** Cross-section of the scanner's ring: a rounded rectangle turned around the axis. */
+function gantryGeometry(inner: number, outer: number, depth: number, round: number) {
+  const pts: THREE.Vector2[] = [];
+  const corner = (cx: number, cy: number, a0: number) => {
+    for (let i = 0; i <= 6; i++) {
+      const a = a0 + (i / 6) * (Math.PI / 2);
+      pts.push(new THREE.Vector2(cx + Math.cos(a) * round, cy + Math.sin(a) * round));
+    }
+  };
+  corner(inner + round, -depth / 2 + round, Math.PI);
+  corner(outer - round, -depth / 2 + round, -Math.PI / 2);
+  corner(outer - round, depth / 2 - round, 0);
+  corner(inner + round, depth / 2 - round, Math.PI / 2);
+  pts.push(pts[0].clone());
+  const g = new THREE.LatheGeometry(pts, 128);
+  g.rotateX(Math.PI / 2);
+  return g;
+}
+
+function Scanner({ active }: { active: boolean }) {
+  const reduced = useStory((s) => s.reducedMotion);
+  const rotor = useRef<THREE.Group>(null);
+  const built = useMemo(() => {
+    const beam = new THREE.BufferGeometry();
+    beam.setAttribute('position', new THREE.Float32BufferAttribute([0, 0.98, 0, -0.62, -0.78, 0, 0.62, -0.78, 0], 3));
+    return {
+      gantry: gantryGeometry(1.05, 1.75, 0.8, 0.12),
+      shell: new THREE.MeshPhysicalMaterial({ color: '#eeede8', roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.2 }),
+      slice: makeCtTexture(512),
+      beam,
+      beamMat: new THREE.MeshBasicMaterial({
+        color: '#9cc8ff',
+        transparent: true,
+        opacity: 0.12,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+    };
+  }, []);
+  useFrame((_, dt) => {
+    if (active && rotor.current && !reduced) rotor.current.rotation.z -= dt * 1.1;
+  });
+  // a point on the slice picture (its coordinates run from −1 to 1 across the circle)
+  const img = (x: number, y: number): [number, number, number] => [x * 0.98, y * 0.98, 0.03];
   return (
     <group position={[20, 0, 0]}>
-      <mesh position={[0, 0.25, 0]}>
-        <circleGeometry args={[1.75, 96]} />
-        <meshBasicMaterial map={tex} toneMapped={false} />
+      <mesh geometry={built.gantry} material={built.shell} />
+      <mesh position={[0, 0, 0.402]}>
+        <torusGeometry args={[1.42, 0.012, 8, 160]} />
+        <meshStandardMaterial color="#7fb2e6" emissive="#4d86c2" emissiveIntensity={0.6} />
       </mesh>
-      <mesh position={[0, 0.25, -0.01]}>
-        <ringGeometry args={[1.75, 1.95, 96]} />
-        <meshStandardMaterial color="#1a1716" roughness={0.4} metalness={0.3} />
+      <mesh>
+        <circleGeometry args={[0.98, 96]} />
+        <meshBasicMaterial map={built.slice} toneMapped={false} />
       </mesh>
-      <Label3D visible={active} position={[1.35, 1.35, 0]} interactive>
-        <div className="leader" style={{ animation: 'rise 700ms 500ms both' }}>
-          <span className="leader__line" style={{ width: 36 }} />
+      {/* the x-ray tube and its fan of rays spin around the patient */}
+      <group ref={rotor} position={[0, 0, 0.02]}>
+        <mesh geometry={built.beam} material={built.beamMat} />
+        <mesh position={[0, 1.0, 0]}>
+          <boxGeometry args={[0.22, 0.08, 0.3]} />
+          <meshStandardMaterial color="#34373c" roughness={0.4} metalness={0.3} />
+        </mesh>
+      </group>
+      <Label3D visible={active} position={[1.3, 1.1, 0.4]} interactive>
+        <div className="leader" style={{ animation: 'rise 700ms 450ms both' }}>
+          <span className="leader__line" style={{ width: 30 }} />
           <span className="tag">
-            <span>
-              <TermButton termKey="pas">PAS</TermButton>-stained macrophages
-            </span>
-            <small>(magenta)</small> <Cites ids={[2, 9]} />
+            <TermButton termKey="ct">CT scanner</TermButton> <Cites ids={[6]} />
           </span>
         </div>
       </Label3D>
-      <Label3D visible={active} position={[0, -1.72, 0]} center>
-        <span className="tag">
-          <small>Illustration of a stained biopsy, not a patient image</small>
-        </span>
+      <Label3D visible={active} position={img(-0.62, 0.38)} interactive>
+        <div className="leader leader--left" style={{ animation: 'rise 700ms 650ms both' }}>
+          <span className="leader__line" style={{ width: 36 }} />
+          <span className="tag">
+            One slice <small>of the belly</small>
+          </span>
+        </div>
       </Label3D>
-    </group>
-  );
-}
-
-/* ----------------------------------------------------------------- C · PCR (x = 40) */
-
-function helixGeometry() {
-  const parts: THREE.BufferGeometry[] = [];
-  const turns = 1.8;
-  const height = 1.7;
-  const radius = 0.2;
-  const colorize = (g: THREE.BufferGeometry, hex: string) => {
-    const c = new THREE.Color(hex);
-    const n = g.getAttribute('position').count;
-    const arr = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) arr.set([c.r, c.g, c.b], i * 3);
-    g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
-    return g;
-  };
-  for (const [phase, col] of [
-    [0, '#efe7d6'],
-    [Math.PI, '#9fb7c9'],
-  ] as [number, string][]) {
-    const pts = Array.from({ length: 80 }, (_, i) => {
-      const t = i / 79;
-      const a = t * turns * Math.PI * 2 + phase;
-      return new THREE.Vector3(Math.cos(a) * radius, t * height - height / 2, Math.sin(a) * radius);
-    });
-    parts.push(colorize(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 120, 0.032, 8, false), col).toNonIndexed());
-  }
-  const rungs = 16;
-  for (let i = 0; i < rungs; i++) {
-    const t = (i + 0.5) / rungs;
-    const a = t * turns * Math.PI * 2;
-    const y = t * height - height / 2;
-    const g = new THREE.CylinderGeometry(0.016, 0.016, radius * 2, 6);
-    g.rotateZ(Math.PI / 2);
-    g.rotateY(-a);
-    g.translate(0, y, 0);
-    parts.push(colorize(g, i % 2 ? '#e0b27d' : '#d58f86').toNonIndexed());
-  }
-  const merged = mergeGeometries(parts)!;
-  merged.computeVertexNormals();
-  return merged;
-}
-
-// Copies double 1 → 2 → 4 → 8 → 16: one in the middle, then a pair, then a centred 8 × 2 grid
-// where each new copy lands next to the copy it was made from (child i comes from i − 2^cycle).
-const GRID: [number, number][] = [
-  [0, 0],
-  [1, 0],
-  [0, 1],
-  [1, 1],
-  [-1, 0],
-  [2, 0],
-  [-1, 1],
-  [2, 1],
-  [-3, 0],
-  [4, 0],
-  [-3, 1],
-  [4, 1],
-  [-2, 0],
-  [3, 0],
-  [-2, 1],
-  [3, 1],
-];
-const GAP = 0.52;
-const SLOT = [0, 1, 2, 3, 4].map((c) =>
-  GRID.map(([col, row], i) =>
-    c === 0
-      ? new THREE.Vector3(0, 0, 0)
-      : c === 1
-        ? new THREE.Vector3((i - 0.5) * GAP, 0, 0)
-        : new THREE.Vector3((col - 0.5) * GAP, row === 0 ? 0.96 : -0.96, (row - 0.5) * 0.25),
-  ),
-);
-const PARENT = Array.from({ length: 16 }, (_, i) => (i === 0 ? 0 : i - 2 ** Math.floor(Math.log2(i))));
-
-function Pcr({ active }: { active: boolean }) {
-  const reduced = useStory((s) => s.reducedMotion);
-  const [cycle, setCycle] = useState(0);
-  const built = useMemo(() => {
-    const g = helixGeometry();
-    const mesh = new THREE.InstancedMesh(
-      g,
-      new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.35, clearcoat: 0.6, sheen: 0.3 }),
-      16,
-    );
-    mesh.frustumCulled = false;
-    return mesh;
-  }, []);
-  const clock = useRef(0);
-  const m = useMemo(() => new THREE.Matrix4(), []);
-  const q = useMemo(() => new THREE.Quaternion(), []);
-  const p = useMemo(() => new THREE.Vector3(), []);
-  const sc = useMemo(() => new THREE.Vector3(), []);
-
-  useFrame((_, dt) => {
-    if (!active) return;
-    clock.current += reduced ? 0 : dt;
-    const period = 1.7;
-    const total = period * 5 + 2.2;
-    const t = reduced ? period * 4.9 : clock.current % total;
-    const c = Math.min(4, Math.floor(t / period));
-    if (c !== cycle) setCycle(c);
-    const count = 2 ** c;
-    const local = Math.min(1, (t - c * period) / 0.9);
-    const e = local * local * (3 - 2 * local);
-    for (let i = 0; i < 16; i++) {
-      if (i >= count) {
-        m.makeScale(0, 0, 0);
-      } else {
-        const born = c > 0 && i >= count / 2;
-        const from = c === 0 ? SLOT[0][0] : SLOT[c - 1][born ? PARENT[i] : i];
-        p.copy(from).lerp(SLOT[c][i], e);
-        // new copies arc slightly towards the viewer so they don't pass through their neighbours
-        if (born) p.z += Math.sin(e * Math.PI) * 0.45;
-        q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, clock.current * 0.5 + i * 0.4);
-        sc.setScalar(born ? 0.4 + 0.6 * e : 1);
-        m.compose(p, q, sc);
-      }
-      built.setMatrixAt(i, m);
-    }
-    built.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <group position={[40, 0, 0]}>
-      <primitive object={built} />
-      <Label3D visible={active} position={[0, 2.05, 0]} center>
-        <span className="tag" aria-live="polite">
-          {cycle === 0 ? 'Start: 1 copy of the DNA' : `After round ${cycle}: ${2 ** cycle} copies`}
-        </span>
+      <Label3D visible={active} position={img(CT.tumor.x + 0.22, CT.tumor.y + 0.08)} interactive>
+        <div className="leader" style={{ animation: 'rise 700ms 850ms both' }}>
+          <span className="leader__line" style={{ width: 44 }} />
+          <span className="tag">
+            Tumor <small>in the left kidney</small> <Cites ids={[6]} />
+          </span>
+        </div>
       </Label3D>
+      {active && <Note at={[0, -1.98, 0.4]} />}
     </group>
   );
 }
@@ -331,15 +208,17 @@ function Pcr({ active }: { active: boolean }) {
 export function DiagnosisWorld({ visible }: { visible: boolean }) {
   const id = useStopId();
   const invalidate = useThree((s) => s.invalidate);
+  const reduced = useStory((s) => s.reducedMotion);
   const parts = useRef<(THREE.Group | null)[]>([]);
-  // The three set-ups sit side by side; only draw the one the camera is at. The zoom between them
-  // passes through the veil, so the switch is never seen. All three start visible so the stage
+  useFrame((_, dt) => {
+    if (visible && !reduced) uTime.value += dt;
+  });
+  // The two set-ups sit side by side; only draw the one the camera is at. The zoom between them
+  // passes through the veil, so the switch is never seen. Both start visible so the stage
   // compiles every shader up front.
   useEffect(() => {
     const apply = (t: number) => {
-      const b = STOP_INDEX.biopsy + 0.5;
-      const s = STOP_INDEX.stain + 0.5;
-      const show = [t < b, t >= b && t < s, t >= s];
+      const show = [t < STOP_INDEX.ultrasound + 0.5, t >= STOP_INDEX.ultrasound + 0.5];
       parts.current.forEach((g, i) => {
         if (g && g.visible !== show[i]) {
           g.visible = show[i];
@@ -353,13 +232,10 @@ export function DiagnosisWorld({ visible }: { visible: boolean }) {
   return (
     <group>
       <group ref={(g) => void (parts.current[0] = g)}>
-        <Biopsy active={visible && id === 'biopsy'} />
+        <Ultrasound active={visible && id === 'ultrasound'} />
       </group>
       <group ref={(g) => void (parts.current[1] = g)}>
-        <Microscope active={visible && id === 'stain'} />
-      </group>
-      <group ref={(g) => void (parts.current[2] = g)}>
-        <Pcr active={visible && id === 'pcr'} />
+        <Scanner active={visible && id === 'scans'} />
       </group>
     </group>
   );

@@ -3,6 +3,7 @@ import { creditLine, SUBMISSION, periodLabel } from '../app/config';
 import { useStory } from '../app/store';
 import { MEDIA_CREDITS, SOURCES } from '../content/citations';
 import { GLOSSARY } from '../content/glossary';
+import { Reference } from './Reference';
 import { Cites } from './RichText';
 
 function CloseButton({ onClick, label }: { onClick: () => void; label: string }) {
@@ -53,8 +54,8 @@ export function SourcesOverlay() {
         <CloseButton onClick={close} label="Close sources" />
         <h2 id="sources-title">Sources</h2>
         <p className="lede">
-          References in APA style. Numbers match the small markers beside each fact. Information was paraphrased; the
-          1907 article is quoted only in its original scanned pages.
+          References in APA style. Numbers match the small markers beside each fact. All information was put in my own
+          words.
         </p>
 
         <h3>References</h3>
@@ -63,12 +64,7 @@ export function SourcesOverlay() {
             <li key={s.id} id={`ref-${s.id}`} className={`ref${focus === s.id ? ' is-focus' : ''}`}>
               <span className="ref__n">{s.id}</span>
               <span className="ref__text">
-                {s.authors} ({s.year}). {s.container ? <>{s.title}. </> : <i>{s.title}. </i>}
-                {s.container && <i>{s.container}</i>}
-                {s.details ? <>. {s.details} </> : '. '}
-                <a href={s.url} target="_blank" rel="noreferrer">
-                  {s.url.replace(/^https?:\/\//, '')}
-                </a>
+                <Reference s={s} />
               </span>
               <span className="ref__use">Used for: {s.usedFor}</span>
             </li>
@@ -92,13 +88,6 @@ export function SourcesOverlay() {
             </li>
           ))}
         </ul>
-
-        <h3>Accuracy note</h3>
-        <p style={{ fontSize: 14.5, lineHeight: 1.55 }}>
-          The class eponym list gave “Allen Whipple” for #26. Whipple’s disease is named for George Hoyt Whipple, who
-          described it in 1907 <Cites ids={[5, 6]} />. Allen Oldfather Whipple (1881–1963) was a surgeon; the Whipple
-          procedure, a pancreas operation, is named for him <Cites ids={[8, 15]} />.
-        </p>
 
         <div className="student-card">
           <div>
@@ -135,7 +124,7 @@ export function GlossaryOverlay() {
         <ul className="gloss-list">
           {GLOSSARY.map((t) => (
             <li key={t.key} className="gloss">
-              <span className="gloss__term">{t.key === 'tropheryma' ? <i>{t.term}</i> : t.term}</span>
+              <span className="gloss__term">{t.term}</span>
               {t.say && <span className="gloss__say">{t.say}</span>}
               {t.parts && (
                 <p style={{ color: 'var(--muted)', fontSize: 13 }}>

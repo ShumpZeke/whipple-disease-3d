@@ -4,8 +4,8 @@ import { LAST_STOP, SOURCES_PAGE, STOPS, type Stop, type World } from '../conten
  * The scroll-driven zoom. `journey.t` is a continuous position along the story:
  * t = 3 means "at stop 3", t = 3.5 is halfway to stop 4. The page scrolls natively (wheel,
  * trackpad, touch, scrollbar, keyboard, presenter clicker) and t follows the scroll with damping,
- * so every visual — camera, fades, the villi morph — is a pure function of t and can be scrubbed
- * forwards and backwards.
+ * so every visual (the camera, the fades, the tumor growing) is a pure function of t and can be
+ * scrubbed forwards and backwards.
  */
 export const journey = {
   t: 0,
@@ -36,7 +36,7 @@ export const smoothstep = (a: number, b: number, x: number) => {
 };
 export const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
-/** The hinge between the 1907 history and the modern 3D model. */
+/** The hinge between the 1899 history and the 3D model. */
 export const HINGE = STOPS.findIndex((s) => s.id === 'name');
 
 export interface FrameState {
@@ -54,19 +54,17 @@ export interface FrameState {
   dir: 'in' | 'out';
 }
 
-const OUTWARD = new Set(['cause>symptoms', 'symptoms>spread', 'pcr>treatment', 'treatment>quiz']);
+const OUTWARD = new Set(['genes>lump', 'scans>treatment']);
 
 const VEIL: Record<string, string> = {
-  'intestine>wall': '#c7766b',
-  'wall>villi': '#b25a52',
-  'villi>cause': '#e9c3bb',
-  'cause>symptoms': '#140d16',
-  'symptoms>spread': '#15171a',
-  'spread>biopsy': '#b25a52',
-  'biopsy>stain': '#f4e2ea',
-  'stain>pcr': '#2a1024',
-  'pcr>treatment': '#140d16',
-  'treatment>quiz': '#15171a',
+  'kidneys>inside': '#7a2f27',
+  'inside>nephron': '#a4493d',
+  'nephron>cause': '#e9c3bb',
+  'cause>genes': '#2a1a3a',
+  'genes>lump': '#140d16',
+  'signs>ultrasound': '#0d0f12',
+  'ultrasound>scans': '#0d0f12',
+  'scans>treatment': '#15171a',
 };
 
 export function frameState(t: number): FrameState {

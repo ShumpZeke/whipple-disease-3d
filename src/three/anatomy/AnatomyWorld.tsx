@@ -1,23 +1,25 @@
-import { ContactShadows, useGLTF } from '@react-three/drei';
+import { ContactShadows } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { frameState, HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
-import { STOPS, STOP_INDEX } from '../../content/story';
+import { STOP_INDEX, type StopId } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
 import { useJourney } from '../../ui/useJourney';
 import { Label3D } from '../Label3D';
-import { DigestiveModel } from './DigestiveModel';
+import { mulberry32 } from '../random';
 import { createOrganMaterial, sharedOrganUniforms } from './organMaterial';
+import { UrinaryModel } from './UrinaryModel';
 import { MODEL_SCALE, useAnatomy } from './useAnatomy';
 
-/* ------------------------------------------------------------ 1907 plate → modern model */
+/* ------------------------------------------------------------ old plate → 3D model */
 
 /**
  * Scroll-driven hinge between history and today. While scrolling from the "name" stop to the
- * "body" stop the 1907 page gives way to paper, the model fades in as an engraved plate, then a
- * sweep "develops" it into the realistic model (and the paper wipes away with it).
+ * "body" stop the paper page gives way to an engraved plate of the model, then a sweep "develops"
+ * it into the realistic model (and the paper wipes away with it).
  */
 function HingeController() {
   const invalidate = useThree((s) => s.invalidate);
@@ -54,8 +56,8 @@ function HingeController() {
       }
       u.uEngrave.value = engrave;
       u.uReveal.value = reveal;
-      // model height maps to roughly 8%–92% of the viewport in the plate framing
-      paper?.style.setProperty('--sweep', String(0.08 + (1 - reveal) * 0.84));
+      // model height maps to roughly 15%–85% of the viewport in the plate framing
+      paper?.style.setProperty('--sweep', String(0.15 + (1 - reveal) * 0.7));
       if (paper) paper.style.opacity = String(paperOpacity);
       if (label) label.style.opacity = String(labelOpacity);
       if (layer) layer.style.opacity = String(canvasOpacity);
@@ -69,14 +71,154 @@ function HingeController() {
   return null;
 }
 
-/* ------------------------------------------------------------ anchored marker */
+/* ------------------------------------------------------------ the tumor and the operation */
 
-/** At the "body" stop, a single marker invites the visitor to zoom into the small intestine. */
-function IntestineMarker({ visible }: { visible: boolean }) {
+/** Tumor size in world units (the model is shown ×5, so 0.13 is about 2.6 cm on the real-size model). */
+const TUMOR_R = 0.13;
+/** Where the removed kidney goes: out of the body towards the viewer and off to the side. */
+const LIFT = new THREE.Vector3(0.95, 0.3, 0.8);
+
+/** 0 → 1 while the tumor grows in, on the way to the "lump" stop. */
+const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.4, STOP_INDEX.lump, t) * (t < STOP_INDEX.outlook + 0.5 ? 1 : 0);
+/** 0 → 1 while the left kidney is taken out (treatment → outlook), 1 → 0 while it comes back for the quiz. */
+const removal = (t: number) =>
+  smoothstep(STOP_INDEX.treatment + 0.1, STOP_INDEX.outlook - 0.1, t) - smoothstep(STOP_INDEX.outlook + 0.1, STOP_INDEX.quiz - 0.1, t);
+
+/** A lumpy mass: a sphere pushed out by a few overlapping lobes (seeded, so always the same shape). */
+function tumorGeometry() {
+  // weld the sphere's corners first, so the lumpy surface is shaded smoothly
+  const ico = new THREE.IcosahedronGeometry(1, 20);
+  ico.deleteAttribute('normal');
+  ico.deleteAttribute('uv');
+  const g = mergeVertices(ico, 1e-4);
+  const rnd = mulberry32(27);
+  const lobes = Array.from({ length: 11 }, () => {
+    const c = new THREE.Vector3(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).normalize();
+    return { c, a: 0.08 + rnd() * 0.12, s: 0.35 + rnd() * 0.3 };
+  });
+  const pos = g.getAttribute('position');
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).normalize();
+    let r = 0.9;
+    for (const l of lobes) r += l.a * Math.exp(-v.distanceToSquared(l.c) / (l.s * l.s));
+    // a few fine bumps on top
+    r += 0.012 * Math.sin(v.x * 17 + v.y * 5) * Math.sin(v.y * 13 - v.z * 7);
+    pos.setXYZ(i, v.x * r, v.y * r * 1.08, v.z * r);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+/**
+ * The left kidney's lower half grows a tumor on the way to the "lump" stop. At "treatment" the
+ * kidney (with its ureter and the tumor) is lifted out, and it is back, healthy, for the quiz.
+ */
+function Tumor() {
+  const data = useAnatomy();
+  const invalidate = useThree((s) => s.invalidate);
+  const stopId = useStopId();
+  const group = useRef<THREE.Group>(null);
+  const mass = useRef<THREE.Mesh>(null);
+  // the kidney turns about its own centre as it is lifted out; the tumor turns with it
+  const pivot = useMemo(
+    () => ((data.meshes.LeftKidney?.userData.base as THREE.Vector3 | undefined)?.clone() ?? new THREE.Vector3(0.06, 0.075, -0.015)).multiplyScalar(MODEL_SCALE),
+    [data],
+  );
+  const built = useMemo(() => {
+    const a = data.anchors.anchor_tumor;
+    const n = (a?.normal.clone() ?? new THREE.Vector3(0.3, 0, 1)).normalize();
+    const p = (a?.position.clone() ?? new THREE.Vector3(0.073, 0.054, 0.002)).multiplyScalar(MODEL_SCALE);
+    // mostly outside the kidney, a little sunk into it
+    const center = p.clone().addScaledVector(n, TUMOR_R * 0.45);
+    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+    const mat = createOrganMaterial(
+      {
+        id: 'LeftKidney',
+        name: 'tumor',
+        color: '#c7a18f',
+        vein: '#8a3a3c',
+        veinStrength: 0.5,
+        roughness: 0.46,
+        clearcoat: 0.55,
+        sheen: 0.45,
+        sheenColor: '#ffd9c8',
+        bumpScale: 5,
+        bumpStrength: 0.02,
+        mottle: 0.16,
+      },
+      TUMOR_R,
+      false,
+    );
+    return { geo: tumorGeometry(), mat, center, q, labelAt: center.clone().addScaledVector(n, TUMOR_R * 0.7) };
+  }, [data]);
+
+  // tumor scale and the operation both follow the scroll, so they can be played backwards
+  useEffect(() => {
+    const kidney = data.meshes.LeftKidney;
+    const ureter = data.leftUreter;
+    const lift = LIFT.clone().divideScalar(MODEL_SCALE);
+    const apply = (t: number) => {
+      const s = tumorGrowth(t);
+      const k = removal(t);
+      const e = k * k * (3 - 2 * k);
+      if (mass.current) {
+        mass.current.visible = s > 0.001 && e < 0.999;
+        mass.current.scale.setScalar(Math.max(0.001, s) * TUMOR_R);
+      }
+      if (group.current) {
+        group.current.position.copy(pivot).addScaledVector(LIFT, e);
+        group.current.rotation.set(0, 0, -0.5 * e);
+      }
+      for (const m of [kidney, ureter]) {
+        if (!m) continue;
+        m.position.copy(m.userData.base as THREE.Vector3).addScaledVector(lift, e);
+        m.rotation.set(0, 0, -0.5 * e);
+        m.visible = e < 0.999;
+      }
+      invalidate();
+    };
+    apply(journey.t);
+    return onJourneyFrame(apply);
+  }, [data, pivot, invalidate]);
+
+  // warm rim on the tumor while the operation is explained
+  useFrame((_, dt) => {
+    const u = built.mat.userData.uniforms;
+    const want = stopId === 'treatment' ? 0.8 : 0;
+    if (Math.abs(u.uHighlight.value - want) < 0.002) {
+      u.uHighlight.value = want;
+      return;
+    }
+    u.uHighlight.value += (want - u.uHighlight.value) * (1 - Math.exp(-dt * 7));
+    invalidate();
+  });
+
+  return (
+    <group ref={group} position={pivot}>
+      <group position={pivot.clone().negate()}>
+        <mesh ref={mass} geometry={built.geo} material={built.mat} position={built.center} quaternion={built.q} visible={false} />
+        <Label3D visible={stopId === 'lump' || stopId === 'signs'} position={built.labelAt} interactive>
+          <div className="leader">
+            <span className="leader__line" style={{ width: 36 }} />
+            <span className="tag">
+              Wilms tumor <Cites ids={[1]} />
+            </span>
+          </div>
+        </Label3D>
+      </group>
+    </group>
+  );
+}
+
+/* ------------------------------------------------------------ labels and the marker */
+
+/** At the "body" stop, a single marker invites the visitor to zoom in on the kidneys. */
+function KidneyMarker({ visible }: { visible: boolean }) {
   const stopId = useStopId();
   const data = useAnatomy();
   const box = useRef<HTMLDivElement | null>(null);
-  // only once the engraving has fully "developed" into the modern model
+  // only once the engraving has fully "developed" into the 3D model
   const apply = (t: number) => {
     const k = smoothstep(HINGE + 0.9, HINGE + 0.98, t) * (1 - smoothstep(HINGE + 1.12, HINGE + 1.3, t));
     if (!box.current) return;
@@ -89,7 +231,7 @@ function IntestineMarker({ visible }: { visible: boolean }) {
     box.current = el;
     if (el) apply(journey.t);
   };
-  const a = data.anchors.label_SmallIntestine ?? data.anchors.anchor_si_center;
+  const a = data.anchors.label_LeftKidney ?? data.anchors.anchor_kidney_center;
   if (!a) return null;
   const p = a.position.clone().multiplyScalar(MODEL_SCALE);
   return (
@@ -98,151 +240,91 @@ function IntestineMarker({ visible }: { visible: boolean }) {
         <button
           type="button"
           className="marker marker--pulse"
-          aria-label="Zoom into the small intestine"
-          onClick={() => useStory.getState().goToId('intestine')}
+          aria-label="Zoom in on the kidneys"
+          onClick={() => useStory.getState().goToId('kidneys')}
         >
           +
         </button>
         <span className="tag" style={{ pointerEvents: 'none' }}>
-          Small intestine
+          Kidneys
         </span>
       </div>
     </Label3D>
   );
 }
 
-/* ------------------------------------------------------------ other organ systems */
-
-const SAT = [
+const LABELS: { stop: StopId; anchor: string; left?: boolean; width?: number; body: ReactNode }[] = [
+  { stop: 'kidneys', anchor: 'label_RightKidney', left: true, body: 'Right kidney' },
+  { stop: 'kidneys', anchor: 'label_LeftKidney', body: 'Left kidney' },
   {
-    url: '/models/brain.glb',
-    key: 'brain',
-    name: 'Brain',
-    pos: [1.62, 0.74, -0.1] as const,
-    rot: -1.25,
-    size: 0.52,
-    color: '#d8b2a8',
-    text: 'Memory loss, confusion, unusual eye movements.',
-    cites: [1, 3],
-  },
-  {
-    url: '/models/heart.glb',
-    key: 'heart',
-    name: 'Heart',
-    pos: [1.62, 0.02, 0] as const,
-    rot: 0.35,
-    size: 0.46,
-    color: '#a9463d',
-    text: (
+    stop: 'kidneys',
+    anchor: 'label_Adrenals',
+    left: true,
+    width: 44,
+    body: (
       <>
-        Can infect the heart’s lining and valves. This is called <TermButton termKey="endocarditis">endocarditis</TermButton>.
+        Adrenal gland <small>sits on top</small> <Cites ids={[14]} />
       </>
     ),
-    cites: [1, 3],
   },
   {
-    url: '/models/knee.glb',
-    key: 'knee',
-    name: 'Joints',
-    pos: [1.62, -0.72, 0] as const,
-    rot: 0.25,
-    size: 0.5,
-    color: '#e3d6c3',
-    text: 'Joint pain is often the first sign, sometimes years earlier.',
-    cites: [2, 3],
+    stop: 'kidneys',
+    anchor: 'label_Ureters',
+    left: true,
+    body: (
+      <>
+        <TermButton termKey="ureter">Ureter</TermButton> <small>to the bladder</small>
+      </>
+    ),
+  },
+  {
+    stop: 'signs',
+    anchor: 'label_Bladder',
+    body: (
+      <>
+        <TermButton termKey="hematuria">Blood in the urine</TermButton> <Cites ids={[1, 2]} />
+      </>
+    ),
+  },
+  {
+    stop: 'treatment',
+    anchor: 'label_LeftKidney',
+    body: (
+      <>
+        <TermButton termKey="nephrectomy">Taken out</TermButton> <small>with the tumor</small> <Cites ids={[1]} />
+      </>
+    ),
+  },
+  {
+    stop: 'outlook',
+    anchor: 'label_RightKidney',
+    left: true,
+    body: (
+      <>
+        One kidney can do the work <Cites ids={[13]} />
+      </>
+    ),
   },
 ];
 
-function Satellite({ s, visible }: { s: (typeof SAT)[number]; visible: boolean }) {
-  const gltf = useGLTF(s.url);
-  const invalidate = useThree((st) => st.invalidate);
-  const group = useRef<THREE.Group>(null);
-  const { object, scale } = useMemo(() => {
-    const root = gltf.scene.clone(true);
-    const box = new THREE.Box3().setFromObject(root);
-    const dim = box.getSize(new THREE.Vector3());
-    const scale = s.size / Math.max(dim.x, dim.y, dim.z);
-    const mat = createOrganMaterial(
-      {
-        id: 'SmallIntestine',
-        name: s.name,
-        color: s.color,
-        vein: '#6d2a2a',
-        veinStrength: s.key === 'knee' ? 0 : 0.15,
-        roughness: s.key === 'knee' ? 0.6 : 0.4,
-        clearcoat: s.key === 'knee' ? 0.2 : 0.6,
-        sheen: 0.3,
-        sheenColor: '#ffd9cc',
-        bumpScale: 60,
-        bumpStrength: 0.0004,
-        mottle: 0.08,
-      },
-      scale,
-    );
-    root.updateMatrixWorld(true);
-    root.traverse((o) => {
-      if ((o as THREE.Mesh).isMesh) {
-        (o as THREE.Mesh).material = mat;
-        // noise in model units (undo quantization); satellites are ≈0.1–0.2 m models
-        mat.userData.uniforms.uObjMatrix.value.copy(o.matrixWorld);
-      }
-    });
-    return { object: root, scale };
-  }, [gltf, s]);
-
-  // grows in only while the scroll is near "beyond the gut" (deterministic, so fast scrolling can't strand it)
-  useEffect(() => {
-    const apply = (t: number) => {
-      const g = group.current;
-      if (!g) return;
-      const k = smoothstep(0.45, 0.12, Math.abs(t - STOP_INDEX.spread));
-      const e = 1 - Math.pow(1 - k, 3);
-      g.scale.setScalar(Math.max(0.0001, scale * e));
-      g.visible = k > 0.001;
-      invalidate();
-    };
-    apply(journey.t);
-    return onJourneyFrame(apply);
-  }, [scale, invalidate]);
-
+function OrganLabels({ visible }: { visible: boolean }) {
+  const stopId = useStopId();
+  const data = useAnatomy();
   return (
-    <group position={[s.pos[0], s.pos[1], s.pos[2]]}>
-      <group ref={group} scale={0.0001} rotation-y={s.rot} visible={false}>
-        <primitive object={object} />
-      </group>
-      <Label3D visible={visible} position={[0.3, 0, 0]} interactive>
-        <div className="leader">
-          <span className="leader__line" />
-          <span className="tag" style={{ whiteSpace: 'normal', width: 'min(230px, 46vw)' }}>
-            <span>
-              <b>{s.name}</b>
-              <br />
-              <small style={{ color: 'var(--ivory-soft)' }}>
-                {s.text} <Cites ids={s.cites} />
-              </small>
-            </span>
-          </span>
-        </div>
-      </Label3D>
-    </group>
-  );
-}
-
-function Satellites() {
-  const stop = useStory((s) => s.stop);
-  const id = STOPS[stop].id;
-  const [mounted, setMounted] = useState(false);
-  // prefetch a few stops before "beyond the gut"
-  useEffect(() => {
-    if (stop >= STOP_INDEX.spread - 4) setMounted(true);
-  }, [stop]);
-  if (!mounted) return null;
-  return (
-    <Suspense fallback={null}>
-      {SAT.map((s) => (
-        <Satellite key={s.key} s={s} visible={id === 'spread'} />
-      ))}
-    </Suspense>
+    <>
+      {LABELS.map((l, i) => {
+        const a = data.anchors[l.anchor];
+        if (!a) return null;
+        return (
+          <Label3D key={i} visible={visible && stopId === l.stop} position={a.position.clone().multiplyScalar(MODEL_SCALE)} interactive>
+            <div className={`leader${l.left ? ' leader--left' : ''}`} style={{ animation: `rise 700ms ${300 + i * 120}ms both` }}>
+              <span className="leader__line" style={{ width: l.width ?? 32 }} />
+              <span className="tag">{l.body}</span>
+            </div>
+          </Label3D>
+        );
+      })}
+    </>
   );
 }
 
@@ -250,14 +332,13 @@ function Satellites() {
 
 export function AnatomyWorld({ visible }: { visible: boolean }) {
   const id = useStopId();
-  const shadowOpacity = id === 'body' || id === 'name' ? 0.45 : 0.55;
   const idle = useRef(0);
   const g = useRef<THREE.Group>(null);
   const invalidate = useThree((s) => s.invalidate);
   const reduced = useStory((s) => s.reducedMotion);
   const interacted = useStory((s) => s.interacted);
 
-  // gentle turntable only on the final "explore" screen, until the visitor takes over
+  // gentle turntable only on the final summary, until the visitor takes over
   useFrame((_, dt) => {
     if (!g.current) return;
     if (id === 'end' && !reduced && !interacted) {
@@ -275,19 +356,20 @@ export function AnatomyWorld({ visible }: { visible: boolean }) {
   return (
     <group>
       <group ref={g}>
-        <DigestiveModel />
+        <UrinaryModel />
+        <Tumor />
       </group>
-      <IntestineMarker visible={visible} />
-      <Satellites />
+      <KidneyMarker visible={visible} />
+      <OrganLabels visible={visible} />
       <HingeController />
       {visible && (
         <ContactShadows
-          position={[0, -0.98, 0]}
+          position={[0, -0.9, 0]}
           scale={3.2}
           blur={2.6}
           far={1.4}
           resolution={512}
-          opacity={shadowOpacity}
+          opacity={id === 'body' ? 0.45 : 0.55}
           color="#050404"
           frames={1}
         />

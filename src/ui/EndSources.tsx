@@ -2,6 +2,7 @@ import { creditLine } from '../app/config';
 import { useStory } from '../app/store';
 import { MEDIA_CREDITS, SOURCES } from '../content/citations';
 import { GLOSSARY } from '../content/glossary';
+import { Reference } from './Reference';
 
 /**
  * The end of the page: after the summary, the exhibit scrolls on into its reference list, the
@@ -13,7 +14,7 @@ export function EndSources() {
     <section id="sources" className="endnotes" aria-labelledby="endnotes-title">
       <div className="endnotes__inner">
         <header className="endnotes__head">
-          <p className="endnotes__kicker">Whipple’s disease</p>
+          <p className="endnotes__kicker">Wilms tumor</p>
           <h2 id="endnotes-title">Sources</h2>
           <p className="endnotes__lede">
             Every fact in this exhibit comes from these sources. The small numbers beside each fact, like [1], point to
@@ -22,22 +23,11 @@ export function EndSources() {
         </header>
 
         <ol className="endnotes__refs">
-          {SOURCES.map((s) => {
-            // APA: when there is a DOI, it is the link
-            const doi = s.details?.match(/https:\/\/doi\.org\/\S+/)?.[0];
-            const details = (doi ? s.details!.replace(doi, '') : s.details)?.trim().replace(/\.$/, '');
-            const url = doi ?? s.url;
-            return (
-              <li key={s.id} value={s.id}>
-                {s.authors} ({s.year}). {s.container ? <>{s.title}. </> : <i>{s.title}. </i>}
-                {s.container && <i>{s.container}</i>}
-                {details ? <>. {details}. </> : '. '}
-                <a href={url} target="_blank" rel="noreferrer">
-                  {url.replace(/^https?:\/\//, '')}
-                </a>
-              </li>
-            );
-          })}
+          {SOURCES.map((s) => (
+            <li key={s.id} value={s.id}>
+              <Reference s={s} />
+            </li>
+          ))}
         </ol>
 
         <div className="endnotes__cols">
@@ -47,7 +37,7 @@ export function EndSources() {
               {GLOSSARY.map((t) => (
                 <div key={t.key}>
                   <dt>
-                    {t.key === 'tropheryma' ? <i>{t.term}</i> : t.term}
+                    {t.term}
                     {t.say && <span className="endnotes__say"> ({t.say})</span>}
                   </dt>
                   <dd>

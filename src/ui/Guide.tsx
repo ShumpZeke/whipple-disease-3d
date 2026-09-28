@@ -6,14 +6,14 @@ import { FACTS, QA, STOPS } from '../content/story';
 import { plainText } from './RichText';
 
 /** When to reach each stop in a five-minute talk (same order as STOPS). */
-const TIMES = ['0:00', '0:30', '0:50', '1:10', '1:30', '1:50', '2:05', '2:20', '2:35', '2:55', '3:15', '3:30', '3:45', '3:55', '4:05', '4:20', '4:50'];
+const TIMES = ['0:00', '0:25', '0:45', '1:00', '1:20', '1:40', '1:55', '2:10', '2:25', '2:40', '2:55', '3:10', '3:25', '3:40', '3:55', '4:10', '4:25', '4:50'];
 
 const PARTS = [
-  { time: '0:00 to 0:30', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
-  { time: '0:30 to 1:30', name: 'History', what: 'Who Whipple was, the 1907 case, and why it has his name' },
-  { time: '1:30 to 2:35', name: 'The disease', what: 'The definition, then zoom into the intestine, its wall and the villi' },
-  { time: '2:35 to 4:20', name: 'The facts', what: 'The cause, the symptoms, how doctors find it, and the treatment' },
-  { time: '4:20 to 4:50', name: 'Quick check', what: 'Four questions, and classmates tap the answers' },
+  { time: '0:00 to 0:25', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
+  { time: '0:25 to 1:20', name: 'History', what: 'Who Max Wilms was, his 1899 book, and why the tumor has his name' },
+  { time: '1:20 to 2:25', name: 'The disease', what: 'The definition, then zoom into the kidney, its layers and its tiny filters' },
+  { time: '2:25 to 4:25', name: 'The facts', what: 'The cause, the signs, how doctors find it, the treatment and the outlook' },
+  { time: '4:25 to 4:50', name: 'Quick check', what: 'Four questions, and classmates tap the answers' },
   { time: '4:50 to 5:00', name: 'Summary', what: 'Sum it up, then show the sources' },
 ];
 
@@ -24,14 +24,14 @@ const PARTS = [
 export function Guide() {
   useEffect(() => {
     document.documentElement.classList.add('guide-mode');
-    document.title = 'Presenter guide, Whipple’s Disease';
+    document.title = 'Presenter guide, Wilms Tumor';
     return () => document.documentElement.classList.remove('guide-mode');
   }, []);
   return (
     <main className="guide">
       <header className="guide__head">
         <p className="guide__kicker">Presenter guide</p>
-        <h1>Whipple’s Disease</h1>
+        <h1>Wilms Tumor</h1>
         <p className="guide__credit">{creditLine()}</p>
         <button type="button" className="guide__print" onClick={() => window.print()}>
           Print this guide
@@ -112,7 +112,7 @@ export function Guide() {
                     <ol>
                       {QUESTIONS.map((q) => (
                         <li key={q.id}>
-                          {q.prompt} → <b>{q.kind === 'organ' ? 'the small intestine' : q.options.find((o) => o.correct)?.text}</b>
+                          {q.prompt} → <b>{q.kind === 'organ' ? 'a kidney (either one)' : q.options.find((o) => o.correct)?.text}</b>
                         </li>
                       ))}
                     </ol>
@@ -148,15 +148,15 @@ export function Guide() {
             </li>
           ))}
         </ol>
-        <p>Named after George Hoyt Whipple, who first described it in 1907. Not Allen O. Whipple, who was a surgeon.</p>
+        <p>Named after Max Wilms, a German surgeon who wrote a book about it in 1899. Its medical name is nephroblastoma.</p>
       </section>
 
       <section className="guide__how">
         <h2>Submission checklist</h2>
         <ul className="guide__check">
           <li>Shareable link that opens without asking for access (test it in a private window)</li>
-          <li>Only Whipple’s disease is presented, with all the required content</li>
-          <li>All interactive features work: the list of parts, swiping, underlined words, source numbers, the + marker, the healthy and infected switch, the quiz</li>
+          <li>Only Wilms tumor is presented, with all the required content</li>
+          <li>All interactive features work: the list of parts, swiping, underlined words, source numbers, the + marker, turning the model, the quiz</li>
           <li>Reference page included: it is at the end of the exhibit</li>
           <li>Student name and class period appear on the home screen and at the end ({creditLine()})</li>
           <li>Proofread, and practiced out loud with this guide (about 5 minutes)</li>

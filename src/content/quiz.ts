@@ -5,7 +5,8 @@ export type Question =
       id: string;
       kind: 'organ';
       prompt: string;
-      answer: OrganId;
+      /** Any of these organs counts as right. */
+      answer: OrganId[];
       correct: string;
       /** Feedback when another organ is picked. {organ} is replaced with its name. */
       retry: string;
@@ -24,46 +25,46 @@ export const QUESTIONS: Question[] = [
   {
     id: 'organ',
     kind: 'organ',
-    prompt: 'On the model, tap the organ that Whipple’s disease damages most.',
-    answer: 'SmallIntestine',
-    correct: 'Yes, the small intestine. That is where the villi absorb food.',
-    retry: 'That’s the {organ}. Look for the long, coiled tube in the middle.',
-    cites: [1],
-  },
-  {
-    id: 'cause',
-    kind: 'choice',
-    prompt: 'What causes Whipple’s disease?',
-    options: [
-      { text: 'A virus', why: 'Not a virus. It is caused by a bacterium.' },
-      { text: 'The bacterium Tropheryma whipplei', correct: true },
-      { text: 'Eating too much fat', why: 'Fat builds up because it is not absorbed, but diet is not the cause.' },
-      { text: 'A vitamin deficiency', why: 'Deficiencies can result from it, but they are not the cause.' },
-    ],
-    correct: 'Right. Tropheryma whipplei is a rod-shaped bacterium.',
-    cites: [1, 6],
-  },
-  {
-    id: 'malabsorption',
-    kind: 'choice',
-    prompt: 'What does “malabsorption” mean?',
-    options: [
-      { text: 'Trouble absorbing nutrients from food', correct: true },
-      { text: 'An allergy to certain foods', why: 'An allergy is an immune reaction. Malabsorption is about absorbing food.' },
-      { text: 'Eating too little food', why: 'The problem is absorbing food that is eaten.' },
-    ],
-    correct: 'Right. Mal means bad, so malabsorption means bad absorption.',
-    cites: [12, 13],
+    prompt: 'On the model, tap the organ where Wilms tumor grows.',
+    answer: ['LeftKidney', 'RightKidney'],
+    correct: 'Yes, a kidney. Most of the time only one kidney has a tumor.',
+    retry: 'That’s the {organ}. Look for the two bean-shaped organs near the top.',
+    cites: [1, 3],
   },
   {
     id: 'who',
     kind: 'choice',
-    prompt: 'Who first described this disease, in 1907?',
+    prompt: 'Who usually gets Wilms tumor?',
     options: [
-      { text: 'Allen O. Whipple, a surgeon', why: 'He is the namesake of the Whipple procedure, a pancreas operation.' },
-      { text: 'George Hoyt Whipple, a pathologist', correct: true },
+      { text: 'Young children, most often between 2 and 5', correct: true },
+      { text: 'Teenagers', why: 'It is much more common in younger children.' },
+      { text: 'Older adults', why: 'Adults very rarely get it. It is a childhood cancer.' },
     ],
-    correct: 'Right, George Hoyt Whipple. Allen Whipple on our class list was a mix-up.',
-    cites: [5, 6, 8],
+    correct: 'Right. Most children are between 2 and 5 when it is found.',
+    cites: [1, 4],
+  },
+  {
+    id: 'name',
+    kind: 'choice',
+    prompt: 'What does nephroblastoma mean?',
+    options: [
+      { text: 'A tumor of young kidney cells', correct: true },
+      { text: 'A kidney stone', why: 'A kidney stone is a hard lump of minerals, not a tumor.' },
+      { text: 'An infection of the bladder', why: 'Nephr means kidney, and oma means tumor.' },
+    ],
+    correct: 'Right. Nephr means kidney, blast means bud and oma means tumor.',
+    cites: [15, 1],
+  },
+  {
+    id: 'outlook',
+    kind: 'choice',
+    prompt: 'Today, about how many children with Wilms tumor are cured?',
+    options: [
+      { text: 'About 1 in 10', why: 'That was closer to the numbers before modern treatment.' },
+      { text: 'About half' , why: 'That was around the 1950s. It is much higher now.' },
+      { text: 'About 9 in 10', correct: true },
+    ],
+    correct: 'Right. About 9 in 10 children are alive five years later.',
+    cites: [2, 9],
   },
 ];

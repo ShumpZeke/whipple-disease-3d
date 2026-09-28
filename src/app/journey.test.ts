@@ -20,7 +20,7 @@ describe('scroll position → frame', () => {
     expect(nearestStop(99)).toBe(LAST_STOP);
   });
 
-  it('stays in the 1907 pages until the hinge, which develops the modern model', () => {
+  it('stays on the history pages until the hinge, which develops the 3D model', () => {
     for (let t = 0; t < HINGE; t += 0.25) {
       expect(frameState(t).world).toBe('none');
       expect(frameState(t).cut).toBe(false);
@@ -45,10 +45,10 @@ describe('scroll position → frame', () => {
     }
   });
 
-  it('dives in on the way down to the germ and the DNA, and pulls back out afterwards', () => {
+  it('dives in on the way down to the cells and the DNA, and pulls back out afterwards', () => {
     const dir = (a: string) => frameState(STOP_INDEX[a as keyof typeof STOP_INDEX] + 0.5).dir;
-    for (const a of ['intestine', 'wall', 'villi', 'spread', 'biopsy', 'stain']) expect(dir(a), a).toBe('in');
-    for (const a of ['cause', 'symptoms', 'pcr', 'treatment']) expect(dir(a), a).toBe('out');
+    for (const a of ['kidneys', 'inside', 'nephron', 'cause', 'signs', 'ultrasound']) expect(dir(a), a).toBe('in');
+    for (const a of ['genes', 'scans']) expect(dir(a), a).toBe('out');
   });
 
   it('shows each caption only near its stop', () => {

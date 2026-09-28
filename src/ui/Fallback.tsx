@@ -3,13 +3,25 @@ import { STOPS } from '../content/story';
 
 const IMAGES: Record<string, { src: string; alt: string }> = {
   anatomy: {
-    src: '/fallback/digestive.webp',
-    alt: 'Rendered 3D model of the digestive system with the small intestine coiled in the center.',
+    src: '/fallback/urinary.webp',
+    alt: 'Rendered 3D model of the urinary system: two kidneys, the ureters and the bladder, with the aorta and the vena cava.',
   },
-  tissue: { src: '/fallback/tissue.webp', alt: 'Cutaway illustration of the small-intestine wall with layers, folds and villi.' },
-  villi: { src: '/fallback/villi.webp', alt: 'Illustration of finger-like villi with a sectioned villus showing its lacteal and capillaries.' },
-  micro: { src: '/fallback/micro.webp', alt: 'Illustration of macrophages packed with rod-shaped Tropheryma whipplei bacteria.' },
-  diagnosis: { src: '/fallback/diagnosis.webp', alt: 'Illustration of a stained biopsy seen through a microscope.' },
+  kidney: {
+    src: '/fallback/kidney.webp',
+    alt: 'Illustration of a kidney cut in half, showing the outer cortex, the dark pyramids of the medulla, the renal pelvis and the ureter.',
+  },
+  nephron: {
+    src: '/fallback/nephron.webp',
+    alt: 'Illustration of a glomerulus, a ball of tiny blood vessels inside a cup, with the tubule leaving it.',
+  },
+  cells: {
+    src: '/fallback/cells.webp',
+    alt: 'Illustration of a ring of mature kidney cells next to a growing clump of young cells.',
+  },
+  diagnosis: {
+    src: '/fallback/diagnosis.webp',
+    alt: 'Illustration of an ultrasound probe and a fan-shaped scan picture showing a kidney and a round tumor.',
+  },
 };
 
 /** Shown when WebGL is unavailable: all text, quiz and sources still work. */

@@ -21,7 +21,7 @@ function gpuName(): string {
   }
 }
 
-const KEY = 'whipple-quality';
+const KEY = 'exhibit-quality';
 
 /** Remember that this device struggled, so next time it starts in lite straight away. */
 export function rememberLite() {

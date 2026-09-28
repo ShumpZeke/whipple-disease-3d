@@ -4,21 +4,23 @@
 
 | What | Creator / source | License |
 | --- | --- | --- |
-| 3D digestive organs, heart, brain and knee (also the home-screen picture) | [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html), © The Database Center for Life Science (DBCLS) | CC BY-SA 2.1 Japan |
-| Portrait of George Hoyt Whipple (1934) | The Nobel Foundation, via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:George_Whipple_nobel.jpg) | Public domain (PD-Sweden-photo, PD-1996) |
-| 1907 article page, naming paragraph and photomicrograph plates (Figs. 2 and 9) | G. H. Whipple, *Bulletin of the Johns Hopkins Hospital* (1907); scan by the [Internet Archive](https://archive.org/details/sim_johns-hopkins-medical-journal_1907-09_18_198) | Public domain (published 1907) |
-| Tissue, villi, cell, microscope, biopsy and PCR scenes; paper and grain textures | Created for this project (procedural 3D and code) | Original work (MIT, with the code) |
-| Typefaces: IBM Plex Mono, Unbounded | IBM; The Unbounded Project Authors (via Fontsource) | SIL Open Font License 1.1 |
+| 3D kidneys, ureters, bladder, adrenal glands, aorta and vena cava (also the home-screen picture) | [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html), © The Database Center for Life Science (DBCLS) | CC BY-SA 2.1 Japan |
+| Portrait of Max Wilms | Wellcome Collection, via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Portrait_of_Max_Wilms._Wellcome_M0017800.jpg) | CC BY 4.0 |
+| Tumor, kidney cross-section, nephron, cells, DNA, ultrasound and CT scenes; paper and grain textures | Created for this project (procedural 3D and code) | Original work (MIT, with the code) |
+| Typefaces: IBM Plex Sans, IBM Plex Mono, Unbounded | IBM; The Unbounded Project Authors (via Fontsource) | SIL Open Font License 1.1 |
 
-**About the BodyParts3D models.** The meshes were combined, hole-filled, remeshed, smoothed,
+**About the BodyParts3D model.** The meshes were combined, hole-filled, remeshed, smoothed,
 simplified and given baked shading in Blender, then compressed (meshopt). As required by
-CC BY-SA 2.1 JP, the modified models in `public/models/` are shared under the same license
+CC BY-SA 2.1 JP, the modified model in `public/models/` is shared under the same license
 (`public/models/LICENSE.txt`). BodyParts3D, © The Database Center for Life Science, licensed
 under CC Attribution-Share Alike 2.1 Japan.
 
-**About the illustrations.** Everything below the organ level (the wall, villi, macrophages,
-bacteria, stained slide and DNA) is an illustration: not to scale, with colours chosen for
-clarity. The stained-slide view is not a patient image.
+**About the illustrations.** The tumor on the 3D kidney, the cut-open kidney, the nephron, the
+cells, the DNA and the two scan pictures are illustrations: not to scale, with colours chosen for
+clarity. The ultrasound and CT pictures are drawings made in code, not patient images.
+
+**About the portrait.** “Portrait of Max Wilms”, Wellcome Collection, licensed under Creative
+Commons Attribution 4.0 (CC BY 4.0). Resized and converted to WebP.
 
 ## Software
 

@@ -62,11 +62,15 @@ export function RichText({ text }: { text: string }) {
     if (m[1]) {
       const term = TERM_BY_KEY.get(m[1]);
       const label = m[2] ?? term?.term.split(' (')[0].split(' —')[0].toLowerCase() ?? m[1];
+      // keep a full stop or comma on the same line as the word before it
+      const tail = /^[.,;:!?)]+/.exec(text.slice(m.index + m[0].length))?.[0] ?? '';
       out.push(
-        <TermButton key={k++} termKey={m[1]}>
-          {label}
-        </TermButton>,
+        <span key={k++} style={{ whiteSpace: 'nowrap' }}>
+          <TermButton termKey={m[1]}>{label}</TermButton>
+          {tail}
+        </span>,
       );
+      TOKEN.lastIndex += tail.length;
     } else if (m[3]) {
       const ids = m[3]
         .split(',')
@@ -76,13 +80,13 @@ export function RichText({ text }: { text: string }) {
     } else if (m[4]) {
       out.push(<em key={k++}>{renderInner(m[4])}</em>);
     }
-    last = m.index + m[0].length;
+    last = TOKEN.lastIndex;
   }
   if (last < text.length) out.push(<Fragment key={k++}>{text.slice(last)}</Fragment>);
   return <>{out}</>;
 }
 
-/** Italic spans may contain a term token: *{t:tropheryma|Tropheryma whipplei}* */
+/** Italic spans may contain a term token: *{t:nephroblastoma|nephroblastoma}* */
 function renderInner(s: string): ReactNode {
   const m = /^\{t:([a-z-]+)(?:\|([^}]+))?\}$/.exec(s);
   if (m) return <TermButton termKey={m[1]}>{m[2] ?? m[1]}</TermButton>;

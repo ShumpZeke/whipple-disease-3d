@@ -6,11 +6,11 @@ import { mkdirSync } from 'node:fs';
 import { withPreview } from './serve.mjs';
 
 const shots = [
-  ['body', 'digestive'],
-  ['wall', 'tissue'],
-  ['villi', 'villi'],
-  ['cause', 'micro'],
-  ['stain', 'diagnosis'],
+  ['body', 'urinary'],
+  ['inside', 'kidney'],
+  ['nephron', 'nephron'],
+  ['cause', 'cells'],
+  ['ultrasound', 'diagnosis'],
 ];
 const out = process.argv[2] ?? 'fallback-png';
 mkdirSync(out, { recursive: true });
@@ -19,7 +19,7 @@ await withPreview(async (base) => {
   for (const [stop, name] of shots) {
     const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
     await page.goto(`${base}?stop=${stop}&e2e&reduced`);
-    await page.waitForFunction(() => !!window.__whipple, null, { timeout: 60000 });
+    await page.waitForFunction(() => !!window.__exhibit, null, { timeout: 60000 });
     await page.waitForTimeout(4000);
     await page.addStyleTag({
       content: `.hud-top,.rail,.pnav,.caption,.scale-note,.anchor-label,.grain,.loading,.veil{display:none!important}`,

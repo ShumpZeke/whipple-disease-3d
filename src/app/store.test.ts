@@ -9,27 +9,20 @@ const st = () => useStory.getState();
 beforeEach(() => {
   window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
   st().restart();
-  useStory.setState({ stop: 0, quizIndex: 0, quizAnswers: {}, quizFeedback: null, mechanism: 'disease' });
+  useStory.setState({ stop: 0, quizIndex: 0, quizAnswers: {}, quizFeedback: null });
 });
 
 describe('stops', () => {
   it('tracks the stop nearest to the scroll position and clears transient UI', () => {
-    st().openTerm({ key: 'villi', rect: { left: 0, top: 0, width: 1, height: 1 } });
-    st().setStop(STOP_INDEX.villi);
-    expect(st().stop).toBe(STOP_INDEX.villi);
+    st().openTerm({ key: 'nephron', rect: { left: 0, top: 0, width: 1, height: 1 } });
+    st().setStop(STOP_INDEX.nephron);
+    expect(st().stop).toBe(STOP_INDEX.nephron);
     expect(st().term).toBeNull();
   });
 
-  it('puts the healthy/disease toggle back when leaving the symptoms stop', () => {
-    st().setStop(STOP_INDEX.symptoms);
-    st().setMechanism('healthy');
-    st().setStop(STOP_INDEX.spread);
-    expect(st().mechanism).toBe('disease');
-  });
-
-  it('restart scrolls back to 1907 and clears the quiz', () => {
+  it('restart scrolls back to the start and clears the quiz', () => {
     st().setStop(STOP_INDEX.quiz);
-    st().answerOrgan('Stomach', 'stomach');
+    st().answerOrgan('Bladder', 'bladder');
     st().restart();
     expect(st().quizAnswers).toEqual({});
     expect(st().quizIndex).toBe(0);
@@ -53,10 +46,10 @@ describe('quiz', () => {
   it('scores first tries separately from solved questions', () => {
     st().setStop(STOP_INDEX.quiz);
     // Q1 (organ): wrong first, then right
-    st().answerOrgan('Stomach', 'stomach');
+    st().answerOrgan('Bladder', 'bladder');
     expect(st().quizFeedback?.correct).toBe(false);
-    expect(st().quizFeedback?.text).toMatch(/stomach/);
-    st().answerOrgan('SmallIntestine', 'small intestine');
+    expect(st().quizFeedback?.text).toMatch(/bladder/);
+    st().answerOrgan('RightKidney', 'right kidney');
     expect(st().quizFeedback?.correct).toBe(true);
     st().nextQuestion();
     // remaining choice questions: pick the correct option directly
