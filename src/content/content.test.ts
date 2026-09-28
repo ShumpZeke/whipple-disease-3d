@@ -173,6 +173,7 @@ describe('submission details', () => {
   it('names the student and shows an editable class period', () => {
     expect(SUBMISSION.studentName).toBe('Vardhmansinh Rathod');
     expect(SUBMISSION.course).toBe('Medical Terminology');
-    expect(periodLabel()).toMatch(/^Period /);
+    expect(SUBMISSION.classPeriod).toBe('3rd Block');
+    expect(periodLabel()).toBe('3rd Block');
   });
 });

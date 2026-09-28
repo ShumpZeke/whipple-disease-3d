@@ -25,7 +25,7 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   await expect(cover).toContainText('Whipple disease'); // the modern spelling
   await expect(cover.locator('.cover__def')).toContainText('small intestine');
   await expect(cover.locator('.cover__by')).toContainText('Vardhmansinh Rathod');
-  await expect(cover.locator('.cover__by')).toContainText('Period');
+  await expect(cover.locator('.cover__by')).toContainText('3rd Block');
   await expect(cover.getByRole('button', { name: /Start/ })).toBeVisible();
   // the "What's inside" menu jumps straight to a part
   const menu = page.getByRole('navigation', { name: 'What’s inside' });

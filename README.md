@@ -1,6 +1,6 @@
 # Whipple’s Disease — an interactive 3D exhibit
 
-**Medical Terminology · Eponym #26 · Vardhmansinh Rathod · Period ___**
+**Medical Terminology · Eponym #26 · Vardhmansinh Rathod · 3rd Block**
 
 One continuous page. Scrolling is a camera zoom: from a 1907 autopsy report, into today’s
 digestive system, through the wall of the small intestine and its villi, down to the bacterium
@@ -17,13 +17,14 @@ treated, ending with a short self-check and the sources.
 
 ## Before you submit
 
-Open [`src/app/config.ts`](src/app/config.ts) and fill in your class period:
+Your name and class are set in [`src/app/config.ts`](src/app/config.ts):
 
 ```ts
-classPeriod: '3',   // shows as “Period 3” on the title and summary
+studentName: 'Vardhmansinh Rathod',
+classPeriod: '3rd Block',   // shown on the home screen, the summary and the list of sources
 ```
 
-While it is empty the exhibit shows a visible **Period ___** placeholder. Nothing else needs editing.
+Nothing else needs editing.
 
 ## Presenting it (smart board, projector or laptop)
 
@@ -99,7 +100,7 @@ still pictures instead of 3D.
 - [x] Only the assigned eponym, with all required content
 - [x] All interactive features work (checked by the browser tests)
 - [x] Reference page included (end of the exhibit)
-- [ ] Student name **and class period** — the name is on the home screen and at the end; fill in the period in `src/app/config.ts`
+- [x] Student name and class period — “Vardhmansinh Rathod · Medical Terminology · 3rd Block” on the home screen, the summary and the list of sources
 - [ ] Proofread and practiced — use the presenter guide
 
 ## Running it

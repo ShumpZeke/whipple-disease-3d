@@ -1,7 +1,7 @@
 # Build report
 
 **Project:** Whipple’s disease — interactive 3D exhibit (Medical Terminology, eponym #26)
-**Student:** Vardhmansinh Rathod · class period: *placeholder, edit `src/app/config.ts`*
+**Student:** Vardhmansinh Rathod · 3rd Block
 **Repository:** https://github.com/ShumpZeke/whipple-disease-3d (private)
 **Report date:** September 27, 2026
 
@@ -107,7 +107,6 @@ labelled as an illustration, not a patient image.
 
 ## Known limitations
 
-- The class period is a visible placeholder (“Period ___”) until it is set in `src/app/config.ts`.
 - Built for a smart board, projector or laptop. Phones work (portrait framing, wrapped labels), but
   the 3D scenes are demanding on older phones.
 - Smart boards with a very old built-in browser (no WebGL 2) show still pictures instead of the 3D;
