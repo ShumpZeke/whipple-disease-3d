@@ -28,7 +28,7 @@ await withPreview(async (base) => {
   await page.reload();
   await page.waitForTimeout(3500);
   skip = (Date.now() - t0) / 1000 - 3.2;
-  const stops = await page.evaluate(() => document.querySelectorAll('.rail__stop').length);
+  const stops = await page.evaluate(() => document.querySelectorAll('.scroller .snap').length);
   for (let i = 1; i < stops; i++) {
     await page.keyboard.press('PageDown');
     await page.waitForTimeout(1700 + +hold * 1000);
