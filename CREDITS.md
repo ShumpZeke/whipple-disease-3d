@@ -8,7 +8,7 @@
 | Portrait of George Hoyt Whipple (1934) | The Nobel Foundation, via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:George_Whipple_nobel.jpg) | Public domain (PD-Sweden-photo, PD-1996) |
 | 1907 article page, naming paragraph and photomicrograph plates (Figs. 2 and 9) | G. H. Whipple, *Bulletin of the Johns Hopkins Hospital* (1907); scan by the [Internet Archive](https://archive.org/details/sim_johns-hopkins-medical-journal_1907-09_18_198) | Public domain (published 1907) |
 | Tissue, villi, cell, microscope, biopsy and PCR scenes; paper and grain textures | Created for this project (procedural 3D and code) | Original work (MIT, with the code) |
-| Typefaces: Archivo, Atkinson Hyperlegible Next | Omnibus-Type; Braille Institute of America (via Fontsource) | SIL Open Font License 1.1 |
+| Typefaces: IBM Plex Mono, Unbounded | IBM; The Unbounded Project Authors (via Fontsource) | SIL Open Font License 1.1 |
 
 **About the BodyParts3D models.** The meshes were combined, hole-filled, remeshed, smoothed,
 simplified and given baked shading in Blender, then compressed (meshopt). As required by

@@ -1,6 +1,7 @@
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import { journey } from '../app/journey';
+import { QUALITY } from '../app/quality';
 import { useStory } from '../app/store';
 import { STOPS } from '../content/story';
 import { MODEL_SCALE, useAnatomy } from './anatomy/useAnatomy';
@@ -9,8 +10,10 @@ declare global {
   interface Window {
     __whipple?: {
       organPoint: (organ: string) => { x: number; y: number } | null;
-      state: () => { stop: number; id: string; t: number; world: string };
+      state: () => { stop: number; id: string; t: number; world: string; quality: string };
       renderInfo: () => { calls: number; triangles: number; programs: number; geometries: number; textures: number };
+      /** Render once and wait for the graphics card to finish (for timing). */
+      renderNow: () => void;
       scene: () => unknown;
       camera: () => { x: number; y: number; z: number; fov: number };
     };
@@ -35,10 +38,15 @@ export function TestHooks() {
       },
       state: () => {
         const s = useStory.getState();
-        return { stop: s.stop, id: STOPS[s.stop].id, t: journey.t, world: s.displayWorld };
+        return { stop: s.stop, id: STOPS[s.stop].id, t: journey.t, world: s.displayWorld, quality: QUALITY };
       },
       scene: () => scene,
       camera: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z, fov: (camera as { fov?: number }).fov ?? 0 }),
+      renderNow: () => {
+        gl.render(scene, camera);
+        const ctx = gl.getContext();
+        ctx.readPixels(0, 0, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, new Uint8Array(4));
+      },
       renderInfo: () => ({
         calls: gl.info.render.calls,
         triangles: gl.info.render.triangles,

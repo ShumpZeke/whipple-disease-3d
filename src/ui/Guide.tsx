@@ -9,12 +9,12 @@ import { plainText } from './RichText';
 const TIMES = ['0:00', '0:30', '0:50', '1:10', '1:30', '1:50', '2:05', '2:20', '2:35', '2:55', '3:15', '3:30', '3:45', '3:55', '4:05', '4:20', '4:50'];
 
 const PARTS = [
-  { time: '0:00–0:30', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
-  { time: '0:30–1:30', name: 'History', what: 'Who Whipple was, the 1907 case, why it has his name' },
-  { time: '1:30–2:35', name: 'The disease', what: 'Definition, then zoom: intestine → wall → villi' },
-  { time: '2:35–4:20', name: 'Four facts', what: 'Cause · symptoms · diagnosis · treatment' },
-  { time: '4:20–4:50', name: 'Quick check', what: 'Four questions; classmates tap the answers' },
-  { time: '4:50–5:00', name: 'Summary', what: 'The four facts, then show the sources' },
+  { time: '0:00 to 0:30', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
+  { time: '0:30 to 1:30', name: 'History', what: 'Who Whipple was, the 1907 case, and why it has his name' },
+  { time: '1:30 to 2:35', name: 'The disease', what: 'The definition, then zoom into the intestine, its wall and the villi' },
+  { time: '2:35 to 4:20', name: 'The facts', what: 'The cause, the symptoms, how doctors find it, and the treatment' },
+  { time: '4:20 to 4:50', name: 'Quick check', what: 'Four questions, and classmates tap the answers' },
+  { time: '4:50 to 5:00', name: 'Summary', what: 'Sum it up, then show the sources' },
 ];
 
 /**
@@ -24,7 +24,7 @@ const PARTS = [
 export function Guide() {
   useEffect(() => {
     document.documentElement.classList.add('guide-mode');
-    document.title = 'Presenter guide — Whipple’s Disease';
+    document.title = 'Presenter guide, Whipple’s Disease';
     return () => document.documentElement.classList.remove('guide-mode');
   }, []);
   return (
@@ -42,15 +42,22 @@ export function Guide() {
         <h2>Before you start</h2>
         <ul>
           <li>
-            Open the link on the board and press <b>F</b> (or the full-screen button, top right).
+            Open the link on the board and tap <b>Full screen</b> in the top-right corner (or press <b>F</b>).
           </li>
           <li>
-            To move on, tap the <b>↓ arrow</b> on the right (or use a clicker, the arrow keys, or swipe up). <b>↑</b>{' '}
-            goes back. You never have to say “next slide” — it zooms.
+            There are no buttons to go forward. <b>Swipe up</b> on the board to zoom on to the next part and{' '}
+            <b>swipe down</b> to go back. A clicker, the arrow keys or a mouse wheel do the same. It always stops on
+            the next part by itself.
           </li>
-          <li>Keep this guide on your phone or printed. Say the lines in your own words — you don’t need to read the screen out.</li>
           <li>
-            Speak to the class, not the board: the screen only shows short labels, so <b>you</b> are the explanation.
+            On a slow board computer, add <b>?lite</b> to the end of the link (for example <i>…vercel.app/?lite</i>).
+            Everything looks the same; it just paces the drawing for weaker hardware. Slow computers switch to it by
+            themselves.
+          </li>
+          <li>Keep this guide on your phone or printed. Say the lines in your own words. You do not need to read the screen out.</li>
+          <li>
+            Speak to the class, not the board. The screen only shows a heading and a few lines, so <b>you</b> are
+            the explanation.
           </li>
         </ul>
       </section>
@@ -94,7 +101,7 @@ export function Guide() {
                 {t && (
                   <p className="guide__term">
                     <b>{s.termLabel ?? 'Key term'}:</b> {t.term.replace(/\s*\(.*\)$/, '')}
-                    {t.say && <> (say “{t.say}”)</>} —{' '}
+                    {t.say && <> (say {t.say})</>}.{' '}
                     {t.parts?.length ? <>{t.parts.map((p) => `${p.part} ${p.meaning}`).join(' + ')} = </> : null}
                     {t.short}
                   </p>
@@ -141,7 +148,7 @@ export function Guide() {
             </li>
           ))}
         </ol>
-        <p>Named after George Hoyt Whipple, who first described it in 1907 — not Allen O. Whipple (a surgeon).</p>
+        <p>Named after George Hoyt Whipple, who first described it in 1907. Not Allen O. Whipple, who was a surgeon.</p>
       </section>
 
       <section className="guide__how">
@@ -149,7 +156,7 @@ export function Guide() {
         <ul className="guide__check">
           <li>Shareable link that opens without asking for access (test it in a private window)</li>
           <li>Only Whipple’s disease is presented, with all the required content</li>
-          <li>All interactive features work: menu, ↑ ↓ arrows, underlined words, [1] numbers, the ＋ marker, the healthy/infected switch, the quiz</li>
+          <li>All interactive features work: the list of parts, swiping, underlined words, source numbers, the + marker, the healthy and infected switch, the quiz</li>
           <li>Reference page included: it is at the end of the exhibit</li>
           <li>Student name and class period appear on the home screen and at the end ({creditLine()})</li>
           <li>Proofread, and practiced out loud with this guide (about 5 minutes)</li>

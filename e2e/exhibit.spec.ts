@@ -24,14 +24,16 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   const cover = page.locator('.cover');
   await expect(cover).toContainText('Whipple disease'); // the modern spelling
   await expect(cover.locator('.cover__def')).toContainText('small intestine');
-  await expect(cover.locator('.cover__by')).toContainText('Vardhmansinh Rathod');
-  await expect(cover.locator('.cover__by')).toContainText('3rd Block');
-  await expect(cover.getByRole('button', { name: /Start/ })).toBeVisible();
-  // the "What's inside" menu jumps straight to a part
+  await expect(cover.locator('.cover__brand')).toContainText('Vardhmansinh Rathod');
+  await expect(cover.locator('.cover__brand')).toContainText('3rd Block');
+  await expect(cover).toContainText('Scroll down to explore');
+  // a pure scene: no slide buttons, arrows or counters
+  await expect(page.getByRole('button', { name: /^(Next|Back|Start)$/ })).toHaveCount(0);
+  // the list of parts jumps straight to one
   const menu = page.getByRole('navigation', { name: 'What’s inside' });
-  await expect(menu.getByRole('button')).toHaveCount(5);
+  await expect(menu.getByRole('button')).toHaveCount(8);
   await waitForStage(page);
-  await menu.getByRole('button', { name: /Four facts/ }).click();
+  await menu.getByRole('button', { name: /The cause/ }).click();
   await expect.poll(async () => (await state(page))?.id).toBe('cause');
   expect(errors).toEqual([]);
 });
@@ -41,7 +43,7 @@ test('the history begins with a profile of George Hoyt Whipple', async ({ page }
   const card = page.getByRole('article', { name: 'Profile of George Hoyt Whipple' });
   await expect(card).toBeVisible();
   for (const year of ['1878', '1905', '1907', '1934']) await expect(card).toContainText(year);
-  await expect(page.locator('section.caption[data-step="doctor"] .keyterm')).toContainText('Pathology');
+  await expect(page.locator('section.caption[data-step="doctor"] .caption__body')).toContainText('pathologist');
 });
 
 test('one continuous page: a presenter clicker walks every stop in order', async ({ page }) => {
@@ -103,7 +105,7 @@ test('self-check: pick the organ on the 3D model, then answer the questions', as
     await expect(page.locator('.quiz__feedback')).toHaveClass(/is-wrong/);
     await page.getByRole('button', { name: q.options.find((o) => o.correct)!.text, exact: true }).click();
     await expect(page.locator('.quiz__feedback')).toHaveClass(/is-right/);
-    await page.getByRole('button', { name: /Next question|See results/ }).click();
+    await page.getByRole('button', { name: /Next question|See how you did/ }).click();
   }
   await expect(page.locator('[data-quiz="done"]')).toContainText('Nicely done');
   expect(errors).toEqual([]);
@@ -147,6 +149,18 @@ test('reduced motion jumps between stops without the zoom animation', async ({ p
   expect(Math.abs(((await state(page))?.t ?? 0) - STOPS.findIndex((s) => s.id === 'villi'))).toBeLessThan(0.001);
 });
 
+test('lite mode (?lite) runs the same exhibit', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?e2e&lite&stop=villi');
+  await waitForStage(page);
+  expect((await state(page))?.quality).toBe('lite');
+  await expect(page.locator('html')).toHaveClass(/lite/);
+  await expect(page.locator('section.caption[data-step="villi"]')).toBeVisible();
+  await page.keyboard.press('PageDown');
+  await expect.poll(async () => (await state(page))?.id).toBe('cause');
+  expect(errors).toEqual([]);
+});
+
 test('falls back to still images when WebGL is unavailable', async ({ page }) => {
   await page.addInitScript(() => {
     const orig = HTMLCanvasElement.prototype.getContext;
@@ -183,31 +197,18 @@ for (const vp of [
 test.describe('on a smart board (1920×1080 touch screen)', () => {
   test.use({ viewport: { width: 1920, height: 1080 }, hasTouch: true });
 
-  test('big text, big Back/Next buttons and swiping', async ({ page }) => {
+  test('readable text, and swiping moves through the scene', async ({ page }) => {
     const errors = collectErrors(page);
-    await page.goto('/?e2e');
+    await page.goto('/?e2e&stop=case');
     await waitForStage(page);
     // text sized for the back of a classroom
-    await page.getByRole('button', { name: 'Next', exact: true }).tap();
-    await expect.poll(async () => (await state(page))?.id).toBe('doctor');
-    const title = page.locator('section.caption[data-step="doctor"] .caption__title');
+    const title = page.locator('section.caption[data-step="case"] .caption__title');
     await expect(title).toBeVisible();
-    expect(parseFloat(await title.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(56);
-    const body = page.locator('section.caption[data-step="doctor"] .caption__body');
+    expect(parseFloat(await title.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(40);
+    const body = page.locator('section.caption[data-step="case"] .caption__body');
     expect(parseFloat(await body.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(24);
-    await expect(page.locator('section.caption[data-step="doctor"] .keyterm')).toContainText('Pathology');
-    // two quick taps move two stops
-    const next = page.getByRole('button', { name: 'Next', exact: true });
-    await next.tap();
-    await next.tap();
-    await expect.poll(async () => (await state(page))?.id).toBe('name');
-    await page.getByRole('button', { name: 'Back', exact: true }).tap();
-    await expect.poll(async () => (await state(page))?.id).toBe('case');
-    // no slide numbers: the zoom gauge shows which part of the story we are in
-    await expect(page.locator('.rail__stop.is-section .rail__label')).toHaveText('History');
-    // big enough to hit with a finger
-    const box = (await next.boundingBox())!;
-    expect(box.width).toBeGreaterThanOrEqual(56);
+    // no slide furniture on screen
+    await expect(page.getByRole('button', { name: /^(Next|Back)$/ })).toHaveCount(0);
     // a finger swipe up zooms on to the next stop and comes to rest there; a tiny swipe falls back
     await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 2)).toBeLessThan(0.01);
     const cdp = await page.context().newCDPSession(page);
@@ -225,6 +226,9 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await swipe(1300, 500, 60);
     await page.waitForTimeout(1500);
     await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 3)).toBeLessThan(0.01);
+    // swiping down goes back
+    await swipe(1300, 400, 420);
+    await expect.poll(async () => (await state(page))?.id).toBe('case');
     await expect(page.getByRole('button', { name: /Full screen/ })).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -232,8 +236,9 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
   test('the summary leads on to the list of sources', async ({ page }) => {
     await page.goto('/?stop=end&e2e');
     await waitForStage(page);
-    await expect(page.locator('section.caption[data-step="end"] .facts li')).toHaveCount(4);
-    await page.getByRole('button', { name: 'Next: sources' }).tap();
+    const end = page.locator('section.caption[data-step="end"]');
+    await expect(end.locator('.caption__body')).toContainText('antibiotics');
+    await end.getByRole('button', { name: 'Sources' }).tap();
     const sources = page.locator('#sources');
     await expect.poll(async () => Math.abs((await sources.boundingBox())?.y ?? 999)).toBeLessThan(4);
     await expect(sources.getByRole('heading', { name: 'Sources' })).toBeVisible();

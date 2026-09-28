@@ -1,9 +1,12 @@
-import { useFrame } from '@react-three/fiber';
-import { useMemo, useRef, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { journey, onJourneyFrame } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
+import { STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
+import { useFrontToBack } from '../drawOrder';
 import { Label3D } from '../Label3D';
 import { mulberry32 } from '../tissue/tissueGeometry';
 import { villusMaterial, villusProfile } from '../tissue/VilliWorld';
@@ -72,6 +75,7 @@ function Biopsy({ active }: { active: boolean }) {
     });
     return { floor, floorMat, inst };
   }, []);
+  useFrontToBack(built.inst, 'biopsy');
 
   // endoscope comes in from upper left-back, pointing at the target on the lining
   const target = new THREE.Vector3(0.35, -0.05, 0.2);
@@ -181,7 +185,7 @@ function Microscope({ active }: { active: boolean }) {
       </Label3D>
       <Label3D visible={active} position={[0, -1.72, 0]} center>
         <span className="tag">
-          <small>Illustration of a stained biopsy · not a patient image</small>
+          <small>Illustration of a stained biopsy, not a patient image</small>
         </span>
       </Label3D>
     </group>
@@ -315,7 +319,7 @@ function Pcr({ active }: { active: boolean }) {
       <primitive object={built} />
       <Label3D visible={active} position={[0, 2.05, 0]} center>
         <span className="tag" aria-live="polite">
-          {cycle === 0 ? 'Start · 1 copy of the target DNA' : `After cycle ${cycle} · ${2 ** cycle} copies`}
+          {cycle === 0 ? 'Start: 1 copy of the DNA' : `After round ${cycle}: ${2 ** cycle} copies`}
         </span>
       </Label3D>
     </group>
@@ -326,11 +330,37 @@ function Pcr({ active }: { active: boolean }) {
 
 export function DiagnosisWorld({ visible }: { visible: boolean }) {
   const id = useStopId();
+  const invalidate = useThree((s) => s.invalidate);
+  const parts = useRef<(THREE.Group | null)[]>([]);
+  // The three set-ups sit side by side; only draw the one the camera is at. The zoom between them
+  // passes through the veil, so the switch is never seen. All three start visible so the stage
+  // compiles every shader up front.
+  useEffect(() => {
+    const apply = (t: number) => {
+      const b = STOP_INDEX.biopsy + 0.5;
+      const s = STOP_INDEX.stain + 0.5;
+      const show = [t < b, t >= b && t < s, t >= s];
+      parts.current.forEach((g, i) => {
+        if (g && g.visible !== show[i]) {
+          g.visible = show[i];
+          invalidate();
+        }
+      });
+    };
+    apply(journey.t);
+    return onJourneyFrame(apply);
+  }, [invalidate]);
   return (
     <group>
-      <Biopsy active={visible && id === 'biopsy'} />
-      <Microscope active={visible && id === 'stain'} />
-      <Pcr active={visible && id === 'pcr'} />
+      <group ref={(g) => void (parts.current[0] = g)}>
+        <Biopsy active={visible && id === 'biopsy'} />
+      </group>
+      <group ref={(g) => void (parts.current[1] = g)}>
+        <Microscope active={visible && id === 'stain'} />
+      </group>
+      <group ref={(g) => void (parts.current[2] = g)}>
+        <Pcr active={visible && id === 'pcr'} />
+      </group>
     </group>
   );
 }

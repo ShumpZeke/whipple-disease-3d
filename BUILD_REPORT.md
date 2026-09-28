@@ -29,29 +29,35 @@ sources, medical terms and credits (the page scrolls on into it after the summar
   the middle and comes towards the viewer. Pull-backs (germ → villi, DNA → villi, villi → body) play
   the same effect in reverse. A unit test checks that every transition keeps moving in one
   direction.
-- **An explorer, not a slide deck.** The layout follows anatomy-explorer apps rather than slides:
-  a compact information panel on the left with a coloured tag for each part of the story (History,
-  The disease, Fact 1–4, Quick check, Summary — each with its own colour and icon), the 3D picture
-  in the middle, and a zoom gauge on the right with ↑ ↓ arrows. There are no slide numbers.
-- **Type.** Archivo (a grotesque that can narrow, for headings and labels) and Atkinson Hyperlegible
-  Next (designed by the Braille Institute to be read easily from far away, for text).
-- **Easy to present.** One idea per stop: a headline of a few words, one short line, and a “Key
-  term” (e.g. *arthr-* joint + *-algia* pain = joint pain, with how to say it). The screen carries
-  labels; the presenter does the explaining. A printable guide (`?guide`) gives a five-minute plan,
-  one or two lines to say and what to tap at each stop, likely questions answered from the sources,
-  and the quiz answers.
-- **Smart board ready.** Text and controls scale with the screen (a 1080p board shows ~63 px
-  headlines and ~27 px body text); big ↑ ↓ arrows beside the zoom gauge; a full-screen button
-  (and **F**); swipes, wheel and trackpad always settle on a stop, and quick taps queue up (two taps
-  = two stops); the 3D is drawn at no more than ~2600 pixels across so big 4K boards stay smooth;
-  older browsers without WebGL 2 — or a crash in the 3D — fall back to still pictures instead of a
-  blank page; going full screen keeps your place.
-- **Uncluttered.** The 3D subject sits to the right, clear of the panel; at most two or three 3D
-  labels at a time; no dashboards or full-body figures.
-- **A home screen that guides the viewer.** The first screen gives the eponym’s correct and modern
-  spelling, how to say it, a one-line definition, the student’s name and class, and a “What’s inside”
-  menu of the five parts (History · The disease · Four facts · Quick check · Sources) that jumps
-  straight to each one.
+- **A scene, not slides.** No arrows, Next buttons, page numbers or side rail. The 3D fills the
+  screen, the words for each part sit quietly in the bottom-left corner, and the presenter moves by
+  swiping on the board, scrolling, or a clicker. Every move is a zoom that settles on the next part.
+- **Plain words.** Each part has a short heading and a few sentences written the way you would
+  explain it to a friend. No “Fact 1” labels, no em dashes or dots between words (a unit test checks
+  this). Word parts are explained in the sentences, e.g. “Arthr means joint and algia means pain.”
+  The presenter’s own lines are in a printable guide (`?guide`), not on the big screen.
+- **Type in the style of igloo.inc.** IBM Plex Mono for small labels and links (“//” and “//////”,
+  thin underlined 3D labels with crosshair markers), IBM Plex Sans for everything people read, and
+  Unbounded for the title like a logo. A faint dot grid and corner marks; headings decode into
+  place. The colours stay warm (igloo.inc’s icy palette was not copied).
+- **Runs on slow computers without losing anything.** Every device gets the same scenes, detail and
+  effects. The work is cut instead: dense fields of villi are drawn front to back so the graphics
+  card skips hidden surfaces; the diagnosis set-ups the camera is not looking at are not drawn at
+  all (the microscope view went from about 490,000 triangles to about 300); scenes that move by
+  themselves are paced at 60 frames a second. Weak devices (software rendering, phone, tablet and
+  smart-board graphics, basic Intel graphics, 4 or fewer CPU cores, 4 GB or less memory) also draw
+  at the screen’s own resolution instead of above it and pace moving scenes at 30 frames a second.
+  A device that keeps dropping frames lowers its resolution step by step and remembers it.
+  `?lite` and `?hq` force either mode.
+- **Smart board ready.** Text scales with the screen (a 1080p board shows about 48 px headings and
+  25 px text); a Full screen link (and **F**); swipes, wheel and trackpad always settle on a part, and
+  quick clicks queue up; the 3D is drawn at no more than about 2600 pixels across so 4K boards stay
+  smooth; browsers without WebGL 2, or a crash in the 3D, fall back to still pictures; going full
+  screen keeps your place.
+- **A home screen that guides the viewer.** The title with the student’s name and class in the
+  top-left corner, a short “About” with the definition, pronunciation and modern spelling in the
+  top-right corner, the digestive system in the middle, and a list of the parts (History, The
+  disease, The cause, Symptoms, Diagnosis, Treatment, Quick check, Sources) that jumps to each one.
 - **History first, then 3D.** A profile card of George Hoyt Whipple (1934 portrait and four dates:
   1878, 1905, 1907, 1934, from the Nobel Prize biography), then the real public-domain scans of the
   1907 article, naming paragraph and Fig. 9 photomicrograph. The modern model then appears as an
@@ -80,17 +86,22 @@ labelled as an illustration, not a patient image.
 
 | Asset | Size |
 | --- | --- |
-| Main bundle (home screen, history pages, captions, UI) | 297 kB (93 kB gzip) |
-| 3D bundle, loaded in the background while 1907 is on screen | 1.16 MB (320 kB gzip) |
-| CSS | 55 kB (12 kB gzip) |
+| Main bundle (home screen, history pages, captions, UI) | 293 kB (93 kB gzip) |
+| 3D bundle, loaded in the background while the home screen is up | 1.16 MB (321 kB gzip) |
+| CSS | 43 kB (10 kB gzip) |
 | Organ models (4 files, meshopt-compressed) | 1.08 MB |
 | Home-screen picture (WebP with transparency) | 76 kB |
 | Archive scans (WebP) | 0.3 MB |
 
-- The 3D code starts downloading on idle while the visitor reads the 1907 pages.
+- The 3D code starts downloading on idle while the home screen is up.
 - Each 3D world is mounted ahead of need and its shaders compiled in the background
   (`compileAsync`); a fixed light rig and a 3D noise texture keep shader compile time short.
-- The canvas renders only while something moves; resolution adapts to the device.
+- The canvas renders only while something moves, at most 60 frames a second (30 on lite devices);
+  resolution adapts to the device and steps down only if frames are dropped.
+- Opaque instanced villi are sorted front to back once, so hidden surfaces fail the depth test
+  before shading; only the diagnosis set-up the camera is at is drawn.
+- Triangles drawn per view, full detail everywhere: body 154k, wall 610k, villi 165k, cells 233k,
+  biopsy 429k, microscope 0.3k, PCR 68k.
 - `prefers-reduced-motion`: stops jump instead of flying.
 - Without WebGL the page shows still renders of each scene with all captions, quiz and sources.
 
@@ -100,8 +111,8 @@ labelled as an illustration, not a patient image.
 | --- | --- |
 | `npm run build` (type-check + build) | passes |
 | `npm run lint` (oxlint) | 0 warnings |
-| `npm test` — 37 unit tests | all pass: story order, caption length, a presenter script for every stop, key terms with word parts, 4 numbered facts, citations resolve, every fact cited, name correction, quiz answers, zoom maths (world switch at the veil peak, in/out direction), camera poses move consistently through every transition |
-| `npm run test:e2e` — 15 browser tests | all pass: home screen (name, modern spelling, definition, student name and period, “What’s inside” menu jumps); Whipple profile card; clicker walk through all 17 stops on one scrolling page; mouse-wheel zoom; **smart board 1920×1080 touch**: text size, ↑ ↓ taps (two quick taps = two stops), zoom gauge shows the current part, swipe settles on the next stop, a tiny swipe falls back, full-screen button; summary → list of sources; printable presenter guide; small-intestine marker; self-check (tapping the organ on the 3D model + choices, wrong-then-right feedback); Sources/Terms panels, definitions and source markers; name correction; reduced motion; no-WebGL fallback; laptop 1366×768 and phone 390×844 layouts |
+| `npm test`, 38 unit tests | all pass: story order, caption length, plain wording (no em dashes, dots or fact numbers on screen), a presenter script for every part, terms with word parts, the four facts cited, citations resolve, name correction, quiz answers, zoom maths (world switch at the veil peak, in/out direction), camera poses move consistently through every transition |
+| `npm run test:e2e`, 16 browser tests | all pass: home screen (title, modern spelling, definition, name and class, list of parts that jumps, no slide buttons); Whipple profile card; clicker walk through all 17 parts on one scrolling page; mouse-wheel zoom; smart board 1920×1080 touch (text size, swiping forward and back settles on a part, a tiny swipe falls back, Full screen link); summary leads to the sources; lite mode; printable presenter guide; small-intestine marker; self-check (tapping the organ on the 3D model, choices, wrong then right feedback); Sources and Terms panels, definitions and source numbers; name correction; reduced motion; no-WebGL fallback; laptop 1366×768 and phone 390×844 |
 | Console | no errors or warnings during a full scroll-through |
 | Visual review | screenshots of every stop at 1920×1080, 1366×768 and 390×844, and of each zoom transition |
 

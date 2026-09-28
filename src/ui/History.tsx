@@ -5,6 +5,7 @@ import { useStory } from '../app/store';
 import { NAMING_MARKS, SUMMARY_MARKS, type Box } from '../content/archive';
 import { SECTIONS, STOP_INDEX, STOPS, type World } from '../content/story';
 import { Cites, RichText, TermButton } from './RichText';
+import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
 
 /* ------------------------------------------------------------------ backdrops */
@@ -101,43 +102,37 @@ function Cover() {
   });
   return (
     <section ref={ref} className="cover fly" aria-labelledby="cover-title">
-      <div className="cover__text">
-        <p className="cover__eyebrow">Medical Terminology · Eponym #26</p>
+      <div className="cover__brand">
         <h1 id="cover-title" className="cover__title">
-          Whipple’s Disease
+          <Scramble text="Whipple’s Disease" duration={1100} />
         </h1>
-        <p className="cover__say">
-          say “WIP-ulz dih-ZEEZ” · modern spelling: <b>Whipple disease</b> <Cites ids={[1, 3]} />
+        <p className="cover__meta">// {SUBMISSION.course}, eponym 26</p>
+        <p className="cover__meta">
+          By {SUBMISSION.studentName}, {periodLabel()}.
         </p>
+      </div>
+      <div className="cover__about">
+        <p className="cover__label">About</p>
         <p className="cover__def">
           <RichText text={STOPS[0].text} />
         </p>
-        <p className="cover__by">
-          By <b>{SUBMISSION.studentName}</b> · {SUBMISSION.course} · {periodLabel()}
+        <p className="cover__say">
+          Say it WIP-ulz. Also written Whipple disease. <Cites ids={[1, 3]} />
         </p>
-        <button type="button" className="pill pill--primary cover__start" onClick={() => scrollToStop(1)}>
-          Start
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <nav className="cover__toc" aria-label="What’s inside">
-          <p className="cover__toc-title">What’s inside</p>
-          <ol>
-            {SECTIONS.map((sec, i) => (
-              <li key={sec.title} className={`cat-${sec.cat}`}>
-                <button type="button" onClick={() => scrollToStop(sec.stop)}>
-                  <span className="cover__n">{i + 1}</span>
-                  <span className="cover__sec">
-                    <b>{sec.title}</b>
-                    <small>{sec.sub}</small>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ol>
-        </nav>
       </div>
+      <nav className="cover__toc" aria-label="What’s inside">
+        <p className="cover__label">Inside</p>
+        <ol>
+          {SECTIONS.map((sec, i) => (
+            <li key={sec.title}>
+              <button type="button" onClick={() => scrollToStop(sec.stop)}>
+                <span className="cover__n">{String(i + 1).padStart(2, '0')}</span>
+                {sec.title}
+              </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
       <figure className="cover__art">
         <img
           src="/cover/digestive.webp"
@@ -145,8 +140,8 @@ function Cover() {
           height={1300}
           alt="3D model of the digestive system: liver, stomach, small intestine and large intestine."
         />
-        <figcaption>The digestive system, where Whipple’s disease strikes</figcaption>
       </figure>
+      <p className="cover__scroll">Scroll down to explore.</p>
     </section>
   );
 }
@@ -174,12 +169,12 @@ function Profile() {
             height={396}
             alt="Black-and-white portrait photograph of George Hoyt Whipple in a suit, 1934."
           />
-          <figcaption>Photo 1934 · public domain</figcaption>
+          <figcaption>Photo from 1934, public domain</figcaption>
         </figure>
         <div className="profile__body">
           <p className="profile__kicker">The disease is named after</p>
           <h2 className="profile__name">George Hoyt Whipple</h2>
-          <p className="profile__life">1878–1976 · American pathologist</p>
+          <p className="profile__life">1878 to 1976, American pathologist</p>
           <ol className="profile__timeline">
             {LIFE.map((l) => (
               <li key={l.year}>
@@ -214,7 +209,7 @@ const CASE_NOTES: Record<keyof typeof SUMMARY_MARKS, { title: string; modern: st
     modern: 'Today: fatty diarrhea',
     body: (
       <>
-        Fat passed straight through — a sign of <TermButton termKey="malabsorption">malabsorption</TermButton>.{' '}
+        Fat passed straight through. That is a sign of <TermButton termKey="malabsorption">malabsorption</TermButton>.{' '}
         <Cites ids={[5, 12]} />
       </>
     ),
@@ -224,7 +219,7 @@ const CASE_NOTES: Record<keyof typeof SUMMARY_MARKS, { title: string; modern: st
     modern: 'Today: joint pain (arthralgia)',
     body: (
       <>
-        Still one of the four main symptoms — and often the first. <Cites ids={[5, 2]} />
+        Still one of the main symptoms, and often the first. <Cites ids={[5, 2]} />
       </>
     ),
   },
@@ -272,7 +267,7 @@ function Case() {
             />
           ))}
         </div>
-        <figcaption className="print__caption">Bulletin of the Johns Hopkins Hospital, September 1907, p. 382 — public domain.</figcaption>
+        <figcaption className="print__caption">Bulletin of the Johns Hopkins Hospital, September 1907, page 382, public domain.</figcaption>
         {active && (
           <Note title={active.title} style={{ left: 0, top: 'calc(100% + 14px)', width: 'min(420px, 100%)' }}>
             <span className="note__modern">{active.modern}</span>
@@ -328,7 +323,7 @@ function Naming() {
               onSelect={() => setNote(note === 'term' ? null : 'term')}
             />
           </div>
-          <figcaption className="print__caption">Whipple, 1907, p. 391 — public domain.</figcaption>
+          <figcaption className="print__caption">Whipple, 1907, page 391, public domain.</figcaption>
           {note === 'noName' && (
             <Note title="A placeholder name" style={{ left: 0, top: 'calc(100% + 14px)' }}>
               “Etiological factor” means the cause. Whipple knew his name was temporary until the cause was found.{' '}

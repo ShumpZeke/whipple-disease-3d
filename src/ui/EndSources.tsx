@@ -48,11 +48,11 @@ export function EndSources() {
                 <div key={t.key}>
                   <dt>
                     {t.key === 'tropheryma' ? <i>{t.term}</i> : t.term}
-                    {t.say && <span className="endnotes__say"> · {t.say}</span>}
+                    {t.say && <span className="endnotes__say"> ({t.say})</span>}
                   </dt>
                   <dd>
-                    {t.parts?.length ? <>{t.parts.map((p) => `${p.part} ${p.meaning}`).join(' + ')} = </> : null}
-                    {t.short}
+                    {t.short.charAt(0).toUpperCase() + t.short.slice(1)}.
+                    {t.parts?.length ? ` ${t.parts.map((p) => `${p.part} means ${p.meaning}`).join(', ')}.` : null}
                   </dd>
                 </div>
               ))}
@@ -63,7 +63,7 @@ export function EndSources() {
             <ul className="endnotes__credits">
               {MEDIA_CREDITS.map((c) => (
                 <li key={c.what}>
-                  <b>{c.what}</b> — {c.creator}. {c.license}.{c.note ? ` ${c.note}` : ''}
+                  <b>{c.what}.</b> {c.creator}. {c.license}.{c.note ? ` ${c.note}` : ''}
                 </li>
               ))}
             </ul>
@@ -72,12 +72,12 @@ export function EndSources() {
 
         <footer className="endnotes__foot">
           <p className="endnotes__credit">{creditLine()}</p>
-          <p className="endnotes__small">Made for a Medical Terminology eponym project. For learning only — not medical advice.</p>
-          <div className="caption__actions">
-            <button type="button" className="pill pill--primary" onClick={restart}>
-              Back to 1907
+          <p className="endnotes__small">Made for a Medical Terminology eponym project. For learning only, not medical advice.</p>
+          <div className="caption__links">
+            <button type="button" className="text-link" onClick={restart}>
+              Start again
             </button>
-            <a className="pill" href="?guide" target="_blank" rel="noreferrer">
+            <a className="text-link" href="?guide" target="_blank" rel="noreferrer">
               Presenter guide
             </a>
           </div>

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { Cites } from '../../ui/RichText';
 import { createOrganMaterial } from '../anatomy/organMaterial';
+import { useFrontToBack } from '../drawOrder';
 import { Label3D } from '../Label3D';
 import { ensureNoiseTexture, NOISE_GLSL, noiseUniform } from '../shaders/noise';
 import {
@@ -136,6 +137,7 @@ export function TissueWorld({ visible }: { visible: boolean }) {
     const villiPt = tubePoint(-1.75, farT + 0.25, innerRadius(-1.75, farT + 0.25, folds) - 0.06).toArray() as [number, number, number];
     return { outer, inner, cuts, inst, serosaMat, mucosaMat, layerMat: layerMaterial(), anchors, foldPt, villiPt };
   }, []);
+  useFrontToBack(built.inst, 'wall');
 
   return (
     <group rotation={[0, -0.12, 0]}>

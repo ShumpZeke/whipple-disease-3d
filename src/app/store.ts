@@ -26,6 +26,8 @@ interface State {
   quizAnswers: Record<string, QuizAnswer | undefined>;
   quizFeedback: { text: string; correct: boolean } | null;
   reducedMotion: boolean;
+  /** The device turned out to be slow while running: render less from now on. */
+  lowPower: boolean;
   stageReady: boolean;
   webgl: 'unknown' | 'ok' | 'failed';
   interacted: boolean;
@@ -52,6 +54,7 @@ interface State {
   answerChoice: (optionIndex: number) => void;
   nextQuestion: () => void;
   setReducedMotion: (v: boolean) => void;
+  setLowPower: () => void;
   setStageReady: (v: boolean) => void;
   setWebgl: (v: 'ok' | 'failed') => void;
   markInteracted: () => void;
@@ -78,6 +81,7 @@ export const useStory = create<State>((set, get) => ({
   quizAnswers: {},
   quizFeedback: null,
   reducedMotion: false,
+  lowPower: false,
   stageReady: false,
   webgl: 'unknown',
   interacted: false,
@@ -135,6 +139,7 @@ export const useStory = create<State>((set, get) => ({
   },
   nextQuestion: () => set((s) => ({ quizIndex: Math.min(QUESTIONS.length, s.quizIndex + 1), quizFeedback: null })),
   setReducedMotion: (v) => set({ reducedMotion: v }),
+  setLowPower: () => set({ lowPower: true }),
   setStageReady: (v) => set({ stageReady: v }),
   setWebgl: (v) => set({ webgl: v }),
   markInteracted: () => {

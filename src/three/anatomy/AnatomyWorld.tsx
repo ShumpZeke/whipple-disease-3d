@@ -135,7 +135,7 @@ const SAT = [
     color: '#a9463d',
     text: (
       <>
-        Can infect the heart’s lining and valves — <TermButton termKey="endocarditis">endocarditis</TermButton>.
+        Can infect the heart’s lining and valves. This is called <TermButton termKey="endocarditis">endocarditis</TermButton>.
       </>
     ),
     cites: [1, 3],
@@ -148,7 +148,7 @@ const SAT = [
     rot: 0.25,
     size: 0.5,
     color: '#e3d6c3',
-    text: 'Joint pain is often the first sign — sometimes years earlier.',
+    text: 'Joint pain is often the first sign, sometimes years earlier.',
     cites: [2, 3],
   },
 ];

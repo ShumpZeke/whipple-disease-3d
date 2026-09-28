@@ -4,25 +4,30 @@ import { TERM_BY_KEY } from '../content/glossary';
 
 const TOKEN = /\{t:([a-z-]+)(?:\|([^}]+))?\}|\{c:([\d,\s]+)\}|\*([^*]+)\*/g;
 
+/** Source numbers as one small bracket, e.g. [1, 2, 6]; each number opens that source. */
 export function Cites({ ids }: { ids: number[] }) {
   const openSources = useStory((s) => s.openSources);
   return (
-    <>
-      {ids.map((id) => (
-        <button
-          key={id}
-          type="button"
-          className="cite"
-          aria-label={`Source ${id}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            openSources(id);
-          }}
-        >
-          [{id}]
-        </button>
+    <span className="cites">
+      [
+      {ids.map((id, i) => (
+        <Fragment key={id}>
+          {i > 0 && ', '}
+          <button
+            type="button"
+            className="cite"
+            aria-label={`Source ${id}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              openSources(id);
+            }}
+          >
+            {id}
+          </button>
+        </Fragment>
       ))}
-    </>
+      ]
+    </span>
   );
 }
 

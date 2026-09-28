@@ -4,6 +4,7 @@ import { QUESTIONS } from '../content/quiz';
 import { ORGANS, ORGAN_IDS } from '../three/anatomy/organs';
 import { Cites } from './RichText';
 
+/** The self-check: short questions, answered by tapping the model or a choice. */
 export function Quiz() {
   const quizIndex = useStory((s) => s.quizIndex);
   const answers = useStory((s) => s.quizAnswers);
@@ -11,7 +12,6 @@ export function Quiz() {
   const answerChoice = useStory((s) => s.answerChoice);
   const answerOrgan = useStory((s) => s.answerOrgan);
   const nextQuestion = useStory((s) => s.nextQuestion);
-  const next = useStory((s) => s.next);
   const [picked, setPicked] = useState<Record<string, number[]>>({});
   const [showList, setShowList] = useState(false);
 
@@ -19,17 +19,10 @@ export function Quiz() {
     const score = quizScore(answers);
     return (
       <div aria-live="polite" data-quiz="done">
-        <p className="caption__eyebrow">Quick self-check · done</p>
         <h1 className="caption__title">Nicely done</h1>
-        <p className="quiz__done">
-          You found all {score.total} answers — {score.firstTry} on the first try. Every answer is backed by the sources
-          you saw along the way.
+        <p className="caption__body">
+          You found all {score.total} answers, {score.firstTry} of them on the first try. Keep scrolling for the summary.
         </p>
-        <div className="caption__actions">
-          <button type="button" className="pill" onClick={next}>
-            See the summary
-          </button>
-        </div>
       </div>
     );
   }
@@ -41,7 +34,7 @@ export function Quiz() {
   return (
     <div key={q.id} className="quiz-enter" aria-live="polite" data-question={q.id}>
       <p className="quiz__progress">
-        Self-check · {quizIndex + 1} of {QUESTIONS.length}
+        Question {quizIndex + 1} of {QUESTIONS.length}
       </p>
       <h1 className="quiz__prompt">{q.prompt}</h1>
 
@@ -68,13 +61,13 @@ export function Quiz() {
       )}
 
       {q.kind === 'organ' && !solved && (
-        <div className="caption__actions">
-          <button type="button" className="pill" aria-expanded={showList} onClick={() => setShowList((v) => !v)}>
-            {showList ? 'Hide organ list' : 'Choose from a list instead'}
+        <div className="caption__links">
+          <button type="button" className="text-link" aria-expanded={showList} onClick={() => setShowList((v) => !v)}>
+            {showList ? 'Hide the list' : 'Pick from a list'}
           </button>
           {showList &&
             ORGAN_IDS.map((id) => (
-              <button key={id} type="button" className="pill" onClick={() => answerOrgan(id, ORGANS[id].name)}>
+              <button key={id} type="button" className="text-link" onClick={() => answerOrgan(id, ORGANS[id].name)}>
                 {ORGANS[id].name}
               </button>
             ))}
@@ -83,17 +76,14 @@ export function Quiz() {
 
       {feedback && (
         <p className={`quiz__feedback ${feedback.correct ? 'is-right' : 'is-wrong'}`} role="status">
-          <span aria-hidden="true">{feedback.correct ? '✓' : '↺'}</span>
-          <span>
-            {feedback.text} {feedback.correct && <Cites ids={q.cites} />}
-          </span>
+          {feedback.text} {feedback.correct && <Cites ids={q.cites} />}
         </p>
       )}
 
       {solved && (
-        <div className="caption__actions">
-          <button type="button" className="pill" onClick={nextQuestion} autoFocus>
-            {quizIndex === QUESTIONS.length - 1 ? 'See results' : 'Next question'}
+        <div className="caption__links">
+          <button type="button" className="text-link" onClick={nextQuestion} autoFocus>
+            {quizIndex === QUESTIONS.length - 1 ? 'See how you did' : 'Next question'}
           </button>
         </div>
       )}

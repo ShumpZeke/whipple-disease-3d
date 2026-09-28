@@ -34,10 +34,8 @@ export function StageLoading() {
   if (ready || STOPS[stop].world === 'none') return null;
   return (
     <div className="loading" role="status" aria-live="polite">
-      Preparing the 3D model
-      <div className="loading__bar">
-        <span className="loading__indeterminate" />
-      </div>
+      Loading the 3D model
+      <span className="loading__ascii" aria-hidden="true" />
     </div>
   );
 }

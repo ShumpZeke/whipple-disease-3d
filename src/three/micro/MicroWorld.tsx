@@ -149,10 +149,11 @@ export function MicroWorld({ visible }: { visible: boolean }) {
     const nucleusMat = membraneMaterial('#3c2350', '#9a74b8', 0.55, 0.9, 0.6);
     const vacGeo = new THREE.IcosahedronGeometry(1, 3);
     const vacMat = membraneMaterial('#d8c2d6', '#fff2fa', 0.05, 0.35, 0.3);
-    const vac = new THREE.InstancedMesh(vacGeo, vacMat, 120);
+    const perCell = 40;
+    const vac = new THREE.InstancedMesh(vacGeo, vacMat, perCell * cells.length);
     let vi = 0;
     for (const c of cells) {
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < perCell; i++) {
         const d = new THREE.Vector3(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).normalize().multiplyScalar(c.r * rnd() * 0.75);
         m.compose(c.c.clone().add(d), new THREE.Quaternion(), new THREE.Vector3().setScalar(0.12 + rnd() * 0.16));
         vac.setMatrixAt(vi++, m);

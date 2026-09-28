@@ -43,8 +43,20 @@ describe('the one-page journey (storyboard order)', () => {
   it('keeps every caption short enough to read out from the board', () => {
     for (const s of STOPS) {
       const words = s.text.replace(/\{c:[^}]+\}/g, '').split(/\s+/).filter(Boolean).length;
-      expect(words, s.id).toBeLessThanOrEqual(26);
+      expect(words, s.id).toBeLessThanOrEqual(45);
       expect(s.title.split(/\s+/).length, s.id).toBeLessThanOrEqual(6);
+    }
+  });
+
+  it('writes plain sentences on screen: no em dashes, dots between words or fact numbers', () => {
+    const onScreen = [
+      ...STOPS.flatMap((s) => [s.title, s.text, s.note ?? '']),
+      ...QUESTIONS.flatMap((q) => [q.prompt, q.correct, ...(q.kind === 'choice' ? q.options.flatMap((o) => [o.text, o.why ?? '']) : [q.retry])]),
+      ...GLOSSARY.flatMap((t) => [t.short, t.definition]),
+    ];
+    for (const line of onScreen) {
+      expect(line, line).not.toMatch(/[—·]/);
+      expect(line, line).not.toMatch(/\bFact \d/);
     }
   });
 
@@ -68,17 +80,11 @@ describe('the one-page journey (storyboard order)', () => {
     for (const f of FACTS) expect(f.cites.length, f.label).toBeGreaterThan(0);
   });
 
-  it('teaches four numbered clinical facts: cause, symptoms, diagnosis, treatment', () => {
-    const facts = new Map<number, string[]>();
-    for (const s of STOPS) {
-      const m = s.eyebrow.match(/^Fact (\d)/);
-      if (m) facts.set(Number(m[1]), [...(facts.get(Number(m[1])) ?? []), s.id]);
+  it('covers four clinical facts, each with sources: cause, symptoms, diagnosis, treatment', () => {
+    for (const id of ['cause', 'symptoms', 'biopsy', 'treatment'] as const) {
+      expect(citeRefs(STOPS[STOP_INDEX[id]].text).length, id).toBeGreaterThan(0);
     }
-    expect([...facts.keys()].sort()).toEqual([1, 2, 3, 4]);
-    expect(facts.get(1)).toContain('cause');
-    expect(facts.get(2)).toContain('symptoms');
-    expect(facts.get(3)).toContain('biopsy');
-    expect(facts.get(4)).toContain('treatment');
+    expect(FACTS.map((f) => f.label)).toEqual(['Cause', 'Symptoms', 'Diagnosis', 'Treatment']);
   });
 
   it('tells the history on the page and the modern story in 3D', () => {

@@ -79,7 +79,7 @@ export function SourcesOverlay() {
         <ul className="credit-list">
           {MEDIA_CREDITS.map((c) => (
             <li key={c.what}>
-              <b>{c.what}</b> — {c.creator}. {c.license}.
+              <b>{c.what}.</b> {c.creator}. {c.license}.
               {c.url && (
                 <>
                   {' '}
@@ -105,7 +105,7 @@ export function SourcesOverlay() {
             <b style={{ color: 'var(--ivory)' }}>{SUBMISSION.studentName}</b>
           </div>
           <div>
-            {SUBMISSION.course} · {periodLabel()} · Eponym {SUBMISSION.assignedEponym}
+            {SUBMISSION.course}, {periodLabel()}, eponym {SUBMISSION.assignedEponym}
           </div>
         </div>
       </div>
@@ -139,7 +139,7 @@ export function GlossaryOverlay() {
               {t.say && <span className="gloss__say">{t.say}</span>}
               {t.parts && (
                 <p style={{ color: 'var(--muted)', fontSize: 13 }}>
-                  {t.parts.map((p) => `${p.part} = ${p.meaning}`).join(' · ')}
+                  {t.parts.map((p) => `${p.part} means ${p.meaning}`).join('. ')}.
                 </p>
               )}
               <p>

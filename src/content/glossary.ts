@@ -36,7 +36,7 @@ export const GLOSSARY: Term[] = [
     term: 'Malabsorption',
     say: 'mal-ab-SORP-shun',
     parts: [
-      { part: 'mal-', meaning: 'bad, abnormal' },
+      { part: 'mal-', meaning: 'bad or abnormal' },
       { part: 'absorption', meaning: 'taking in' },
     ],
     short: 'trouble absorbing nutrients from food',
@@ -78,18 +78,18 @@ export const GLOSSARY: Term[] = [
     term: 'Endoscopy',
     say: 'en-DOS-kuh-pee',
     parts: [
-      { part: 'endo-', meaning: 'within, inner' },
+      { part: 'endo-', meaning: 'within' },
       { part: '-scopy', meaning: 'examine' },
     ],
     short: 'looking inside the body with a camera tube',
     definition:
-      'Looking inside the body with an endoscope — a flexible tube with a small camera and light. Tiny tools passed through it can take biopsies.',
+      'Looking inside the body with an endoscope, a flexible tube with a small camera and light. Tiny tools passed through it can take biopsies.',
     cites: [13, 14],
   },
   {
     key: 'pcr',
-    term: 'PCR — polymerase chain reaction',
-    say: 'P-C-R · puh-LIM-er-ace',
+    term: 'PCR (polymerase chain reaction)',
+    say: 'P-C-R, puh-LIM-er-ace',
     short: 'a test that copies DNA to find a germ',
     definition:
       'A laboratory technique that makes many copies (“amplifies”) of a small piece of DNA, so even a tiny amount of a germ’s DNA can be detected.',
@@ -113,7 +113,7 @@ export const GLOSSARY: Term[] = [
     say: 'lip-oh-DIS-truh-fee',
     parts: [
       { part: 'lip(o)-', meaning: 'fat' },
-      { part: 'dys-', meaning: 'difficult, abnormal' },
+      { part: 'dys-', meaning: 'abnormal' },
       { part: '-trophy', meaning: 'growth' },
     ],
     short: 'abnormal fat in the body’s tissues',
@@ -127,7 +127,7 @@ export const GLOSSARY: Term[] = [
     say: 'MAK-roh-fayj',
     parts: [
       { part: 'macro-', meaning: 'large' },
-      { part: '-phage', meaning: 'eating, swallowing' },
+      { part: '-phage', meaning: 'eating' },
     ],
     short: 'a “big eater”: an immune cell that swallows germs',
     definition:
@@ -151,7 +151,7 @@ export const GLOSSARY: Term[] = [
     term: 'Endocarditis',
     say: 'en-doh-kar-DY-tis',
     parts: [
-      { part: 'endo-', meaning: 'within, inner' },
+      { part: 'endo-', meaning: 'within' },
       { part: 'cardi-', meaning: 'heart' },
       { part: '-itis', meaning: 'inflammation' },
     ],

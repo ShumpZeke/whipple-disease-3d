@@ -5,7 +5,7 @@ import { Caption } from '../ui/Caption';
 import { Fallback, StageLoading } from '../ui/Fallback';
 import { Backdrops, HistoryLayer, PlateLabel } from '../ui/History';
 import { EndSources } from '../ui/EndSources';
-import { DepthRail, HudTop, toggleFullscreen } from '../ui/Hud';
+import { HudTop, toggleFullscreen } from '../ui/Hud';
 import { GlossaryOverlay, SourcesOverlay } from '../ui/Overlays';
 import { TermPopover } from '../ui/TermPopover';
 import { useJourney } from '../ui/useJourney';
@@ -193,7 +193,7 @@ function ScaleNote() {
   const stop = useStory((s) => s.stop);
   const world = STOPS[stop].world;
   if (!['tissue', 'villi', 'micro', 'diagnosis'].includes(world)) return null;
-  return <p className="scale-note">Illustration · not to scale · colors for clarity</p>;
+  return <p className="scale-note">Illustration, not to scale</p>;
 }
 
 export default function App() {
@@ -245,17 +245,23 @@ export default function App() {
         )}
         {fallback && worldNeeded && <Fallback />}
         {!fallback && <StageLoading />}
+        <div className="dots" aria-hidden="true" />
         <ZoomVeil />
         <PlateLabel />
         <HistoryLayer />
         <Caption />
         <ScaleNote />
         <HudTop />
-        <DepthRail />
         <HoverTip />
         <TermPopover />
         <SourcesOverlay />
         <GlossaryOverlay />
+        <div className="frame" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
         <div className="grain" aria-hidden="true" />
       </main>
       <EndSources />

@@ -28,40 +28,43 @@ Nothing else needs editing.
 
 ## Presenting it (smart board, projector or laptop)
 
-1. Open the exhibit in Chrome or Edge on the board and press **F** (or the full-screen button, top
-   right) so it fills the screen. Everything the class reads — headlines, text, key terms, buttons —
-   grows with the screen, so it stays readable from the back of the room.
-2. Move with the **↓ / ↑** arrows on the right (beside the zoom gauge), a clicker, the arrow keys,
-   or by swiping up and down on the board. Every move is a smooth zoom that always comes to rest on
-   a stop — there are no slide numbers. The gauge shows which part of the story you are in; tap a
-   part’s name to jump there.
-3. The screen only shows short labels: a coloured tag for the part of the story, a headline, one
-   line, and a **Key term** that splits the medical word into its parts (e.g. *arthr-* joint +
-   *-algia* pain = joint pain). You do the explaining — the presenter guide has one or two lines to
-   say at each stop.
+The exhibit is one scene, not slides. There are no arrows, Next buttons or page numbers: you move by
+zooming, and the words for each part appear quietly in the corner.
+
+1. Open the link on the board in Chrome or Edge and tap **Full screen** in the top-right corner (or
+   press **F**). Text grows with the screen, so it stays readable from the back of the room.
+2. **Swipe up** on the board to zoom on to the next part, **swipe down** to go back. A clicker, the
+   arrow keys, Page Down or a mouse wheel do the same. It always comes to rest on the next part.
+3. At each part, read the heading and explain it in your own words. The presenter guide has a line
+   to say for every part.
 
 | Do this | To |
 | --- | --- |
-| **↓** arrow, clicker, **→ / ↓ / Page Down / Space** | zoom to the next stop |
-| **↑** arrow, **← / ↑ / Page Up** | go back one stop |
-| **Swipe**, scroll wheel or trackpad | zoom continuously; it settles on the next stop |
-| **F** | full screen on / off |
-| **Home / End** | jump to 1907 / the summary |
-| **Drag** the 3D picture | turn it (double-tap or **R** resets it) |
-| Tap an **underlined word** | its definition, pronunciation and word parts |
-| Tap a **[1] [2] …** marker | the source behind that fact |
+| Swipe up, clicker, **→ / ↓ / Page Down / Space**, mouse wheel | zoom on to the next part |
+| Swipe down, **← / ↑ / Page Up** | go back |
+| Tap a part in the home screen list | jump straight there |
+| **F** or **Full screen** | full screen on or off |
+| **Home / End** | back to the start, or the summary |
+| Drag the 3D picture | turn it (double-tap or **R** resets it) |
+| Tap an underlined word | its meaning, pronunciation and word parts |
+| Tap a small source number | the source behind that fact |
 
-After the summary, one more **↓** (or swipe) scrolls into the full list of sources, the medical
-terms and the image credits.
+After the summary, one more swipe scrolls into the full list of sources, the medical terms and the
+image credits.
 
 ### Presenter guide (printable)
 
-Open the exhibit’s address with **`?guide`** on the end (e.g. `http://localhost:4173/?guide`) for a
-printable script: what to say at each stop, each key term with its pronunciation, and the answers to
-the quiz. Print it or keep it on your phone while you present. There is also a link at the very end
-of the exhibit.
+Open the exhibit’s address with **`?guide`** on the end (e.g. `…vercel.app/?guide`) for a printable
+five-minute plan: what to say and what to tap at each part, the medical terms with pronunciation,
+likely questions with answers from the sources, and the quiz answers. There is also a link at the
+very end of the exhibit.
 
-Tip: to open straight at a stop, add `?stop=` to the address, e.g. `…/?stop=villi`.
+**On a slower computer** (a smart board’s built-in computer): add `?lite` to the address, e.g.
+`…vercel.app/?lite`. Nothing is removed or simplified. Lite draws at the screen’s own resolution
+instead of above it and paces the moving scenes at 30 frames a second. Weak devices switch to it by
+themselves, and a device that starts lagging switches and remembers it. `?hq` forces full mode.
+
+Tip: to open straight at a part, add `?stop=` to the address, e.g. `…/?stop=villi`.
 
 **Backup video.** If the classroom computer can’t run 3D, `node scripts/record-tour.mjs tour.mp4`
 records the whole zoom as an MP4 (needs ffmpeg). Without WebGL the page itself still works, with
@@ -73,38 +76,38 @@ still pictures instead of 3D.
 
 | The handout asks for | Where it is in the exhibit |
 | --- | --- |
-| Correct name and spelling, and the modern term | Home screen: **Whipple’s Disease**, “modern spelling: Whipple disease”, and how to say it |
-| Origin: the person it is named for | Stop 2: profile card of **George Hoyt Whipple** (1878–1976) |
-| Brief historical profile and why the name stuck | Stops 2–4: his life in four dates, the 1907 case, and why the disease carries his name — with the class-list correction (“Allen Whipple” → George Hoyt Whipple; Allen O. Whipple was a surgeon) |
-| A clear definition in your own words | Home screen and stop 5, “What is Whipple’s disease?” |
-| Body system or medical specialty | Stop 5: Body system — digestive system · Specialty — gastroenterology |
-| At least four clinical facts | Fact 1 cause · Fact 2 symptoms · Fact 3 diagnosis · Fact 4 treatment (and outlook) |
-| At least three terms, word parts, abbreviations or pronunciation tips | A **Key term** box on 9 stops (e.g. *arthr-* joint + *-algia* pain), pronunciation for each, abbreviations PCR, PAS and IV; all 14 terms in the **Terms** panel and at the end |
+| Correct name and spelling, and the modern term | Home screen: **Whipple’s Disease**, “Also written Whipple disease”, and how to say it |
+| Origin: the person it is named for | Part 2: profile card of **George Hoyt Whipple** (1878 to 1976) |
+| Brief historical profile and why the name stuck | Parts 2 to 4: his life in four dates, the 1907 case, and why the disease has his name, with the class-list correction (Allen O. Whipple was a different doctor, a surgeon) |
+| A clear definition in your own words | Home screen and part 5, “What is Whipple’s disease?” |
+| Body system or medical specialty | Part 5: a disease of the digestive system (the guide adds gastroenterology) |
+| At least four clinical facts | The cause, the symptoms, how doctors find it (biopsy, stain, PCR) and the treatment |
+| At least three terms, word parts, abbreviations or pronunciation tips | Explained in plain words on screen (e.g. “Arthr means joint and algia means pain”), 14 terms with pronunciation in the **Terms** panel and at the end, abbreviations PCR and PAS |
 | At least two visuals with captions or labels | Labeled 3D models (digestive system, intestine wall, villi, cells, microscope, DNA), captioned 1907 scans and portrait |
-| Purposeful interactive elements | Menu, ↑ ↓ arrows and zoom gauge, ＋ marker, highlighted 1907 phrases, term pop-ups, healthy/infected switch, 3D model you can turn, quiz |
-| Source numbers that connect to the reference list | Every fact has a `[n]` marker; the full list is at the end |
+| Purposeful interactive elements | The list of parts, the + marker, highlighted 1907 phrases, term pop-ups, healthy and infected switch, the 3D model you can turn, the quiz |
+| Source numbers that connect to the reference list | Every fact has a small source number; the full list is at the end |
 
 **Design, research and presenting**
 
 | The handout asks for | Where it is |
 | --- | --- |
-| Clear title, consistent colors and fonts, readable text, logical sections | Five parts (History · The disease · Four facts · Quick check · Sources); one set of fonts and colors; text sized for a smart board |
-| A home screen that introduces the eponym and guides the viewer | Home screen with the definition and a **What’s inside** menu that jumps to each part |
-| At least three interaction types | Navigation (menu, ↑ ↓ arrows, zoom gauge) · hotspots (＋ marker, highlighted phrases, labels, term pop-ups) · self-check quiz — plus the 3D model and the healthy/infected switch |
+| Clear title, consistent colors and fonts, readable text, logical sections | Parts: History, The disease, The cause, Symptoms, Diagnosis, Treatment, Quick check, Sources; one warm palette; IBM Plex Sans for reading |
+| A home screen that introduces the eponym and guides the viewer | Home screen with the definition and a list of the parts that jumps to each one |
+| At least three interaction types | Navigation (the list of parts, swiping and scrolling), hotspots (+ marker, highlighted phrases, labels, term pop-ups), and the self-check quiz, plus the 3D model and the healthy and infected switch |
 | School-appropriate visuals, patient privacy | No patient photos; the stained slide is an illustration; archival images are public domain |
 | At least three credible sources (not Wikipedia or AI) | 17: Merck Manuals, MedlinePlus (NIH), NCBI StatPearls, CDC, OpenStax, NHGRI, NobelPrize.org, peer-reviewed articles, and Whipple’s 1907 paper |
-| Paraphrased, numbered citations and a full APA reference page | Yes — the reference page is the end of the exhibit (and [SOURCES.md](SOURCES.md)) |
+| Paraphrased, numbered citations and a full APA reference page | Yes, the reference page is the end of the exhibit (and [SOURCES.md](SOURCES.md)) |
 | Cite all media you did not create | “Images, 3D models and media” at the end, and [CREDITS.md](CREDITS.md) |
-| 3–5 minute presentation that explains the organization and features | The presenter guide (`?guide`) is paced for about 5 minutes and starts with the “What’s inside” menu |
+| 3 to 5 minute presentation that explains the organization and features | The presenter guide (`?guide`) is paced for about 5 minutes and starts with the list of parts |
 
 **Submission checklist**
 
-- [ ] Shareable link that opens without requesting access — deploy it (see *Deploying*), then test the link in a private window
+- [ ] Shareable link that opens without requesting access: deploy it (see *Deploying*), then test the link in a private window
 - [x] Only the assigned eponym, with all required content
 - [x] All interactive features work (checked by the browser tests)
 - [x] Reference page included (end of the exhibit)
-- [x] Student name and class period — “Vardhmansinh Rathod · Medical Terminology · 3rd Block” on the home screen, the summary and the list of sources
-- [ ] Proofread and practiced — use the presenter guide
+- [x] Student name and class period: “Vardhmansinh Rathod, 3rd Block” on the home screen, in the corner of every part, and at the end
+- [ ] Proofread and practiced: use the presenter guide
 
 ## Running it
 
@@ -124,8 +127,8 @@ Opens a local server with hot reload (Vite). Other scripts:
 | --- | --- |
 | `npm run build` | type-check and build the static site into `dist/` |
 | `npm run preview` | serve the built site at http://localhost:4173 |
-| `npm test` | unit tests (Vitest): story order, caption length, presenter scripts, key terms, facts, sources, quiz, zoom logic, camera poses |
-| `npm run test:e2e` | browser tests (Playwright): full clicker walk, smart-board touch (↑ ↓ taps, swipes, text size), sources page, presenter guide, organ click, quiz, overlays, reduced motion, no-WebGL fallback, laptop and phone sizes |
+| `npm test` | unit tests (Vitest): story order, caption length, plain wording (no em dashes), presenter scripts, terms, facts, sources, quiz, zoom logic, camera poses |
+| `npm run test:e2e` | browser tests (Playwright): home screen and its list of parts, full clicker walk, smart-board swiping and text size, no slide buttons, sources page, presenter guide, organ click, quiz, overlays, reduced motion, lite mode, no-WebGL fallback, laptop and phone sizes |
 | `npm run lint` | oxlint |
 
 First time running the browser tests: `npx playwright install chromium`.
@@ -155,9 +158,15 @@ works the same way — upload the contents of `dist/`.
   with meshopt (all four models ≈ 1.1 MB). Tissue, villi, cells, the microscope and DNA are
   procedural.
 
-**Performance:** the 3D code loads in the background while the 1907 pages are on screen; each 3D
-world is mounted and its shaders compiled ahead of time; frames render only while something moves;
-resolution adapts to the device.
+**Type:** in the style of igloo.inc: IBM Plex Mono for small labels and links (“//” and “//////”),
+IBM Plex Sans for everything people read, and Unbounded for the title like a logo. Headings decode
+into place. The warm colours are this exhibit’s own.
+
+**Performance:** the 3D code loads in the background while the home screen is up; each 3D world is
+mounted and its shaders compiled ahead of time; frames render only while something moves;
+resolution adapts to the device; dense fields of villi are drawn front to back so hidden surfaces
+are skipped; set-ups the camera is not looking at are not drawn at all; low-end devices get the same
+scenes in “lite” mode (see *Presenting it*).
 **Accessibility:** full keyboard and clicker control, visible focus, captions announced to screen
 readers, `prefers-reduced-motion` (jumps instead of flying), and a still-image
 version with all the text, quiz and sources when WebGL is unavailable.

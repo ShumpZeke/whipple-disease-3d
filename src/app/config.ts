@@ -7,7 +7,7 @@ export const SUBMISSION = {
   studentName: 'Vardhmansinh Rathod',
   course: 'Medical Terminology',
   classPeriod: '3rd Block',
-  assignedEponym: '#26 — Whipple’s disease',
+  assignedEponym: '#26, Whipple’s disease',
 } as const;
 
 export function periodLabel(): string {
@@ -17,5 +17,5 @@ export function periodLabel(): string {
 }
 
 export function creditLine(): string {
-  return `${SUBMISSION.studentName} · ${SUBMISSION.course} · ${periodLabel()}`;
+  return `${SUBMISSION.studentName}, ${SUBMISSION.course}, ${periodLabel()}`;
 }

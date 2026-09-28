@@ -26,7 +26,7 @@ export const QUESTIONS: Question[] = [
     kind: 'organ',
     prompt: 'On the model, tap the organ that Whipple’s disease damages most.',
     answer: 'SmallIntestine',
-    correct: 'Yes — the small intestine, where villi absorb nutrients.',
+    correct: 'Yes, the small intestine. That is where the villi absorb food.',
     retry: 'That’s the {organ}. Look for the long, coiled tube in the middle.',
     cites: [1],
   },
@@ -35,12 +35,12 @@ export const QUESTIONS: Question[] = [
     kind: 'choice',
     prompt: 'What causes Whipple’s disease?',
     options: [
-      { text: 'A virus', why: 'Not a virus — it is a bacterium.' },
+      { text: 'A virus', why: 'Not a virus. It is caused by a bacterium.' },
       { text: 'The bacterium Tropheryma whipplei', correct: true },
-      { text: 'Eating too much fat', why: 'Fat builds up because it isn’t absorbed; diet is not the cause.' },
+      { text: 'Eating too much fat', why: 'Fat builds up because it is not absorbed, but diet is not the cause.' },
       { text: 'A vitamin deficiency', why: 'Deficiencies can result from it, but they are not the cause.' },
     ],
-    correct: 'Correct — Tropheryma whipplei, a rod-shaped bacterium.',
+    correct: 'Right. Tropheryma whipplei is a rod-shaped bacterium.',
     cites: [1, 6],
   },
   {
@@ -49,10 +49,10 @@ export const QUESTIONS: Question[] = [
     prompt: 'What does “malabsorption” mean?',
     options: [
       { text: 'Trouble absorbing nutrients from food', correct: true },
-      { text: 'An allergy to certain foods', why: 'An allergy is an immune reaction; malabsorption is about absorbing nutrients.' },
+      { text: 'An allergy to certain foods', why: 'An allergy is an immune reaction. Malabsorption is about absorbing food.' },
       { text: 'Eating too little food', why: 'The problem is absorbing food that is eaten.' },
     ],
-    correct: 'Right — mal- means bad or abnormal, so: poor absorption of nutrients.',
+    correct: 'Right. Mal means bad, so malabsorption means bad absorption.',
     cites: [12, 13],
   },
   {
@@ -63,7 +63,7 @@ export const QUESTIONS: Question[] = [
       { text: 'Allen O. Whipple, a surgeon', why: 'He is the namesake of the Whipple procedure, a pancreas operation.' },
       { text: 'George Hoyt Whipple, a pathologist', correct: true },
     ],
-    correct: 'Correct — George Hoyt Whipple. The class list’s “Allen Whipple” was a mix-up.',
+    correct: 'Right, George Hoyt Whipple. Allen Whipple on our class list was a mix-up.',
     cites: [5, 6, 8],
   },
 ];

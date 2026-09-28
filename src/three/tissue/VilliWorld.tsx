@@ -6,6 +6,7 @@ import { frameState, journey, smoothstep } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
+import { useFrontToBack } from '../drawOrder';
 import { Label3D } from '../Label3D';
 import { ensureNoiseTexture, NOISE_GLSL, noiseUniform } from '../shaders/noise';
 import { mulberry32 } from './tissueGeometry';
@@ -382,6 +383,7 @@ export function VilliWorld({ visible }: { visible: boolean }) {
     macs.instanceMatrix.needsUpdate = true;
     return { inst, base, baseMat: baseMaterial(), particles, motes, heroMat, heroGeo, lacteal, capillary, lactealMat, capMat, macs, macMat };
   }, []);
+  useFrontToBack(built.inst, 'villi');
 
   /**
    * Disease level follows the scroll: villi flatten while pulling back from the bacterium to the
@@ -435,7 +437,7 @@ export function VilliWorld({ visible }: { visible: boolean }) {
           <span className="leader__line" style={{ width: 80 }} />
           <span className="tag">
             <TermButton termKey="lacteal">Lacteal</TermButton>
-            <small>lymph vessel · absorbs fat</small>
+            <small>absorbs fat</small>
           </span>
         </div>
       </Label3D>
@@ -450,10 +452,10 @@ export function VilliWorld({ visible }: { visible: boolean }) {
       <Label3D visible={visible && id === 'treatment'} position={[0.15, 1.45, 0.3]}>
         <span className="tag" style={{ animation: 'rise 700ms 800ms both' }}>
           <span style={{ width: 9, height: 9, borderRadius: 9, background: '#cfe6ff', display: 'inline-block' }} />
-          Antibiotic · the villi grow back
+          With antibiotics the villi grow back
         </span>
       </Label3D>
-      <Label3D visible={visible && id === 'symptoms'} position={[0.95, 1.55, 0.3]}>
+      <Label3D visible={visible && id === 'symptoms'} position={[0.95, 1.38, 0.3]}>
         <span className="tag">
           <span style={{ width: 9, height: 9, borderRadius: 9, background: '#f5c87c', display: 'inline-block' }} />
           Nutrients from digested food

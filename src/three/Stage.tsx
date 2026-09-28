@@ -3,6 +3,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { registerInvalidate } from '../app/journey';
+import { LITE, rememberLite } from '../app/quality';
 import { useStory } from '../app/store';
 import { STOPS, type World } from '../content/story';
 import { AnatomyWorld } from './anatomy/AnatomyWorld';
@@ -16,11 +17,17 @@ import { VilliWorld } from './tissue/VilliWorld';
 const ANIMATED: World[] = ['villi', 'micro', 'diagnosis'];
 const ORDER: World[] = ['anatomy', 'tissue', 'villi', 'micro', 'diagnosis'];
 
-/** Continuous rendering only while an animated world is on screen; otherwise render on demand. */
+/**
+ * Rendering only happens when something changes: while scrolling, and while a scene that moves by
+ * itself (villi, cells, the biopsy, PCR) is on screen. Those scenes are paced at 60 frames a
+ * second at most (screens that refresh 120 times a second would otherwise draw twice as often),
+ * and at 30 on slower devices.
+ */
 function LoopControl() {
   const world = useStory((s) => s.displayWorld);
   const stop = useStory((s) => s.stop);
   const reduced = useStory((s) => s.reducedMotion);
+  const lowPower = useStory((s) => s.lowPower);
   const setFrameloop = useThree((s) => s.setFrameloop);
   const invalidate = useThree((s) => s.invalidate);
   // the scroll journey renders on demand: it calls invalidate() while t is moving
@@ -29,10 +36,21 @@ function LoopControl() {
     return () => registerInvalidate(null);
   }, [invalidate]);
   useEffect(() => {
-    const animated = ANIMATED.includes(world) || (world === 'anatomy' && STOPS[stop].id === 'end');
-    setFrameloop(animated && !reduced ? 'always' : 'demand');
+    setFrameloop('demand');
     invalidate();
-  }, [world, stop, reduced, setFrameloop, invalidate]);
+    const animated = ANIMATED.includes(world) || (world === 'anatomy' && STOPS[stop].id === 'end');
+    if (!animated || reduced) return;
+    const gap = 1000 / (LITE || lowPower ? 30 : 60) - 2;
+    let last = 0;
+    let raf = requestAnimationFrame(function tick(now) {
+      if (now - last >= gap) {
+        last = now;
+        invalidate();
+      }
+      raf = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [world, stop, reduced, lowPower, setFrameloop, invalidate]);
   return null;
 }
 
@@ -199,18 +217,36 @@ function Worlds() {
 
 /**
  * Pixel budget: big screens (a 4K smart board, a projector) would otherwise draw millions of
- * pixels per frame. Keep the canvas at most ~2600 device pixels wide.
+ * pixels per frame. The 3D is drawn at most ~2600 pixels wide (~1920 on lite devices) and
+ * stretched to fill the screen. It only goes lower if the device keeps dropping frames.
  */
-const DPR_CAP = Math.min(1.5, Math.max(0.75, 2600 / Math.max(1, window.innerWidth)));
+const CSS_WIDTH = Math.max(1, window.innerWidth);
+const LITE_CAP = Math.min(1, Math.max(0.5, 1920 / CSS_WIDTH));
+const DPR_CAP = LITE ? LITE_CAP : Math.min(1.5, Math.max(0.75, 2600 / CSS_WIDTH));
+
+/**
+ * If a device that looked fast keeps dropping frames once everything has loaded, switch it to the
+ * lighter settings now (fewer pixels, 30 fps, no screen effects) and remember that for next time.
+ */
+const started = performance.now();
+let declines = 0;
 
 export default function Stage() {
   const setWebgl = useStory((s) => s.setWebgl);
+  const setLowPower = useStory((s) => s.setLowPower);
   const [dpr, setDpr] = useState(DPR_CAP);
+  const onDecline = () => {
+    setDpr(Math.max(0.5, Math.min(DPR_CAP, LITE_CAP) * 0.85));
+    if (LITE || performance.now() - started < 10000 || ++declines < 2) return;
+    setLowPower();
+    rememberLite();
+    document.documentElement.classList.add('lite');
+  };
   return (
     <Canvas
       className="stage-canvas"
       frameloop="demand"
-      dpr={[Math.min(1, DPR_CAP), dpr]}
+      dpr={[Math.min(1, dpr), dpr]}
       camera={{ position: [0, 0.05, 7.4], fov: 16, near: 0.05, far: 80 }}
       gl={{
         antialias: true,
@@ -235,7 +271,7 @@ export default function Stage() {
         setWebgl('ok');
       }}
     >
-      <PerformanceMonitor onDecline={() => setDpr(Math.max(0.75, DPR_CAP * 0.7))} onIncline={() => setDpr(DPR_CAP)} flipflops={3} />
+      <PerformanceMonitor onDecline={onDecline} onIncline={() => setDpr(useStory.getState().lowPower ? LITE_CAP : DPR_CAP)} flipflops={3} />
       <AdaptiveDpr pixelated={false} />
       <LoopControl />
       <LightRig />

@@ -236,7 +236,7 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     what: 'Tissue, villi, microscopic, diagnosis and PCR scenes; paper and grain textures',
     creator: 'Created for this project (procedural 3D and code)',
     license: 'Original work',
-    note: 'Illustrations — not to scale; colors chosen for clarity.',
+    note: 'Illustrations, not to scale, with colors chosen for clarity.',
   },
   {
     what: 'Exhibit text, code and 3D scenes',
@@ -245,8 +245,8 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     note: 'Every fact is paraphrased from the references above.',
   },
   {
-    what: 'Typefaces: Archivo and Atkinson Hyperlegible Next',
-    creator: 'Omnibus-Type (Archivo); Braille Institute of America (Atkinson Hyperlegible Next)',
+    what: 'Typefaces: IBM Plex Mono and Unbounded',
+    creator: 'IBM; The Unbounded Project Authors (via Fontsource)',
     license: 'SIL Open Font License 1.1',
   },
 ];
