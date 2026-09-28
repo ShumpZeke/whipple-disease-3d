@@ -976,7 +976,7 @@ html.is-tweening {
 .intro__year {
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(88px, 17vw, 230px);
+  font-size: clamp(72px, min(17vw, 30vh), 230px);
   line-height: 0.9;
   letter-spacing: 0.04em;
   color: #e9dcc2;
@@ -1002,14 +1002,14 @@ html.is-tweening {
   margin: 0;
   font-family: var(--serif);
   font-weight: 420;
-  font-size: clamp(36px, 5vw, 64px);
+  font-size: clamp(30px, min(5vw, 8.5vh), 64px);
   line-height: 1.05;
   color: var(--ivory);
   animation: rise 900ms 1100ms var(--ease) both;
 }
 .intro__sub {
   max-width: 34ch;
-  margin: 14px 0 34px;
+  margin: clamp(8px, 1.8vh, 14px) 0 clamp(16px, 4.5vh, 34px);
   font-family: var(--serif);
   font-style: italic;
   font-size: clamp(17px, 1.5vw, 20px);
@@ -1749,6 +1749,10 @@ html.is-tweening {
   }
 }
 @media (max-height: 620px) {
+  /* short screens: the button on the title already says "scroll to zoom in" */
+  .scroll-cue {
+    display: none;
+  }
   .caption__body {
     font-size: 14px;
     line-height: 1.45;
