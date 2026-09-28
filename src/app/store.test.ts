@@ -1,54 +1,38 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { QUESTIONS } from '../content/quiz';
-import { STEPS, STEP_INDEX } from '../content/story';
+import { STOP_INDEX } from '../content/story';
 import { quizScore, useStory } from './store';
 
 const st = () => useStory.getState();
 
 beforeEach(() => {
+  window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
   st().restart();
-  useStory.setState({ quizIndex: 0, quizAnswers: {}, quizFeedback: null });
+  useStory.setState({ stop: 0, quizIndex: 0, quizAnswers: {}, quizFeedback: null, mechanism: 'disease' });
 });
 
-describe('navigation', () => {
-  it('walks forward through every step and sub-step, then stops at the end', () => {
-    let moves = 0;
-    const total = STEPS.reduce((n, s) => n + s.captions.length, 0);
-    while (moves < 200) {
-      const before = `${st().step}.${st().sub}`;
-      st().next();
-      if (`${st().step}.${st().sub}` === before) break;
-      moves++;
-    }
-    expect(moves).toBe(total - 1);
-    expect(st().step).toBe(STEPS.length - 1);
-  });
-
-  it('goes back into the last sub-step of the previous step', () => {
-    st().goToId('inside');
-    st().back();
-    expect(STEPS[st().step].id).toBe('facts');
-    expect(st().sub).toBe(3);
-  });
-
-  it('does not go before the opening', () => {
-    st().back();
-    expect(st().step).toBe(0);
-  });
-
-  it('clamps goTo and resets transient UI', () => {
+describe('stops', () => {
+  it('tracks the stop nearest to the scroll position and clears transient UI', () => {
     st().openTerm({ key: 'villi', rect: { left: 0, top: 0, width: 1, height: 1 } });
-    st().goTo(999, 99);
-    expect(st().step).toBe(STEPS.length - 1);
+    st().setStop(STOP_INDEX.villi);
+    expect(st().stop).toBe(STOP_INDEX.villi);
     expect(st().term).toBeNull();
   });
 
-  it('restart returns to 1907 and clears the quiz', () => {
-    st().goToId('quiz');
-    st().answerChoice(0);
+  it('puts the healthy/disease toggle back when leaving the symptoms stop', () => {
+    st().setStop(STOP_INDEX.symptoms);
+    st().setMechanism('healthy');
+    st().setStop(STOP_INDEX.spread);
+    expect(st().mechanism).toBe('disease');
+  });
+
+  it('restart scrolls back to 1907 and clears the quiz', () => {
+    st().setStop(STOP_INDEX.quiz);
+    st().answerOrgan('Stomach', 'stomach');
     st().restart();
-    expect(st().step).toBe(0);
     expect(st().quizAnswers).toEqual({});
+    expect(st().quizIndex).toBe(0);
   });
 });
 
@@ -57,14 +41,17 @@ describe('overlays', () => {
     st().openSources(5);
     expect(st().sourcesOpen).toBe(true);
     expect(st().sourceFocus).toBe(5);
-    st().closeOverlays();
+    st().openGlossary();
     expect(st().sourcesOpen).toBe(false);
+    expect(st().glossaryOpen).toBe(true);
+    st().closeOverlays();
+    expect(st().glossaryOpen).toBe(false);
   });
 });
 
 describe('quiz', () => {
   it('scores first tries separately from solved questions', () => {
-    st().goTo(STEP_INDEX.quiz);
+    st().setStop(STOP_INDEX.quiz);
     // Q1 (organ): wrong first, then right
     st().answerOrgan('Stomach', 'stomach');
     expect(st().quizFeedback?.correct).toBe(false);
@@ -83,5 +70,16 @@ describe('quiz', () => {
     const score = quizScore(st().quizAnswers);
     expect(score.solved).toBe(QUESTIONS.length);
     expect(score.firstTry).toBe(QUESTIONS.length - 1);
+    expect(st().quizIndex).toBe(QUESTIONS.length);
+  });
+
+  it('explains a wrong choice and lets the student try again', () => {
+    useStory.setState({ quizIndex: QUESTIONS.findIndex((q) => q.kind === 'choice') });
+    const q = QUESTIONS[st().quizIndex];
+    if (q.kind !== 'choice') throw new Error('expected a choice question');
+    st().answerChoice(q.options.findIndex((o) => !o.correct));
+    expect(st().quizFeedback?.correct).toBe(false);
+    st().answerChoice(q.options.findIndex((o) => o.correct));
+    expect(st().quizAnswers[q.id]).toEqual({ firstTry: false, solved: true });
   });
 });

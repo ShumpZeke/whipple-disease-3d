@@ -245,6 +245,12 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     note: 'Illustrations — not to scale; colors chosen for clarity.',
   },
   {
+    what: 'Exhibit text, code and 3D scenes',
+    creator: 'Made with the help of Claude (Anthropic), an AI assistant',
+    license: 'Original work',
+    note: 'Every fact is paraphrased from the references above.',
+  },
+  {
     what: 'Typefaces: Newsreader and Instrument Sans',
     creator: 'The Newsreader Project Authors; The Instrument Sans Project Authors',
     license: 'SIL Open Font License 1.1',

@@ -1,11 +1,12 @@
 import { ContactShadows, useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import gsap from 'gsap';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useStory } from '../../app/store';
-import { STEPS } from '../../content/story';
+import { frameState, HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
+import { useStopId, useStory } from '../../app/store';
+import { STOPS, STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
+import { useJourney } from '../../ui/useJourney';
 import { Label3D } from '../Label3D';
 import { DigestiveModel } from './DigestiveModel';
 import { createOrganMaterial, sharedOrganUniforms } from './organMaterial';
@@ -13,13 +14,15 @@ import { MODEL_SCALE, useAnatomy } from './useAnatomy';
 
 /* ------------------------------------------------------------ 1907 plate → modern model */
 
+/**
+ * Scroll-driven hinge between history and today. While scrolling from the "name" stop to the
+ * "body" stop the 1907 page gives way to paper, the model fades in as an engraved plate, then a
+ * sweep "develops" it into the realistic model (and the paper wipes away with it).
+ */
 function HingeController() {
-  const step = useStory((s) => s.step);
-  const reduced = useStory((s) => s.reducedMotion);
   const invalidate = useThree((s) => s.invalidate);
   const gl = useThree((s) => s.gl);
   const data = useAnatomy();
-  const id = STEPS[step].id;
 
   useEffect(() => {
     sharedOrganUniforms.uPixelRatio.value = gl.getPixelRatio();
@@ -33,100 +36,78 @@ function HingeController() {
     const paper = document.querySelector<HTMLElement>('.hinge-paper');
     const label = document.querySelector<HTMLElement>('.plate-label');
     const main = document.querySelector<HTMLElement>('main.exhibit');
-    const setPaper = (on: boolean) => main?.classList.toggle('is-paper', on);
-    const setSweep = (r: number) => {
+    const layer = document.querySelector<HTMLElement>('.canvas-layer');
+    const apply = (t: number) => {
+      const fs = frameState(t);
+      let engrave = 0;
+      let reveal = -0.2;
+      let paperOpacity = 0;
+      let canvasOpacity = t >= HINGE + 1 ? 1 : 0;
+      let labelOpacity = 0;
+      if (fs.hinge) {
+        const f = fs.f;
+        reveal = 1.3 - 1.45 * smoothstep(0.55, 0.95, f);
+        engrave = f < 0.985 ? 1 : 0;
+        paperOpacity = smoothstep(0.06, 0.34, f);
+        canvasOpacity = smoothstep(0.2, 0.44, f);
+        labelOpacity = smoothstep(0.24, 0.42, f) * (1 - smoothstep(0.52, 0.62, f));
+      }
+      u.uEngrave.value = engrave;
+      u.uReveal.value = reveal;
       // model height maps to roughly 8%–92% of the viewport in the plate framing
-      const line = 0.08 + (1 - r) * 0.84;
-      paper?.style.setProperty('--sweep', String(line));
-    };
-    if (id !== 'modern') {
-      u.uEngrave.value = 0;
-      u.uReveal.value = -0.2;
-      setSweep(-0.3);
-      setPaper(false);
+      paper?.style.setProperty('--sweep', String(0.08 + (1 - reveal) * 0.84));
+      if (paper) paper.style.opacity = String(paperOpacity);
+      if (label) label.style.opacity = String(labelOpacity);
+      if (layer) layer.style.opacity = String(canvasOpacity);
+      main?.classList.toggle('is-paper', fs.hinge && fs.f > 0.16 && reveal > 0.45);
       invalidate();
-      return;
-    }
-    u.uEngrave.value = 1;
-    u.uReveal.value = 1.3;
-    setSweep(1.3);
-    setPaper(true);
-    if (label) label.style.opacity = '1';
-    invalidate();
-    const state = { r: 1.3 };
-    const tl = gsap.timeline({ delay: reduced ? 0.4 : 2.2 });
-    tl.to(state, {
-      r: -0.15,
-      duration: reduced ? 0.01 : 3.2,
-      ease: 'power1.inOut',
-      onStart: () => {
-        if (label) label.style.opacity = '0';
-      },
-      onUpdate: () => {
-        u.uReveal.value = state.r;
-        setSweep(state.r);
-        if (state.r < 0.45) setPaper(false);
-        invalidate();
-      },
-    });
-    tl.add(() => {
-      u.uEngrave.value = 0;
-      invalidate();
-    });
-    return () => {
-      tl.kill();
-      setPaper(false);
     };
-  }, [id, reduced, invalidate]);
+    apply(journey.t);
+    return onJourneyFrame((t) => apply(t));
+  }, [invalidate]);
 
   return null;
 }
 
-/* ------------------------------------------------------------ anchored markers */
+/* ------------------------------------------------------------ anchored marker */
 
-function FactMarkers({ visible }: { visible: boolean }) {
-  const step = useStory((s) => s.step);
-  const sub = useStory((s) => s.sub);
-  const goTo = useStory((s) => s.goTo);
-  const next = useStory((s) => s.next);
+/** At the "body" stop, a single marker invites the visitor to zoom into the small intestine. */
+function IntestineMarker({ visible }: { visible: boolean }) {
+  const stopId = useStopId();
   const data = useAnatomy();
-  const id = STEPS[step].id;
-  const a = data.anchors;
-  const world = (n: string) => (a[n] ? a[n].position.clone().multiplyScalar(MODEL_SCALE) : null);
-  const focusPt = world('label_SmallIntestine') ?? world('anchor_si_center');
-  const labels = ['Cause', 'Symptoms', 'Diagnosis', 'Treatment'];
-  const factsStep = STEPS.findIndex((s) => s.id === 'facts');
+  const box = useRef<HTMLDivElement | null>(null);
+  // only once the engraving has fully "developed" into the modern model
+  const apply = (t: number) => {
+    const k = smoothstep(HINGE + 0.9, HINGE + 0.98, t) * (1 - smoothstep(HINGE + 1.12, HINGE + 1.3, t));
+    if (!box.current) return;
+    box.current.style.opacity = k.toFixed(3);
+    box.current.style.visibility = k < 0.02 ? 'hidden' : 'visible';
+  };
+  useJourney(apply);
+  // the label lives in its own DOM root, so it can attach after the first frames
+  const attach = (el: HTMLDivElement | null) => {
+    box.current = el;
+    if (el) apply(journey.t);
+  };
+  const a = data.anchors.label_SmallIntestine ?? data.anchors.anchor_si_center;
+  if (!a) return null;
+  const p = a.position.clone().multiplyScalar(MODEL_SCALE);
   return (
-    <>
-      {focusPt && (
-        <Label3D visible={visible && id === 'overview'} position={focusPt} center interactive>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button type="button" className="marker marker--pulse" aria-label="Focus on the small intestine" onClick={next}>
-              +
-            </button>
-            <span className="tag" style={{ pointerEvents: 'none' }}>
-              Small intestine
-            </span>
-          </div>
-        </Label3D>
-      )}
-      {[1, 2, 3, 4].map((i) => {
-        const p = world(`anchor_fact${i}`);
-        if (!p) return null;
-        return (
-          <Label3D key={i} visible={visible && id === 'facts'} position={p} center interactive>
-            <button
-              type="button"
-              className={`marker${sub === i - 1 ? ' is-active' : ''}`}
-              aria-label={`Clinical fact ${i}: ${labels[i - 1]}`}
-              onClick={() => goTo(factsStep, i - 1)}
-            >
-              {i}
-            </button>
-          </Label3D>
-        );
-      })}
-    </>
+    <Label3D visible={visible && stopId === 'body'} position={p} center interactive>
+      <div ref={attach} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: 0 }}>
+        <button
+          type="button"
+          className="marker marker--pulse"
+          aria-label="Zoom into the small intestine"
+          onClick={() => useStory.getState().goToId('intestine')}
+        >
+          +
+        </button>
+        <span className="tag" style={{ pointerEvents: 'none' }}>
+          Small intestine
+        </span>
+      </div>
+    </Label3D>
   );
 }
 
@@ -209,29 +190,30 @@ function Satellite({ s, visible }: { s: (typeof SAT)[number]; visible: boolean }
     return { object: root, scale };
   }, [gltf, s]);
 
+  // grows in only while the scroll is near "beyond the gut" (deterministic, so fast scrolling can't strand it)
   useEffect(() => {
-    if (!group.current) return;
-    const g = group.current;
-    gsap.to(g.scale, {
-      x: visible ? scale : 0.0001,
-      y: visible ? scale : 0.0001,
-      z: visible ? scale : 0.0001,
-      duration: 0.9,
-      ease: 'power3.out',
-      delay: visible ? 0.35 : 0,
-      onUpdate: invalidate,
-    });
-  }, [visible, scale, invalidate]);
+    const apply = (t: number) => {
+      const g = group.current;
+      if (!g) return;
+      const k = smoothstep(0.45, 0.12, Math.abs(t - STOP_INDEX.spread));
+      const e = 1 - Math.pow(1 - k, 3);
+      g.scale.setScalar(Math.max(0.0001, scale * e));
+      g.visible = k > 0.001;
+      invalidate();
+    };
+    apply(journey.t);
+    return onJourneyFrame(apply);
+  }, [scale, invalidate]);
 
   return (
     <group position={[s.pos[0], s.pos[1], s.pos[2]]}>
-      <group ref={group} scale={0.0001} rotation-y={s.rot}>
+      <group ref={group} scale={0.0001} rotation-y={s.rot} visible={false}>
         <primitive object={object} />
       </group>
       <Label3D visible={visible} position={[0.3, 0, 0]} interactive>
         <div className="leader">
           <span className="leader__line" />
-          <span className="tag" style={{ whiteSpace: 'normal', width: 230 }}>
+          <span className="tag" style={{ whiteSpace: 'normal', width: 'min(230px, 46vw)' }}>
             <span>
               <b>{s.name}</b>
               <br />
@@ -247,20 +229,18 @@ function Satellite({ s, visible }: { s: (typeof SAT)[number]; visible: boolean }
 }
 
 function Satellites() {
-  const step = useStory((s) => s.step);
-  const id = STEPS[step].id;
+  const stop = useStory((s) => s.stop);
+  const id = STOPS[stop].id;
   const [mounted, setMounted] = useState(false);
-  const idx = step;
-  // prefetch shortly before the "other organs" chapter
+  // prefetch a few stops before "beyond the gut"
   useEffect(() => {
-    const systems = STEPS.findIndex((s) => s.id === 'systems');
-    if (idx >= systems - 3) setMounted(true);
-  }, [idx]);
+    if (stop >= STOP_INDEX.spread - 4) setMounted(true);
+  }, [stop]);
   if (!mounted) return null;
   return (
     <Suspense fallback={null}>
       {SAT.map((s) => (
-        <Satellite key={s.key} s={s} visible={id === 'systems'} />
+        <Satellite key={s.key} s={s} visible={id === 'spread'} />
       ))}
     </Suspense>
   );
@@ -269,9 +249,8 @@ function Satellites() {
 /* ------------------------------------------------------------ world */
 
 export function AnatomyWorld({ visible }: { visible: boolean }) {
-  const step = useStory((s) => s.step);
-  const id = STEPS[step].id;
-  const shadowOpacity = id === 'modern' ? 0 : 0.55;
+  const id = useStopId();
+  const shadowOpacity = id === 'body' || id === 'name' ? 0.45 : 0.55;
   const idle = useRef(0);
   const g = useRef<THREE.Group>(null);
   const invalidate = useThree((s) => s.invalidate);
@@ -298,7 +277,7 @@ export function AnatomyWorld({ visible }: { visible: boolean }) {
       <group ref={g}>
         <DigestiveModel />
       </group>
-      <FactMarkers visible={visible} />
+      <IntestineMarker visible={visible} />
       <Satellites />
       <HingeController />
       {visible && (

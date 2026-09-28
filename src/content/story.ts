@@ -1,385 +1,205 @@
 /**
- * The story, in order. The storyboard order is part of the assignment design:
- * 1907 → Whipple → the case → the name → the correction → modern anatomy → small intestine →
- * facts → inside → villi → microscopic → mechanism → other systems → diagnosis → treatment → quiz → end.
+ * The whole exhibit is ONE continuous zoom. Scrolling moves a camera through these stops in order:
+ * 1907 → Whipple → the case → the name → today's digestive system → small intestine → its wall →
+ * villi → the bacterium (cause) → malabsorption (symptoms) → the whole body → diagnosis → treatment →
+ * a quick check → sources.
  *
- * Caption markup (rendered by ui/RichText.tsx):
- *   {t:key}            glossary term button (label from the glossary)
- *   {t:key|shown text} glossary term with custom label
- *   {c:2,3}            source markers → reference list
- *   *text*             italics (species names)
+ * One idea per stop, kept short so a presenter can teach it in a sentence or two.
+ *
+ * Caption markup (ui/RichText.tsx):  {t:key|label} term · {c:1,2} source markers · *italics*
  */
 
-export type StepId =
-  | 'intro'
-  | 'whipple'
+export type StopId =
+  | 'title'
+  | 'doctor'
   | 'case'
-  | 'naming'
-  | 'correction'
-  | 'modern'
-  | 'overview'
-  | 'focus'
-  | 'facts'
-  | 'inside'
+  | 'name'
+  | 'body'
+  | 'intestine'
+  | 'wall'
   | 'villi'
-  | 'micro'
-  | 'mechanism'
-  | 'systems'
-  | 'diagnosis'
+  | 'cause'
+  | 'symptoms'
+  | 'spread'
+  | 'biopsy'
+  | 'stain'
+  | 'pcr'
   | 'treatment'
   | 'quiz'
   | 'end';
 
 export type World = 'none' | 'anatomy' | 'tissue' | 'villi' | 'micro' | 'diagnosis';
-export type Backdrop = 'dark' | 'lab' | 'paper' | 'studio' | 'deep';
 
-export interface Caption {
+/** A scene is what the camera is looking at; moving between scenes is a zoom "through" a surface. */
+export type Scene = 'history' | 'anatomy' | 'tissue' | 'villi' | 'micro' | 'biopsy' | 'stain' | 'pcr';
+
+export interface Stop {
+  id: StopId;
+  scene: Scene;
+  world: World;
+  /** Short label on the zoom rail (only some stops show one). */
+  rail?: string;
   eyebrow: string;
   title: string;
-  body: string[];
-  /** Optional one-line hint about how to interact. */
+  text: string;
+  /** Optional second, smaller line (used for the source-list correction). */
+  note?: string;
   hint?: string;
 }
 
-export interface Step {
-  id: StepId;
-  chapter: 'Opening' | 'History' | 'Anatomy' | 'Inside' | 'Disease' | 'Diagnosis & care' | 'Check' | 'End';
-  label: string;
-  world: World;
-  backdrop: Backdrop;
-  /** Caption for each sub-step (length = number of sub-steps). */
-  captions: Caption[];
-}
-
-export const STEPS: Step[] = [
+export const STOPS: Stop[] = [
   {
-    id: 'intro',
-    chapter: 'Opening',
-    label: '1907',
+    id: 'title',
+    scene: 'history',
     world: 'none',
-    backdrop: 'dark',
-    captions: [
-      {
-        eyebrow: 'Medical Terminology · Eponym #26',
-        title: 'Whipple’s Disease',
-        body: ['A young pathologist, a puzzling autopsy, and a bacterium that hid for 85 years.'],
-      },
-    ],
+    rail: '1907',
+    eyebrow: 'Medical Terminology · Eponym #26',
+    title: 'Whipple’s Disease',
+    text: 'Scroll to zoom from a 1907 autopsy all the way down to the germ that causes it.',
   },
   {
-    id: 'whipple',
-    chapter: 'History',
-    label: 'George Hoyt Whipple',
+    id: 'doctor',
+    scene: 'history',
     world: 'none',
-    backdrop: 'lab',
-    captions: [
-      {
-        eyebrow: 'I · The doctor',
-        title: 'George Hoyt Whipple',
-        body: [
-          'In 1907, Whipple (born 1878) was an instructor in {t:pathology} at Johns Hopkins in Baltimore — a doctor who studies diseased tissue to learn what went wrong. {c:5,7}',
-        ],
-        hint: 'Select the notes on the photograph.',
-      },
-    ],
+    eyebrow: '1907 · Johns Hopkins, Baltimore',
+    title: 'George Hoyt Whipple',
+    text: 'A young {t:pathology|pathologist} — a doctor who studies diseased tissue to find out what went wrong. {c:5,7}',
   },
   {
     id: 'case',
-    chapter: 'History',
-    label: 'The 1907 case',
+    scene: 'history',
     world: 'none',
-    backdrop: 'lab',
-    captions: [
-      {
-        eyebrow: 'II · The case',
-        title: 'A puzzling patient',
-        body: [
-          'In April 1907, a 36-year-old doctor who had worked as a missionary came to Johns Hopkins. For years he had lost weight and had fatty diarrhea, joint pain, and a cough. {c:5}',
-          'He died weeks later. At the autopsy, Whipple found fat deposits in the lining of the intestine and in nearby lymph nodes. {c:5}',
-        ],
-        hint: 'Select the highlighted phrases in Whipple’s own 1907 report.',
-      },
-    ],
+    eyebrow: 'The case',
+    title: 'A puzzling patient',
+    text: 'A 36-year-old doctor had weight loss, fatty diarrhea and joint pain. At the autopsy, Whipple found villi packed with fat. {c:5}',
   },
   {
-    id: 'naming',
-    chapter: 'History',
-    label: 'A name',
+    id: 'name',
+    scene: 'history',
     world: 'none',
-    backdrop: 'lab',
-    captions: [
-      {
-        eyebrow: 'III · The name',
-        title: '“Intestinal lipodystrophy”',
-        body: [
-          'Whipple wrote that no name would truly fit until the cause was known, so he suggested {t:lipodystrophy|intestinal lipodystrophy} — “abnormal fat in the intestine.” {c:5}',
-          'He even saw “rod-shaped” organisms in the tissue, but no one could prove what they were until DNA methods identified the bacterium in 1992. {c:5,4}',
-          'Because Whipple described it first, the condition became known as Whipple’s disease. {c:6}',
-        ],
-      },
-    ],
+    eyebrow: 'The name',
+    title: 'Why “Whipple’s” disease?',
+    text: 'He called it {t:lipodystrophy|intestinal lipodystrophy} and even saw “rod-shaped” germs. He described it first, so it carries his name. {c:5,6}',
+    note: 'Correction: our class list says “Allen Whipple.” It is George Hoyt Whipple — Allen O. Whipple was a surgeon known for a pancreas operation. {c:6,8}',
   },
   {
-    id: 'correction',
-    chapter: 'History',
-    label: 'Which Whipple?',
-    world: 'none',
-    backdrop: 'lab',
-    captions: [
-      {
-        eyebrow: 'IV · Checking the source list',
-        title: 'Which Whipple?',
-        body: [
-          'Our class eponym list names “Allen Whipple.” Reliable sources show the disease is named for George Hoyt Whipple. Allen O. Whipple was a different doctor — the surgeon behind the Whipple procedure. {c:6,8}',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'modern',
-    chapter: 'Anatomy',
-    label: 'Today',
+    id: 'body',
+    scene: 'anatomy',
     world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'V · Today',
-        title: 'From 1907 to modern medicine',
-        body: [
-          'Today we know Whipple’s disease is a rare infection caused by a bacterium. It mainly damages the small intestine, in the digestive system. {c:1,2}',
-        ],
-      },
-    ],
+    rail: 'Body',
+    eyebrow: 'Today · body system',
+    title: 'The digestive system',
+    text: 'Whipple’s disease is a rare bacterial infection of the digestive system. {c:1,2}',
+    hint: 'Drag to turn the model · keep scrolling to zoom in',
   },
   {
-    id: 'overview',
-    chapter: 'Anatomy',
-    label: 'Digestive system',
+    id: 'intestine',
+    scene: 'anatomy',
     world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'Body system',
-        title: 'The digestive system',
-        body: [
-          'Whipple’s disease is classed as a gastrointestinal disorder — one of the malabsorption syndromes — so its body system is the digestive system and its specialty is gastroenterology. {c:2}',
-        ],
-        hint: 'Drag to rotate · scroll or pinch to zoom · select the small intestine.',
-      },
-    ],
+    rail: 'Organ',
+    eyebrow: 'Definition',
+    title: 'The small intestine',
+    text: 'The infection damages the lining of the small intestine, so nutrients from food are not absorbed — {t:malabsorption}. {c:1,3}',
   },
   {
-    id: 'focus',
-    chapter: 'Anatomy',
-    label: 'Small intestine',
-    world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'Definition',
-        title: 'What is Whipple’s disease?',
-        body: [
-          'A rare bacterial infection that damages the lining of the small intestine. The damaged lining can’t absorb nutrients well — {t:malabsorption}. The infection can also spread to other organs. {c:1,3}',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'facts',
-    chapter: 'Anatomy',
-    label: 'Four clinical facts',
-    world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'Clinical fact 1 of 4 · Cause',
-        title: 'A bacterium',
-        body: [
-          'The cause is a bacterium, *{t:tropheryma|Tropheryma whipplei}*. The disease is rare and most often affects middle-aged white men. {c:1,3}',
-        ],
-      },
-      {
-        eyebrow: 'Clinical fact 2 of 4 · Symptoms',
-        title: 'Four main symptoms',
-        body: [
-          'Joint pain ({t:arthralgia}), diarrhea, belly pain, and weight loss. Joint pain often comes first — sometimes years before the gut symptoms. {c:1,2,3}',
-        ],
-      },
-      {
-        eyebrow: 'Clinical fact 3 of 4 · Diagnosis',
-        title: 'A look at the lining',
-        body: [
-          'During an upper {t:endoscopy}, a doctor takes tiny samples ({t:biopsy|biopsies}) of the small intestine. A stain and a {t:pcr|PCR} DNA test can confirm the bacterium. {c:2,3}',
-        ],
-      },
-      {
-        eyebrow: 'Clinical fact 4 of 4 · Treatment & outlook',
-        title: 'Curable, but it can return',
-        body: [
-          'Weeks of IV antibiotics, then about a year of antibiotic pills. Untreated, it is fatal; treatment can cure it, but relapses happen, so follow-up matters. {c:1,2,3}',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'inside',
-    chapter: 'Inside',
-    label: 'Inside the wall',
+    id: 'wall',
+    scene: 'tissue',
     world: 'tissue',
-    backdrop: 'deep',
-    captions: [
-      {
-        eyebrow: 'Inside the small intestine',
-        title: 'Layers and folds',
-        body: [
-          'From outside in, the wall has four layers: serosa, muscularis, submucosa, and the mucosa (the lining). The lining rises into ring-shaped circular folds. {c:17,11}',
-        ],
-        hint: 'Drag to look around the cutaway.',
-      },
-    ],
+    rail: 'Wall',
+    eyebrow: 'Zoom: the intestine wall',
+    title: 'Layers and folds',
+    text: 'Four layers. The inner lining, the mucosa, rises into circular folds. {c:17,11}',
   },
   {
     id: 'villi',
-    chapter: 'Inside',
-    label: 'Villi',
+    scene: 'villi',
     world: 'villi',
-    backdrop: 'deep',
-    captions: [
-      {
-        eyebrow: 'Closer: the lining',
-        title: 'Villi',
-        body: [
-          'The lining is covered with {t:villi} — finger-like projections 0.5–1 mm long. Each has tiny blood vessels and a {t:lacteal}, a lymph vessel that absorbs fat. {c:11}',
-        ],
-      },
-    ],
+    rail: 'Villi',
+    eyebrow: 'Zoom: the lining',
+    title: 'Villi',
+    text: 'Tiny fingers, 0.5–1 mm tall, that absorb food. Each has blood vessels and a {t:lacteal} for fats. {c:11}',
   },
   {
-    id: 'micro',
-    chapter: 'Disease',
-    label: 'Tropheryma whipplei',
+    id: 'cause',
+    scene: 'micro',
     world: 'micro',
-    backdrop: 'deep',
-    captions: [
-      {
-        eyebrow: 'Microscopic scale · Illustration, not to scale',
-        title: '*Tropheryma whipplei*',
-        body: [
-          'A rod-shaped bacterium (say “tro-FER-ih-muh WIP-uh-lee-eye”). In Whipple’s disease, immune cells called {t:macrophage|macrophages} inside the villi fill up with it. {c:2,6}',
-        ],
-      },
-    ],
+    rail: 'Germ',
+    eyebrow: 'Fact 1 · Cause',
+    title: '*Tropheryma whipplei*',
+    text: 'A rod-shaped bacterium. Immune cells called {t:macrophage|macrophages} fill up with it. {c:2,6}',
   },
   {
-    id: 'mechanism',
-    chapter: 'Disease',
-    label: 'Malabsorption',
+    id: 'symptoms',
+    scene: 'villi',
     world: 'villi',
-    backdrop: 'deep',
-    captions: [
-      {
-        eyebrow: 'How it causes symptoms',
-        title: 'Why nutrients get lost',
-        body: [
-          'Healthy villi pull nutrients into blood and lymph. In Whipple’s disease, macrophages crowd the villi, which become flattened, so less is absorbed. {c:11,2,9}',
-          'The unabsorbed food and fat cause diarrhea and weight loss — {t:malabsorption}. {c:1,12}',
-        ],
-        hint: 'Compare healthy and infected villi.',
-      },
-    ],
+    eyebrow: 'Fact 2 · Symptoms',
+    title: 'Nutrients get lost',
+    text: 'Crowded villi flatten and cannot absorb food, causing diarrhea, belly pain and weight loss. {c:1,2,9}',
   },
   {
-    id: 'systems',
-    chapter: 'Disease',
-    label: 'Other organs',
+    id: 'spread',
+    scene: 'anatomy',
     world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'Beyond the gut',
-        title: 'It can spread',
-        body: ['The infection can also reach the joints, heart, brain, eyes, and lungs. {c:1,2}'],
-      },
-    ],
+    rail: 'Whole body',
+    eyebrow: 'Fact 2 · Symptoms',
+    title: 'Beyond the gut',
+    text: 'Joint pain ({t:arthralgia}) often comes first — sometimes years earlier. It can also reach the heart and brain. {c:1,2,3}',
   },
   {
-    id: 'diagnosis',
-    chapter: 'Diagnosis & care',
-    label: 'Diagnosis',
+    id: 'biopsy',
+    scene: 'biopsy',
     world: 'diagnosis',
-    backdrop: 'deep',
-    captions: [
-      {
-        eyebrow: 'Diagnosis · 1 of 3 · Biopsy',
-        title: 'A tiny sample',
-        body: [
-          'An {t:endoscopy|endoscope} is guided into the small intestine, and tiny forceps take {t:biopsy|biopsy} samples of the lining. {c:2,14}',
-        ],
-      },
-      {
-        eyebrow: 'Diagnosis · 2 of 3 · Microscope',
-        title: 'Stained and examined',
-        body: [
-          'The sample is stained and examined under a microscope. A {t:pas|PAS stain} makes macrophages full of bacteria stand out. {c:2,9}',
-        ],
-      },
-      {
-        eyebrow: 'Diagnosis · 3 of 3 · PCR',
-        title: 'Finding its DNA',
-        body: [
-          '{t:pcr|PCR} copies a small piece of DNA again and again, so even a little *T. whipplei* DNA can be detected. {c:10,2}',
-        ],
-      },
-    ],
+    rail: 'Diagnosis',
+    eyebrow: 'Fact 3 · Diagnosis',
+    title: 'A tiny sample',
+    text: 'Through an {t:endoscopy|endoscope}, a doctor takes a {t:biopsy} of the small intestine. {c:2,14}',
+  },
+  {
+    id: 'stain',
+    scene: 'stain',
+    world: 'diagnosis',
+    eyebrow: 'Fact 3 · Diagnosis',
+    title: 'Under the microscope',
+    text: 'A {t:pas|PAS stain} makes the bacteria-filled macrophages stand out. {c:2,9}',
+  },
+  {
+    id: 'pcr',
+    scene: 'pcr',
+    world: 'diagnosis',
+    eyebrow: 'Fact 3 · Diagnosis',
+    title: 'Finding its DNA',
+    text: '{t:pcr|PCR} copies the bacterium’s DNA again and again, so even a trace can be detected. {c:10,2}',
   },
   {
     id: 'treatment',
-    chapter: 'Diagnosis & care',
-    label: 'Treatment',
+    scene: 'villi',
     world: 'villi',
-    backdrop: 'deep',
-    captions: [
-      {
-        eyebrow: 'Treatment & follow-up',
-        title: 'Long-term antibiotics',
-        body: [
-          'Usually 2–4 weeks of IV antibiotics (such as ceftriaxone), then about a year or more of antibiotic pills (such as trimethoprim-sulfamethoxazole). {c:1,2,3}',
-          'Treatment relieves symptoms and can cure the disease, but relapses can occur years later, so regular follow-up matters. {c:2,3}',
-        ],
-      },
-    ],
+    rail: 'Treatment',
+    eyebrow: 'Fact 4 · Treatment',
+    title: 'Long-term antibiotics',
+    text: 'About 2–4 weeks of IV antibiotics, then about a year of pills. It can come back, so follow-up matters. {c:1,2,3}',
   },
   {
     id: 'quiz',
-    chapter: 'Check',
-    label: 'Self-check',
+    scene: 'anatomy',
     world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'Quick self-check',
-        title: 'What do you remember?',
-        body: [],
-      },
-    ],
+    rail: 'Check',
+    eyebrow: 'Quick check',
+    title: 'What do you remember?',
+    text: '',
   },
   {
     id: 'end',
-    chapter: 'End',
-    label: 'Explore',
+    scene: 'anatomy',
     world: 'anatomy',
-    backdrop: 'studio',
-    captions: [
-      {
-        eyebrow: 'Thank you',
-        title: 'Explore freely',
-        body: ['Rotate the model, select organs, revisit any chapter, or open the full reference list.'],
-      },
-    ],
+    rail: 'Sources',
+    eyebrow: 'Summary',
+    title: 'Whipple’s disease',
+    text: 'Named for George Hoyt Whipple (1907) · caused by *Tropheryma whipplei* · damages the small intestine · treated with long-term antibiotics.',
   },
 ];
 
-export const STEP_INDEX: Record<StepId, number> = Object.fromEntries(STEPS.map((s, i) => [s.id, i])) as Record<
-  StepId,
-  number
->;
+export const STOP_INDEX = Object.fromEntries(STOPS.map((s, i) => [s.id, i])) as Record<StopId, number>;
+export const LAST_STOP = STOPS.length - 1;
+
+export type Backdrop = 'dark' | 'lab' | 'paper' | 'studio' | 'deep';

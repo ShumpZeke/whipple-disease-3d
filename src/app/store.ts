@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { QUESTIONS } from '../content/quiz';
-import { STEPS, STEP_INDEX, type StepId, type World } from '../content/story';
+import { STOPS, STOP_INDEX, type StopId, type World } from '../content/story';
 import type { OrganId } from '../three/anatomy/organs';
+import { scrollToStop } from './journey';
 
 export interface TermAnchor {
   key: string;
@@ -13,10 +14,8 @@ export interface TermAnchor {
 export type QuizAnswer = { firstTry: boolean; solved: boolean };
 
 interface State {
-  step: number;
-  sub: number;
-  /** +1 when moving forward, -1 backward (for transition direction). */
-  direction: 1 | -1;
+  /** Stop nearest to the current scroll position (changes only when the nearest stop changes). */
+  stop: number;
   sourcesOpen: boolean;
   sourceFocus: number | null;
   glossaryOpen: boolean;
@@ -32,16 +31,15 @@ interface State {
   interacted: boolean;
   cameraResetNonce: number;
   historyNote: string | null;
-  /** World currently drawn by the canvas (lags the step's world during a veil transition). */
+  /** World the canvas is drawing at the current scroll position. */
   displayWorld: World;
-  veil: boolean;
   /** Worlds whose shaders have finished compiling (KHR_parallel_shader_compile). */
   worldReady: Partial<Record<World, boolean>>;
 
+  setStop: (i: number) => void;
+  goToId: (id: StopId) => void;
   next: () => void;
   back: () => void;
-  goTo: (step: number, sub?: number) => void;
-  goToId: (id: StepId, sub?: number) => void;
   restart: () => void;
   openSources: (focus?: number) => void;
   openGlossary: () => void;
@@ -60,22 +58,16 @@ interface State {
   resetCamera: () => void;
   setHistoryNote: (id: string | null) => void;
   setDisplayWorld: (w: World) => void;
-  setVeil: (v: boolean) => void;
   setWorldReady: (w: World) => void;
 }
-
-const lastStep = STEPS.length - 1;
 
 function record(prev: QuizAnswer | undefined, correct: boolean): QuizAnswer {
   if (!prev) return { firstTry: correct, solved: correct };
   return { firstTry: prev.firstTry, solved: prev.solved || correct };
 }
-const subCount = (i: number) => STEPS[i].captions.length;
 
 export const useStory = create<State>((set, get) => ({
-  step: 0,
-  sub: 0,
-  direction: 1,
+  stop: 0,
   sourcesOpen: false,
   sourceFocus: null,
   glossaryOpen: false,
@@ -92,43 +84,18 @@ export const useStory = create<State>((set, get) => ({
   cameraResetNonce: 0,
   historyNote: null,
   displayWorld: 'none',
-  veil: false,
   worldReady: {},
 
-  next: () => {
-    const { step, sub } = get();
-    if (sub < subCount(step) - 1) {
-      set({ sub: sub + 1, direction: 1, term: null, historyNote: null });
-    } else if (step < lastStep) {
-      set({ step: step + 1, sub: 0, direction: 1, term: null, historyNote: null, quizFeedback: null });
-    }
+  setStop: (i) => {
+    if (i === get().stop) return;
+    const leftSymptoms = STOPS[get().stop]?.id === 'symptoms' && STOPS[i]?.id !== 'symptoms';
+    set({ stop: i, term: null, historyNote: null, quizFeedback: null, ...(leftSymptoms ? { mechanism: 'disease' as const } : {}) });
   },
-  back: () => {
-    const { step, sub } = get();
-    if (sub > 0) {
-      set({ sub: sub - 1, direction: -1, term: null, historyNote: null });
-    } else if (step > 0) {
-      set({ step: step - 1, sub: subCount(step - 1) - 1, direction: -1, term: null, historyNote: null, quizFeedback: null });
-    }
-  },
-  goTo: (step, sub = 0) => {
-    const s = Math.max(0, Math.min(lastStep, step));
-    const cur = get().step;
+  goToId: (id) => scrollToStop(STOP_INDEX[id]),
+  next: () => scrollToStop(Math.round(window.scrollY / window.innerHeight) + 1),
+  back: () => scrollToStop(Math.round(window.scrollY / window.innerHeight) - 1),
+  restart: () => {
     set({
-      step: s,
-      sub: Math.max(0, Math.min(subCount(s) - 1, sub)),
-      direction: s >= cur ? 1 : -1,
-      term: null,
-      historyNote: null,
-      quizFeedback: null,
-    });
-  },
-  goToId: (id, sub = 0) => get().goTo(STEP_INDEX[id], sub),
-  restart: () =>
-    set({
-      step: 0,
-      sub: 0,
-      direction: -1,
       quizIndex: 0,
       quizAnswers: {},
       quizFeedback: null,
@@ -137,7 +104,9 @@ export const useStory = create<State>((set, get) => ({
       term: null,
       mechanism: 'disease',
       historyNote: null,
-    }),
+    });
+    scrollToStop(0);
+  },
   openSources: (focus) => set({ sourcesOpen: true, sourceFocus: focus ?? null, glossaryOpen: false, term: null }),
   openGlossary: () => set({ glossaryOpen: true, sourcesOpen: false, term: null }),
   openTerm: (t) => set({ term: t }),
@@ -174,11 +143,11 @@ export const useStory = create<State>((set, get) => ({
   resetCamera: () => set((s) => ({ cameraResetNonce: s.cameraResetNonce + 1 })),
   setHistoryNote: (id) => set({ historyNote: id }),
   setDisplayWorld: (w) => set({ displayWorld: w }),
-  setVeil: (v) => set({ veil: v }),
   setWorldReady: (w) => set((s) => ({ worldReady: { ...s.worldReady, [w]: true } })),
 }));
 
-export const currentStep = () => STEPS[useStory.getState().step];
+/** Id of the stop nearest to the scroll position (re-renders only when it changes). */
+export const useStopId = () => useStory((s) => STOPS[s.stop].id);
 
 export function quizScore(answers: State['quizAnswers']) {
   let firstTry = 0;

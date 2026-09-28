@@ -1,0 +1,11 @@
+3D models in this folder (digestive.glb, heart.glb, brain.glb, knee.glb)
+
+Source: BodyParts3D, (c) The Database Center for Life Science (DBCLS)
+https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+License: Creative Commons Attribution-Share Alike 2.1 Japan (CC BY-SA 2.1 JP)
+https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en
+
+Changes: selected parts were combined, hole-filled, voxel-remeshed, smoothed, simplified,
+given baked ambient-occlusion shading and label anchors in Blender, then compressed with
+meshopt (glTF Transform). These modified models are distributed under the same license,
+CC BY-SA 2.1 JP.

@@ -1,9 +1,10 @@
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { useStory } from '../../app/store';
-import { STEPS } from '../../content/story';
+import { frameState, journey, smoothstep } from '../../app/journey';
+import { useStopId, useStory } from '../../app/store';
+import { STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
 import { Label3D } from '../Label3D';
 import { ensureNoiseTexture, NOISE_GLSL, noiseUniform } from '../shaders/noise';
@@ -183,7 +184,7 @@ function particleMaterial() {
         '#include <begin_vertex>',
         `#include <begin_vertex>
         float ph = fract(uTime * (0.12 + 0.05 * aSeed.w) + aSeed.z);
-        vec3 start = vec3(aSeed.x, aTarget.y + 0.75 + aSeed.z * 0.55, aSeed.y);
+        vec3 start = vec3(aSeed.x, aTarget.y + 0.4 + aSeed.z * 0.4, aSeed.y);
         float absorbed = step(aSeed.w, mix(0.9, 0.2, uDisease));
         vec3 endPass = vec3(aSeed.x + 0.5 * (aSeed.z - 0.5), -0.25, aSeed.y + 1.1);
         vec3 end = mix(endPass, aTarget, absorbed);
@@ -233,11 +234,9 @@ function moteMaterial() {
 }
 
 export function VilliWorld({ visible }: { visible: boolean }) {
-  const step = useStory((s) => s.step);
+  const id = useStopId();
   const mechanism = useStory((s) => s.mechanism);
   const reduced = useStory((s) => s.reducedMotion);
-  const id = STEPS[step].id;
-  const treatStart = useRef<number | null>(null);
   const inner = useRef<THREE.Group>(null);
 
   const built = useMemo(() => {
@@ -384,35 +383,36 @@ export function VilliWorld({ visible }: { visible: boolean }) {
     return { inst, base, baseMat: baseMaterial(), particles, motes, heroMat, heroGeo, lacteal, capillary, lactealMat, capMat, macs, macMat };
   }, []);
 
-  useEffect(() => {
-    if (id === 'treatment') treatStart.current = null;
-  }, [id]);
-
-  useFrame((state, dt) => {
+  /**
+   * Disease level follows the scroll: villi flatten while pulling back from the bacterium to the
+   * "symptoms" stop, and recover while zooming in to the "treatment" stop. At the symptoms stop the
+   * presenter can still flip between healthy and infected.
+   */
+  useFrame((_, dt) => {
     if (!visible) return;
     if (!reduced) shared.uTime.value += dt;
+    const fs = frameState(journey.t);
     let target = 0;
-    if (id === 'mechanism') target = mechanism === 'disease' ? 1 : 0;
-    if (id === 'treatment') {
-      if (treatStart.current === null) {
-        treatStart.current = state.clock.elapsedTime;
-        shared.uDisease.value = 1;
-      }
-      const t = (state.clock.elapsedTime - treatStart.current - 1.5) / 6;
-      target = 1 - Math.min(1, Math.max(0, t));
-      shared.uDisease.value = reduced ? 0 : target;
-    } else {
-      shared.uDisease.value += (target - shared.uDisease.value) * (reduced ? 1 : 1 - Math.exp(-dt * 2.2));
+    let motes = 0;
+    if (fs.i === STOP_INDEX.cause && fs.f >= 0.5) target = smoothstep(0.55, 0.97, fs.f);
+    else if (fs.i === STOP_INDEX.symptoms) target = mechanism === 'disease' ? 1 : 0;
+    else if (fs.i === STOP_INDEX.pcr && fs.f >= 0.5) {
+      target = 1 - smoothstep(0.58, 0.99, fs.f);
+      motes = 0.85;
+    } else if (fs.i === STOP_INDEX.treatment && fs.f < 0.4) {
+      motes = 0.85 * (1 - smoothstep(0.1, 0.4, fs.f));
     }
+    const scrolling = Math.abs(journey.target - journey.t) > 0.002;
+    const k = reduced || scrolling ? 1 : 1 - Math.exp(-dt * 3);
+    shared.uDisease.value += (target - shared.uDisease.value) * k;
     const d = shared.uDisease.value;
-    const moteTarget = id === 'treatment' ? 0.85 * Math.min(1, d * 1.6 + 0.15) : 0;
-    moteUniforms.uOpacity.value += (moteTarget - moteUniforms.uOpacity.value) * (1 - Math.exp(-dt * 3));
+    moteUniforms.uOpacity.value += (motes - moteUniforms.uOpacity.value) * (1 - Math.exp(-dt * 4));
     built.macMat.opacity = Math.min(1, d * 1.4);
     built.macs.visible = d > 0.02;
     if (inner.current) inner.current.scale.set(1 + 0.42 * d, 1 - 0.44 * d, 1 + 0.42 * d);
   });
 
-  const showParticles = id === 'mechanism' || id === 'treatment';
+  const showParticles = id === 'symptoms';
   const heroY = baseY(HERO.x, HERO.z);
 
   return (
@@ -429,7 +429,7 @@ export function VilliWorld({ visible }: { visible: boolean }) {
         </group>
       </group>
       <primitive object={built.particles} visible={showParticles} />
-      <primitive object={built.motes} visible={id === 'treatment'} />
+      <primitive object={built.motes} visible={id === 'treatment' || id === 'pcr'} />
       <Label3D visible={visible && id === 'villi'} position={[HERO.x + 0.01, heroY + 0.72, HERO.z]} interactive>
         <div className="leader" style={{ animation: 'rise 700ms 500ms both' }}>
           <span className="leader__line" style={{ width: 80 }} />
@@ -447,18 +447,13 @@ export function VilliWorld({ visible }: { visible: boolean }) {
           </span>
         </div>
       </Label3D>
-      <Label3D visible={visible && id === 'villi'} position={[1.05, 1.15, -0.4]}>
-        <span className="tag" style={{ animation: 'rise 700ms 900ms both' }}>
-          Villi <small>0.5–1 mm tall</small>
-        </span>
-      </Label3D>
-      <Label3D visible={visible && id === 'treatment'} position={[1.1, 1.35, 0.3]}>
+      <Label3D visible={visible && id === 'treatment'} position={[0.15, 1.45, 0.3]}>
         <span className="tag" style={{ animation: 'rise 700ms 800ms both' }}>
           <span style={{ width: 9, height: 9, borderRadius: 9, background: '#cfe6ff', display: 'inline-block' }} />
-          Antibiotics clear the bacteria · villi recover (illustration)
+          Antibiotic · the villi grow back
         </span>
       </Label3D>
-      <Label3D visible={visible && id === 'mechanism'} position={[0.95, 1.55, 0.3]}>
+      <Label3D visible={visible && id === 'symptoms'} position={[0.95, 1.55, 0.3]}>
         <span className="tag">
           <span style={{ width: 9, height: 9, borderRadius: 9, background: '#f5c87c', display: 'inline-block' }} />
           Nutrients from digested food

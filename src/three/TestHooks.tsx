@@ -1,13 +1,15 @@
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
+import { journey } from '../app/journey';
 import { useStory } from '../app/store';
+import { STOPS } from '../content/story';
 import { MODEL_SCALE, useAnatomy } from './anatomy/useAnatomy';
 
 declare global {
   interface Window {
     __whipple?: {
       organPoint: (organ: string) => { x: number; y: number } | null;
-      state: () => { step: number; sub: number; world: string; veil: boolean };
+      state: () => { stop: number; id: string; t: number; world: string };
       renderInfo: () => { calls: number; triangles: number; programs: number; geometries: number; textures: number };
       scene: () => unknown;
       camera: () => { x: number; y: number; z: number; fov: number };
@@ -33,7 +35,7 @@ export function TestHooks() {
       },
       state: () => {
         const s = useStory.getState();
-        return { step: s.step, sub: s.sub, world: s.displayWorld, veil: s.veil };
+        return { stop: s.stop, id: STOPS[s.stop].id, t: journey.t, world: s.displayWorld };
       },
       scene: () => scene,
       camera: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z, fov: (camera as { fov?: number }).fov ?? 0 }),

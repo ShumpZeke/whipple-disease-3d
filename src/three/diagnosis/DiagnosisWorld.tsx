@@ -2,8 +2,7 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { useStory } from '../../app/store';
-import { STEPS } from '../../content/story';
+import { useStopId, useStory } from '../../app/store';
 import { Cites, TermButton } from '../../ui/RichText';
 import { Label3D } from '../Label3D';
 import { mulberry32 } from '../tissue/tissueGeometry';
@@ -143,7 +142,7 @@ function Biopsy({ active }: { active: boolean }) {
           <meshPhysicalMaterial color="#d77d72" roughness={0.5} sheen={0.8} />
         </mesh>
       </group>
-      <Label3D visible={active} position={[target.x + 0.3, target.y + 0.55, target.z]} interactive>
+      <Label3D visible={active} position={tip.clone().addScaledVector(dir, 0.55)} interactive>
         <div className="leader" style={{ animation: 'rise 700ms 600ms both' }}>
           <span className="leader__line" style={{ width: 36 }} />
           <span className="tag">
@@ -169,22 +168,14 @@ function Microscope({ active }: { active: boolean }) {
         <ringGeometry args={[1.75, 1.95, 96]} />
         <meshStandardMaterial color="#1a1716" roughness={0.4} metalness={0.3} />
       </mesh>
-      {/* the glass slide with the stained sample */}
-      <group position={[0, -2.05, 0.6]} rotation={[-1.05, 0, 0]}>
-        <mesh>
-          <boxGeometry args={[2.4, 0.8, 0.03]} />
-          <meshPhysicalMaterial color="#dfeef2" roughness={0.08} transparent opacity={0.35} clearcoat={1} />
-        </mesh>
-        <mesh position={[0, 0, 0.02]}>
-          <circleGeometry args={[0.16, 24]} />
-          <meshBasicMaterial color="#d9a2bd" />
-        </mesh>
-      </group>
       <Label3D visible={active} position={[1.35, 1.35, 0]} interactive>
         <div className="leader" style={{ animation: 'rise 700ms 500ms both' }}>
           <span className="leader__line" style={{ width: 36 }} />
           <span className="tag">
-            <TermButton termKey="pas">PAS</TermButton>-positive macrophages <small>(magenta)</small> <Cites ids={[2, 9]} />
+            <span>
+              <TermButton termKey="pas">PAS</TermButton>-stained macrophages
+            </span>
+            <small>(magenta)</small> <Cites ids={[2, 9]} />
           </span>
         </div>
       </Label3D>
@@ -239,29 +230,36 @@ function helixGeometry() {
   return merged;
 }
 
-// copies fill a centred 8 × 2 grid in doubling order: 1 → 2 → 4 → 8 → 16
-const SLOTS = (() => {
-  const order = [
-    [0, 0],
-    [1, 0],
-    [0, 1],
-    [1, 1],
-    [-1, 0],
-    [-1, 1],
-    [2, 0],
-    [2, 1],
-    [-2, 0],
-    [-2, 1],
-    [3, 0],
-    [3, 1],
-    [-3, 0],
-    [-3, 1],
-    [4, 0],
-    [4, 1],
-  ];
-  return order.map(([c, r]) => new THREE.Vector3((c - 0.5) * 0.62, r === 0 ? 0.98 : -0.98, (r - 0.5) * 0.25));
-})();
-// order in which copies appear: parent i spawns child i + 2^cycle
+// Copies double 1 → 2 → 4 → 8 → 16: one in the middle, then a pair, then a centred 8 × 2 grid
+// where each new copy lands next to the copy it was made from (child i comes from i − 2^cycle).
+const GRID: [number, number][] = [
+  [0, 0],
+  [1, 0],
+  [0, 1],
+  [1, 1],
+  [-1, 0],
+  [2, 0],
+  [-1, 1],
+  [2, 1],
+  [-3, 0],
+  [4, 0],
+  [-3, 1],
+  [4, 1],
+  [-2, 0],
+  [3, 0],
+  [-2, 1],
+  [3, 1],
+];
+const GAP = 0.52;
+const SLOT = [0, 1, 2, 3, 4].map((c) =>
+  GRID.map(([col, row], i) =>
+    c === 0
+      ? new THREE.Vector3(0, 0, 0)
+      : c === 1
+        ? new THREE.Vector3((i - 0.5) * GAP, 0, 0)
+        : new THREE.Vector3((col - 0.5) * GAP, row === 0 ? 0.96 : -0.96, (row - 0.5) * 0.25),
+  ),
+);
 const PARENT = Array.from({ length: 16 }, (_, i) => (i === 0 ? 0 : i - 2 ** Math.floor(Math.log2(i))));
 
 function Pcr({ active }: { active: boolean }) {
@@ -280,6 +278,8 @@ function Pcr({ active }: { active: boolean }) {
   const clock = useRef(0);
   const m = useMemo(() => new THREE.Matrix4(), []);
   const q = useMemo(() => new THREE.Quaternion(), []);
+  const p = useMemo(() => new THREE.Vector3(), []);
+  const sc = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((_, dt) => {
     if (!active) return;
@@ -296,12 +296,14 @@ function Pcr({ active }: { active: boolean }) {
       if (i >= count) {
         m.makeScale(0, 0, 0);
       } else {
-        const born = i >= count / 2 && c > 0;
-        const from = born ? SLOTS[PARENT[i]] : SLOTS[i];
-        const p = born ? from.clone().lerp(SLOTS[i], e) : SLOTS[i];
-        q.setFromEuler(new THREE.Euler(0, clock.current * 0.5 + i * 0.4, 0));
-        const s = born ? 0.4 + 0.6 * e : 1;
-        m.compose(p, q, new THREE.Vector3(s, s, s));
+        const born = c > 0 && i >= count / 2;
+        const from = c === 0 ? SLOT[0][0] : SLOT[c - 1][born ? PARENT[i] : i];
+        p.copy(from).lerp(SLOT[c][i], e);
+        // new copies arc slightly towards the viewer so they don't pass through their neighbours
+        if (born) p.z += Math.sin(e * Math.PI) * 0.45;
+        q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, clock.current * 0.5 + i * 0.4);
+        sc.setScalar(born ? 0.4 + 0.6 * e : 1);
+        m.compose(p, q, sc);
       }
       built.setMatrixAt(i, m);
     }
@@ -323,14 +325,12 @@ function Pcr({ active }: { active: boolean }) {
 /* ----------------------------------------------------------------- world */
 
 export function DiagnosisWorld({ visible }: { visible: boolean }) {
-  const step = useStory((s) => s.step);
-  const sub = useStory((s) => s.sub);
-  const onStep = STEPS[step].id === 'diagnosis' && visible;
+  const id = useStopId();
   return (
     <group>
-      <Biopsy active={onStep && sub === 0} />
-      <Microscope active={onStep && sub === 1} />
-      <Pcr active={onStep && sub === 2} />
+      <Biopsy active={visible && id === 'biopsy'} />
+      <Microscope active={visible && id === 'stain'} />
+      <Pcr active={visible && id === 'pcr'} />
     </group>
   );
 }

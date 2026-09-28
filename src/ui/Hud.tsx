@@ -1,44 +1,28 @@
+import { useRef } from 'react';
 import { creditLine } from '../app/config';
+import { scrollToStop, smoothstep } from '../app/journey';
 import { useStory } from '../app/store';
-import { STEPS } from '../content/story';
-
-const Arrow = ({ dir }: { dir: 'left' | 'right' }) => (
-  <svg viewBox="0 0 16 16" aria-hidden="true">
-    <path
-      d={dir === 'right' ? 'M3 8h10M9 4l4 4-4 4' : 'M13 8H3M7 4L3 8l4 4'}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+import { LAST_STOP, STOPS } from '../content/story';
+import { useJourney } from './useJourney';
 
 export function HudTop() {
-  const step = useStory((s) => s.step);
+  const stop = useStory((s) => s.stop);
+  const world = useStory((s) => s.displayWorld);
   const openSources = useStory((s) => s.openSources);
   const openGlossary = useStory((s) => s.openGlossary);
   const resetCamera = useStory((s) => s.resetCamera);
-  const s = STEPS[step];
-  const is3D = s.world !== 'none';
   return (
     <header className="hud-top">
-      <div className="wordmark" aria-live="polite">
-        {step > 0 ? (
-          <>
-            <span className="wordmark__title">Whipple’s Disease</span>
-            <span className="wordmark__chapter">
-              {s.chapter} · {s.label}
-            </span>
-          </>
+      <div className="wordmark">
+        {stop > 0 ? (
+          <span className="wordmark__title">Whipple’s Disease</span>
         ) : (
           <span className="wordmark__chapter">An interactive exhibit</span>
         )}
       </div>
       <nav className="hud-links" aria-label="Exhibit tools">
-        {is3D && (
-          <button type="button" className="icon-btn" aria-label="Reset view (R)" title="Reset view (R)" onClick={resetCamera}>
+        {world !== 'none' && (
+          <button type="button" className="icon-btn" aria-label="Reset the view (R)" title="Reset the view (R)" onClick={resetCamera}>
             <svg viewBox="0 0 20 20" aria-hidden="true">
               <path
                 d="M4 10a6 6 0 1 0 2-4.5M4 3.5V7h3.5"
@@ -62,54 +46,67 @@ export function HudTop() {
   );
 }
 
-export function HudBottom() {
-  const step = useStory((s) => s.step);
-  const sub = useStory((s) => s.sub);
-  const next = useStory((s) => s.next);
-  const back = useStory((s) => s.back);
-  const goTo = useStory((s) => s.goTo);
-  const atEnd = step === STEPS.length - 1;
-  if (step === 0) return null;
-  const nextLabel =
-    STEPS[step].captions.length > 1 && sub < STEPS[step].captions.length - 1 ? 'Next' : atEnd ? 'End' : 'Next';
+/**
+ * A slim zoom rail on the right: where we are in the dive (1907 → body → organ → wall → villi →
+ * germ → …). It moves continuously with the scroll. Only the current section is named, so it
+ * never competes with the picture; hovering the rail shows every label (click to jump).
+ */
+export function DepthRail() {
+  const marker = useRef<HTMLSpanElement>(null);
+  const stop = useStory((s) => s.stop);
+  useJourney((t) => {
+    if (marker.current) marker.current.style.top = `${((t / LAST_STOP) * 100).toFixed(3)}%`;
+  });
+  let section = stop;
+  while (section > 0 && !STOPS[section].rail) section--;
   return (
-    <div className="hud-bottom">
-      <button type="button" className="nav-btn" onClick={back} aria-label="Previous (Left arrow)">
-        <Arrow dir="left" />
-        <span>Back</span>
-      </button>
-      <div className="progress" role="navigation" aria-label="Story progress">
-        {STEPS.map((st, i) => (
+    <nav className="rail" aria-label="Zoom depth">
+      <div className="rail__track">
+        {STOPS.map((s, i) => (
           <button
-            key={st.id}
+            key={s.id}
             type="button"
-            className={`progress__tick${i < step ? ' is-done' : ''}${i === step ? ' is-current' : ''}${
-              i > 0 && STEPS[i - 1].chapter !== st.chapter ? ' is-chapter-start' : ''
-            }`}
-            aria-label={`${i + 1}. ${st.label}`}
-            aria-current={i === step ? 'step' : undefined}
-            onClick={() => goTo(i)}
+            className={`rail__stop${s.rail ? ' has-label' : ''}${i === stop ? ' is-current' : ''}${i === section ? ' is-section' : ''}`}
+            style={{ top: `${(i / LAST_STOP) * 100}%` }}
+            aria-label={`Go to: ${s.title.replace(/\*/g, '')}`}
+            aria-current={i === stop ? 'location' : undefined}
+            onClick={() => scrollToStop(i)}
           >
-            <span className="progress__label">{st.label}</span>
+            {s.rail && <span className="rail__label">{s.rail}</span>}
           </button>
         ))}
+        <span ref={marker} className="rail__marker" aria-hidden="true" />
       </div>
-      <button
-        type="button"
-        className="nav-btn nav-btn--primary"
-        onClick={next}
-        disabled={atEnd}
-        aria-label="Next (Right arrow)"
-      >
-        <span>{nextLabel}</span>
-        <Arrow dir="right" />
-      </button>
+    </nav>
+  );
+}
+
+/** Only on the opening: a gentle reminder that scrolling is the way in. */
+export function ScrollCue() {
+  const ref = useRef<HTMLDivElement>(null);
+  useJourney((t) => {
+    if (ref.current) ref.current.style.opacity = String(1 - smoothstep(0.02, 0.2, t));
+  });
+  return (
+    <div ref={ref} className="scroll-cue" aria-hidden="true">
+      <span className="scroll-cue__mouse">
+        <span />
+      </span>
     </div>
   );
 }
 
 export function Credit() {
-  const step = useStory((s) => s.step);
-  if (step !== 0 && step !== STEPS.length - 1) return null;
-  return <div className="credit">{creditLine()}</div>;
+  const ref = useRef<HTMLDivElement>(null);
+  useJourney((t) => {
+    if (!ref.current) return;
+    const o = 1 - smoothstep(0.1, 0.35, t);
+    ref.current.style.opacity = String(o);
+    ref.current.style.visibility = o < 0.01 ? 'hidden' : 'visible';
+  });
+  return (
+    <div ref={ref} className="credit">
+      {creditLine()}
+    </div>
+  );
 }

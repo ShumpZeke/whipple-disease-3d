@@ -18,7 +18,7 @@ export function Quiz() {
   if (quizIndex >= QUESTIONS.length) {
     const score = quizScore(answers);
     return (
-      <section className="caption caption-enter" aria-live="polite" data-step="quiz">
+      <div aria-live="polite" data-quiz="done">
         <p className="caption__eyebrow">Quick self-check · done</p>
         <h1 className="caption__title">Nicely done</h1>
         <p className="quiz__done">
@@ -27,10 +27,10 @@ export function Quiz() {
         </p>
         <div className="caption__actions">
           <button type="button" className="pill" onClick={next}>
-            Continue
+            See the summary
           </button>
         </div>
-      </section>
+      </div>
     );
   }
 
@@ -39,7 +39,7 @@ export function Quiz() {
   const tried = picked[q.id] ?? [];
 
   return (
-    <section key={q.id} className="caption caption-enter" aria-live="polite" data-step="quiz" data-question={q.id}>
+    <div key={q.id} className="quiz-enter" aria-live="polite" data-question={q.id}>
       <p className="quiz__progress">
         Self-check · {quizIndex + 1} of {QUESTIONS.length}
       </p>
@@ -97,6 +97,6 @@ export function Quiz() {
           </button>
         </div>
       )}
-    </section>
+    </div>
   );
 }

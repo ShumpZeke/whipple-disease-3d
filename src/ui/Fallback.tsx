@@ -1,5 +1,5 @@
 import { useStory } from '../app/store';
-import { STEPS } from '../content/story';
+import { STOPS } from '../content/story';
 
 const IMAGES: Record<string, { src: string; alt: string }> = {
   anatomy: {
@@ -14,8 +14,8 @@ const IMAGES: Record<string, { src: string; alt: string }> = {
 
 /** Shown when WebGL is unavailable: all text, quiz and sources still work. */
 export function Fallback() {
-  const step = useStory((s) => s.step);
-  const img = IMAGES[STEPS[step].world] ?? IMAGES.anatomy;
+  const stop = useStory((s) => s.stop);
+  const img = IMAGES[STOPS[stop].world] ?? IMAGES.anatomy;
   return (
     <>
       <div className="fallback-img">
@@ -29,9 +29,9 @@ export function Fallback() {
 }
 
 export function StageLoading() {
-  const step = useStory((s) => s.step);
+  const stop = useStory((s) => s.stop);
   const ready = useStory((s) => s.stageReady);
-  if (ready || STEPS[step].world === 'none') return null;
+  if (ready || STOPS[stop].world === 'none') return null;
   return (
     <div className="loading" role="status" aria-live="polite">
       Preparing the 3D model

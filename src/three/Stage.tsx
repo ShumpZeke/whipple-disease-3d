@@ -2,8 +2,9 @@ import { AdaptiveDpr, Environment, Lightformer, PerformanceMonitor } from '@reac
 import { Canvas, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
+import { registerInvalidate } from '../app/journey';
 import { useStory } from '../app/store';
-import { STEPS, type World } from '../content/story';
+import { STOPS, type World } from '../content/story';
 import { AnatomyWorld } from './anatomy/AnatomyWorld';
 import { DiagnosisWorld } from './diagnosis/DiagnosisWorld';
 import { Director } from './Director';
@@ -18,15 +19,20 @@ const ORDER: World[] = ['anatomy', 'tissue', 'villi', 'micro', 'diagnosis'];
 /** Continuous rendering only while an animated world is on screen; otherwise render on demand. */
 function LoopControl() {
   const world = useStory((s) => s.displayWorld);
-  const step = useStory((s) => s.step);
+  const stop = useStory((s) => s.stop);
   const reduced = useStory((s) => s.reducedMotion);
   const setFrameloop = useThree((s) => s.setFrameloop);
   const invalidate = useThree((s) => s.invalidate);
+  // the scroll journey renders on demand: it calls invalidate() while t is moving
   useEffect(() => {
-    const animated = ANIMATED.includes(world) || (world === 'anatomy' && STEPS[step].id === 'end');
+    registerInvalidate(invalidate);
+    return () => registerInvalidate(null);
+  }, [invalidate]);
+  useEffect(() => {
+    const animated = ANIMATED.includes(world) || (world === 'anatomy' && STOPS[stop].id === 'end');
     setFrameloop(animated && !reduced ? 'always' : 'demand');
     invalidate();
-  }, [world, step, reduced, setFrameloop, invalidate]);
+  }, [world, stop, reduced, setFrameloop, invalidate]);
   return null;
 }
 
@@ -133,17 +139,20 @@ function WorldShell({ name, children }: { name: World; children: ReactNode }) {
 
 /** Mount the needed world first, then the rest one at a time when the browser is idle. */
 function useProgressiveMount() {
-  const step = useStory((s) => s.step);
+  const stop = useStory((s) => s.stop);
+  const display = useStory((s) => s.displayWorld);
   const worldReady = useStory((s) => s.worldReady);
   const [mounted, setMounted] = useState<World[]>(() => {
-    const w = STEPS[useStory.getState().step].world;
+    const w = STOPS[useStory.getState().stop].world;
     return w === 'none' || w === 'anatomy' ? ['anatomy'] : ['anatomy', w];
   });
-  // the world of the current step must be mounted right away
+  // the world on screen (and the next stop's) must be mounted right away
   useEffect(() => {
-    const w = STEPS[step].world;
-    if (w !== 'none' && !mounted.includes(w)) setMounted((m) => [...m, w]);
-  }, [step, mounted]);
+    const need = [STOPS[stop].world, STOPS[Math.min(STOPS.length - 1, stop + 1)].world, display].filter(
+      (w) => w !== 'none' && !mounted.includes(w),
+    );
+    if (need.length) setMounted((m) => [...m, ...need.filter((w, i) => need.indexOf(w) === i)]);
+  }, [stop, display, mounted]);
   // then warm up the rest in story order, once the previous one has compiled
   useEffect(() => {
     if (!worldReady.anatomy) return;
@@ -208,9 +217,10 @@ export default function Stage() {
         gl.toneMapping = THREE.NeutralToneMapping;
         gl.toneMappingExposure = 1.05;
         gl.localClippingEnabled = true;
+        // the picture is described by the captions; its labels and buttons stay reachable
+        gl.domElement.setAttribute('aria-hidden', 'true');
         setWebgl('ok');
       }}
-      aria-hidden="true"
     >
       <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} flipflops={3} />
       <AdaptiveDpr pixelated={false} />
