@@ -101,7 +101,7 @@ export function Guide() {
                 {t && (
                   <p className="guide__term">
                     <b>{s.termLabel ?? 'Key term'}:</b> {t.term.replace(/\s*\(.*\)$/, '')}
-                    {t.say && <> (say {t.say})</>}.{' '}
+                    {t.say && <> (say {t.say})</>}:{' '}
                     {t.parts?.length ? <>{t.parts.map((p) => `${p.part} ${p.meaning}`).join(' + ')} = </> : null}
                     {t.short}
                   </p>
