@@ -247,7 +247,7 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     what: 'The study with Max Wilms at his desk and his book; the tumor, kidney cross-section, nephron, cells, DNA, ultrasound and CT scenes; paper and grain textures',
     creator: 'Created for this project (modelled in code; the study built with Blender)',
     license: 'Original work',
-    note: 'Illustrations, not to scale, with colors chosen for clarity. The figure at the desk is not a likeness. The scans are drawings, not patient images.',
+    note: 'Illustrations, not to scale, with colors chosen for clarity. The figure at the desk is a simple likeness based on his portrait. The scans are drawings, not patient images.',
   },
   {
     what: 'Exhibit text, code and 3D scenes',

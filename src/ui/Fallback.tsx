@@ -5,7 +5,7 @@ import { ProfileCard, WordPartsCard } from './HistoryCards';
 const IMAGES: Record<string, { src: string; alt: string }> = {
   none: {
     src: '/fallback/study.webp',
-    alt: 'A 3D scene made for this exhibit: a doctor in a dark suit, seen from behind, writing at his desk by an oil lamp, with an old book open on a stand.',
+    alt: 'A 3D scene made for this exhibit: Max Wilms in a dark suit, seen from behind, writing at his desk by an oil lamp, with his book open on a stand.',
   },
   anatomy: {
     src: '/fallback/urinary.webp',

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { LAST_STOP, STOPS } from '../content/story';
 import { nestLevels, type Levels } from './levels';
+import { manLine } from './hinge';
+import { WILMS_HEAD } from './nested';
 import { localPose, makePose, worldPose, zoomLerp, type AnatomyRefs } from './presets';
 
 // the anchors as they come out of public/models/urinary.glb (×5)
@@ -33,6 +35,23 @@ describe('camera poses', () => {
     expect(levels.size.clump).toBeLessThan(levels.size.nephron);
     expect(levels.size.dna).toBeLessThan(levels.size.clump / 10);
     expect(levels.size.study).toBeGreaterThan(1);
+  });
+
+  it('never flies through Max Wilms’s head while he is there', () => {
+    const head = WILMS_HEAD.clone().applyMatrix4(levels.study);
+    const scale = levels.size.study; // world units per metre
+    const cur = makePose();
+    const hinge = STOPS.findIndex((s) => s.id === 'name');
+    for (let i = 0; i <= hinge; i++) {
+      const a = worldPose(STOPS[i].id, refs, levels);
+      const b = worldPose(STOPS[i + 1].id, refs, levels);
+      for (let s = 0; s <= 100; s++) {
+        // (he dissolves from the top down before the camera leans past him to his book)
+        if (manLine(i + s / 100) < WILMS_HEAD.y - 0.14) continue;
+        zoomLerp(a, b, s / 100, cur);
+        expect(cur.pos.distanceTo(head) / scale, `${STOPS[i].id}>${STOPS[i + 1].id} at ${s}`).toBeGreaterThan(0.2);
+      }
+    }
   });
 
   it('moves between every pair of stops in one smooth, unbroken camera move', () => {

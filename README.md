@@ -155,8 +155,9 @@ of `dist/`.
   by the same factor) and the spot being dived into stays in view, so there are no cuts, fades or
   veils, and the dark background never changes. ([`src/three/nested.ts`](src/three/nested.ts),
   [`src/three/presets.ts`](src/three/presets.ts), [`src/three/Director.tsx`](src/three/Director.tsx))
-- **History to 3D.** The home screen is Max Wilms at his desk in 1899, seen from behind. The camera
-  passes over his shoulder to his book on its stand: the real title page, and a plate whose drawing
+- **History to 3D.** The home screen is Max Wilms at his desk in 1899, seen from behind. At “Dr. Max
+  Wilms” the camera comes round to his face (modelled on his portrait, beside it on screen) and he
+  looks up at the class; then the camera passes over his shoulder to his book on its stand: the real title page, and a plate whose drawing
   is the 3D model pressed flat as an engraving. Zooming into the plate, a sweep develops the drawing
   into the full-colour model while the paper and the room dissolve behind it.
 - **Inside the kidney.** The left kidney opens like a book; its cut face is painted from the model’s
@@ -165,7 +166,7 @@ of `dist/`.
 - **3D.** three.js through React Three Fiber. The urinary organs come from BodyParts3D, cleaned up
   in Blender (holes filled, remeshed, smoothed, decimated, ambient occlusion baked) and compressed
   with meshopt (0.3 MB). The study is built from simple shapes by a Blender script
-  (`scripts/build_study.py`, 0.35 MB). The tumor, the cut-open kidney, the nephron, the cells, the
+  (`scripts/build_study.py`, 0.47 MB). The tumor, the cut-open kidney, the nephron, the cells, the
   DNA and the two scans are made in code.
 
 **Type:** in the style of igloo.inc: IBM Plex Mono for small labels and links (“//” and “//////”),

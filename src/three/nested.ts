@@ -31,6 +31,9 @@ export const PAGE = {
   top: 1.25,
 };
 
+/** Centre of Max Wilms's head in the study (matches HEAD_C in scripts/build_study.py). */
+export const WILMS_HEAD = v3(0, 1.315, 0.415);
+
 /** study ← organ scene (the drawing's frame on the page). */
 export function pageFrame() {
   const t = PAGE.tilt;

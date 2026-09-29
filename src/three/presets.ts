@@ -74,7 +74,8 @@ export function localPose(id: StopId, r: AnatomyRefs): LocalPose {
     case 'title':
       return { level: 'study', pos: [2.05, 1.8, 2.75], target: [-0.02, 1.0, 0.08], fov: 30 };
     case 'doctor':
-      return { level: 'study', pos: [1.3, 1.52, 1.5], target: [0.06, 1.08, 0.28], fov: 30 };
+      // his face, from the front and to his right, next to his portrait
+      return { level: 'study', pos: [0.63, 1.45, -0.52], target: [0.0, 1.24, 0.4], fov: 30 };
     case 'book':
       // over his right shoulder, looking at the open book on its stand
       return { level: 'study', pos: [0.5, 1.5, 0.66], target: [0.0, 0.95, -0.13], fov: 30 };

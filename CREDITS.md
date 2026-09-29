@@ -21,9 +21,11 @@ cells, the DNA and the two scan pictures are illustrations: not to scale, with c
 clarity. The ultrasound and CT pictures are drawings made in code, not patient images.
 
 **About the study.** The room, the desk and the man writing at it were built from simple shapes
-by a Blender script, with ambient occlusion baked into the vertex colours. The figure is seen from
-behind and is not a likeness of Max Wilms. The title page reproduces the real title of his 1899
-book; the plate's drawing is the 3D model of the urinary organs, pressed flat onto the page.
+by a Blender script, with ambient occlusion baked into the vertex colours. The man is a simple
+likeness of Max Wilms modelled on his portrait (the Wellcome Collection photograph credited above):
+cropped grey hair receding from a high forehead, a brush moustache, a tall stiff collar and a bow
+tie. The title page reproduces the real title of his 1899 book; the plate's drawing is the 3D model
+of the urinary organs, pressed flat onto the page.
 
 **About the portrait.** “Portrait of Max Wilms”, Wellcome Collection, licensed under Creative
 Commons Attribution 4.0 (CC BY 4.0). Resized and converted to WebP.

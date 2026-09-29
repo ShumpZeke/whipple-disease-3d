@@ -1,6 +1,17 @@
 import { HINGE, smoothstep } from '../app/journey';
 
 /**
+ * Leaving "His 1899 book", the camera leans past Max Wilms's shoulder to the page in front of his
+ * face; just before it reaches him he dissolves from the top down (like the page later on), so only
+ * his book is left. The line is a height in the study (metres); he is below 1.45 m.
+ */
+export function manLine(t: number) {
+  const a = HINGE - 1 + 0.16;
+  const b = HINGE - 1 + 0.46;
+  return t <= a ? 1e3 : t >= b ? -1e3 : 1.55 - 1.65 * smoothstep(a, b, t);
+}
+
+/**
  * From the book to the 3D organs (stop "name" → "body"). The organs start as the engraved
  * drawing on the page, pressed flat onto it. As the camera leans in, a sweep "develops" them from
  * the top down into full colour and full depth; the paper and the room dissolve behind the sweep

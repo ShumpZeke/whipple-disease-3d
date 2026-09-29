@@ -1,8 +1,8 @@
-"""Build the study for the history part: Max Wilms at his writing desk in 1899, seen from behind.
+"""Build the study for the history part: Max Wilms at his writing desk in 1899.
 
 Everything is modelled here from simple shapes (no outside assets): a pedestal desk, a chair, an oil
 lamp, an inkwell, books, a microscope, a sheet of paper and the man himself (a skin-modifier
-figure in a dark suit). The open book on its stand is built in the browser, so its pages can carry
+figure in a dark suit, with a head sculpted from fused shapes after his portrait). The open book on its stand is built in the browser, so its pages can carry
 live text. Ambient occlusion is baked into vertex colours, then the scene is exported as GLB.
 
 Blender is Z-up in metres; the man sits at y < 0 facing +Y (the desk). glTF turns this into
@@ -15,7 +15,7 @@ from mathutils import Vector, Matrix, Euler
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUTDIR = ARGS[0] if ARGS else os.path.join(HERE, "..", "..", "wilms-asset-work", "out")
+OUTDIR = os.path.abspath(ARGS[0] if ARGS else os.path.join(HERE, "..", "..", "wilms-asset-work", "out"))
 PREVIEW = "preview" in ARGS
 os.makedirs(OUTDIR, exist_ok=True)
 OBJDIR = ""
@@ -46,10 +46,14 @@ def srgb(hexs):
 MATS = {
     "Wood": ("#4b2d1d", 0.5, 0.0),
     "WoodDark": ("#2e1b12", 0.55, 0.0),
-    "Jacket": ("#242120", 0.85, 0.0),
+    "Jacket": ("#2a2725", 0.85, 0.0),
     "Trousers": ("#1e1c1b", 0.85, 0.0),
-    "Skin": ("#d4a086", 0.55, 0.0),
-    "Hair": ("#5d5046", 0.7, 0.0),
+    "Skin": ("#d8ae9c", 0.55, 0.0),
+    "Hair": ("#8a857e", 0.8, 0.0),
+    "Moustache": ("#7a6f66", 0.8, 0.0),
+    "Eye": ("#ffffff", 0.4, 0.0),
+    "Tie": ("#121113", 0.4, 0.0),
+    "Shirt": ("#f1eee7", 0.6, 0.0),
     "Collar": ("#ece8de", 0.45, 0.0),
     "Shoe": ("#141212", 0.35, 0.0),
     "Brass": ("#b48b3d", 0.32, 0.9),
@@ -315,7 +319,7 @@ P = {
     "lumbar": (0.0, -0.61, SEAT + 0.26),
     "chest": (0.0, -0.55, SEAT + 0.46),
     "shoulders": (0.0, -0.5, SEAT + 0.6),
-    "neck": (0.0, -0.46, SEAT + 0.7),
+    "neck": (0.0, -0.46, SEAT + 0.68),
     "r_sh": (0.205, -0.5, SEAT + 0.6),
     "r_el": (0.27, -0.34, SEAT + 0.4),
     "r_wr": (0.14, -0.2, TOP + 0.045),
@@ -340,7 +344,7 @@ E = [
     ("pelvis", "l_hip"), ("l_hip", "l_kn"), ("l_kn", "l_an"),
 ]
 R = {
-    "pelvis": (0.165, 0.125), "lumbar": (0.158, 0.112), "chest": (0.19, 0.125), "shoulders": (0.215, 0.12), "neck": (0.056, 0.056),
+    "pelvis": (0.165, 0.125), "lumbar": (0.158, 0.112), "chest": (0.19, 0.125), "shoulders": (0.215, 0.12), "neck": (0.05, 0.05),
     "r_sh": (0.078, 0.078), "r_el": (0.057, 0.057), "r_wr": (0.043, 0.043),
     "l_sh": (0.078, 0.078), "l_el": (0.057, 0.057), "l_wr": (0.043, 0.043),
     "r_hip": (0.085, 0.085), "r_kn": (0.065, 0.065), "r_an": (0.045, 0.045),
@@ -376,35 +380,221 @@ rot = d.to_track_quat("Z", "Y").to_euler()
 cyl("Pen", 0.0045, d.length, mid, "Ink", rot=rot, verts=10)
 cyl("Nib", 0.003, 0.016, pen_tip + d.normalized() * 0.008, "Brass", rot=rot, verts=8)
 
-# head, tilted forward to look at the book
-HX, HY, HZ = 0.0, -0.43, SEAT + 0.86
-tilt = math.radians(22)
-HEAD_C = Vector((HX, HY, HZ))
-HEAD_R = Matrix.Rotation(tilt, 3, "X")
-HEAD_F = HEAD_R @ Vector((0, 1, 0))  # towards his face
-HEAD_U = HEAD_R @ Vector((0, 0, 1))  # up through the crown
-head = sphere("Head", (0.074, 0.098, 0.105), (HX, HY, HZ), "Skin", rot=(tilt, 0, 0), seg=64, rings=40)
-# not a ball: narrower towards the jaw, the back of the skull a little fuller
-# (the mesh is centred on the object's origin at HEAD_C, so vertex positions are relative to it)
-for v in head.data.vertices:
-    s, f, u = v.co.x, v.co.dot(HEAD_F), v.co.dot(HEAD_U)
-    un = u / 0.105
-    if un < 0:
-        s *= 1 - 0.2 * min(1.0, -un) ** 1.3
-    if f < 0:
-        f *= 1 + 0.07 * max(0.0, 1 - abs(un - 0.15) / 0.65)
-    v.co = Vector((s, 0, 0)) + HEAD_F * f + HEAD_U * u
+# ---------------------------------------------------------------- his head: Max Wilms as in his portraits
+# A long, lean face with a straight nose, high cheekbones and a strong chin; a brush moustache; large
+# ears; grey hair cropped very short and receding from a high forehead; a tall stiff white collar
+# with a small black bow tie, and the lapels of a dark suit. The head is modelled from simple shapes
+# fused into one surface (voxel remesh) and smoothed, like a quick clay sculpture. It is a likeness
+# drawn from the portrait, not a scan.
+HEAD_C = Vector((0.0, -0.415, SEAT + 0.855))
+HEAD_R = Matrix.Rotation(math.radians(-3), 3, "X")  # head up; his eyes look down at the book
+HEAD_M = Matrix.Translation(HEAD_C) @ HEAD_R.to_4x4()
+HEAD_LOCAL = HEAD_M.inverted()
+
+
+def blob(name, c, r, rot=(0, 0, 0), seg=40, rings=24):
+    """An ellipsoid in the head's own frame (x to his left ear... right, y towards his face, z up)."""
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=seg, ring_count=rings, radius=1, location=(0, 0, 0))
+    o = bpy.context.active_object
+    o.name = name
+    o.data.transform(Matrix.LocRotScale(Vector(c), Euler(rot), Vector(r)))
+    return o
+
+
+def join(objs, name):
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]
+    bpy.ops.object.join()
+    o = bpy.context.view_layer.objects.active
+    o.name = name
+    return o
+
+
+def modify(o, kind, **props):
+    m = o.modifiers.new(kind.lower(), kind)
+    for k, v in props.items():
+        setattr(m, k, v)
+    apply_mod(o, m)
+
+
+deg = math.radians
+parts = [
+    blob("h_cranium", (0, -0.012, 0.024), (0.071, 0.096, 0.088)),
+    blob("h_occiput", (0, -0.058, 0.012), (0.058, 0.048, 0.062)),
+    blob("h_face", (0, 0.03, -0.028), (0.06, 0.072, 0.066)),
+    blob("h_jaw", (0, 0.042, -0.07), (0.047, 0.056, 0.036)),
+    blob("h_chin", (0, 0.074, -0.093), (0.02, 0.017, 0.018)),
+    blob("h_brow", (0, 0.079, 0.021), (0.05, 0.014, 0.011)),
+    blob("h_bridge", (0, 0.105, -0.011), (0.0085, 0.012, 0.027), rot=(deg(30), 0, 0)),
+    blob("h_tip", (0, 0.119, -0.033), (0.0105, 0.011, 0.0095)),
+    blob("h_alaL", (-0.0125, 0.108, -0.036), (0.0085, 0.009, 0.0072)),
+    blob("h_alaR", (0.0125, 0.108, -0.036), (0.0085, 0.009, 0.0072)),
+    blob("h_lip", (0, 0.094, -0.05), (0.022, 0.012, 0.011)),
+    blob("h_lowerlip", (0, 0.092, -0.064), (0.016, 0.007, 0.0055)),
+    # large ears, leaning back and standing out a little
+    blob("h_earL", (-0.07, -0.01, -0.006), (0.0105, 0.021, 0.034), rot=(deg(15), 0, deg(-14))),
+    blob("h_earR", (0.07, -0.01, -0.006), (0.0105, 0.021, 0.034), rot=(deg(15), 0, deg(14))),
+]
+head = join(parts, "Head")
+modify(head, "REMESH", mode="VOXEL", voxel_size=0.0022)
+# eye sockets under the brow
+sockets = join([blob("sock", (sx * 0.03, 0.083, 0.001), (0.017, 0.016, 0.0145)) for sx in (-1, 1)], "Sockets")
+bpy.context.view_layer.objects.active = head
+modify(head, "BOOLEAN", operation="DIFFERENCE", solver="EXACT", object=sockets)
+bpy.data.objects.remove(sockets)
+modify(head, "REMESH", mode="VOXEL", voxel_size=0.0022)
+modify(head, "SMOOTH", factor=0.6, iterations=8)
+n_tris = sum(len(p.vertices) - 2 for p in head.data.polygons)
+modify(head, "DECIMATE", ratio=min(1.0, 11000 / max(1, n_tris)))
+head.data.transform(HEAD_M)
+finish(head, "Skin")
 head["ao"] = True
+
+
+def at_head(o):
+    o.data.transform(HEAD_M)
+    return o
+
+
+# eyes (looking down at the book, 34° below straight ahead) under heavy lids
+GAZE = Vector((0, math.cos(deg(-34)), math.sin(deg(-34))))
+UP_G = Vector((0, -GAZE.z, GAZE.y))  # up, across the eye as it looks
+
+
+def eye_colour(q):
+    """The eyeball is painted: lid-coloured skin, with an almond-shaped opening around the gaze
+    (iris and pupil in it) and a dark line of lashes along its top edge. q = point on the eyeball."""
+    n = q.normalized()
+    k = n.dot(GAZE)
+    h, w = q.x / 0.0104, q.dot(UP_G) / 0.0041
+    r = h * h + w * w if k > 0 else 9.0
+    lid = tuple(0.84 * v for v in (0.686, 0.423, 0.332))
+    if r < 1.0:
+        return (0.02, 0.02, 0.025) if k > 0.975 else (0.24, 0.3, 0.36) if k > 0.8 else (0.45, 0.42, 0.39)
+    if r < 1.3 and w > 0:
+        return (0.07, 0.045, 0.035)
+    return lid
+
+
+for side, sx in (("L", -1), ("R", 1)):
+    c = Vector((sx * 0.03, 0.0712, -0.001))
+    eye = at_head(finish(blob(f"Eye{side}", c, (0.0118, 0.0118, 0.0118), seg=64, rings=40), "Eye"))
+    ca = eye.data.color_attributes.new(name="AO", type="BYTE_COLOR", domain="POINT")
+    eye.data.color_attributes.active_color = ca
+    for i, v in enumerate(eye.data.vertices):
+        ca.data[i].color = (*eye_colour((HEAD_LOCAL @ v.co) - c), 1.0)
+
+# the moustache: a short brush over the upper lip, the ends turned a little down
+mo = skin_figure(
+    "Moustache",
+    [(-0.029, 0.093, -0.054), (-0.017, 0.103, -0.047), (0.0, 0.107, -0.045), (0.017, 0.103, -0.047), (0.029, 0.093, -0.054)],
+    [(0, 1), (1, 2), (2, 3), (3, 4)],
+    [(0.0055, 0.0055), (0.0105, 0.0105), (0.0115, 0.0115), (0.0105, 0.0105), (0.0055, 0.0055)],
+    "Moustache",
+    root=2,
+)
+at_head(mo)["ao"] = True
+for side, sx in (("L", -1), ("R", 1)):
+    at_head(skin_figure(
+        f"Brow{side}",
+        [(sx * 0.012, 0.097, 0.016), (sx * 0.03, 0.0965, 0.021), (sx * 0.047, 0.085, 0.018)],
+        [(0, 1), (1, 2)],
+        [(0.0036, 0.0026), (0.0036, 0.0026), (0.002, 0.0018)],
+        "Moustache",
+        root=0,
+    ))
+
+# neck, the tall stiff collar, and the back of the jacket's collar
+NECK_TILT = deg(-15)
+cyl("Neck", 0.043, 0.125, (0.0, -0.448, SEAT + 0.75), "Skin", rot=(NECK_TILT, 0, 0), verts=28)
+COLLAR_C = Vector((0.0, -0.458, SEAT + 0.722))
+cyl("Collar", 0.056, 0.052, COLLAR_C, "Collar", rot=(deg(-10), 0, 0), verts=40)["ao"] = True
+
+
+def lathe_arc(name, profile, a0, a1, material, steps=32):
+    """Part of a lathe (angles in radians, 0 = his front): the jacket collar round the back."""
+    bm = bmesh.new()
+    rings = []
+    for i in range(steps + 1):
+        a = a0 + (a1 - a0) * i / steps
+        rings.append([bm.verts.new((r * math.sin(a), r * math.cos(a), z)) for r, z in profile])
+    for i in range(steps):
+        for j in range(len(profile) - 1):
+            bm.faces.new((rings[i][j], rings[i + 1][j], rings[i + 1][j + 1], rings[i][j + 1]))
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    scene.collection.objects.link(o)
+    return finish(o, material)
+
+
+jc = lathe_arc("JacketCollar", [(0.1, -0.035), (0.08, -0.005), (0.064, 0.022), (0.06, 0.03)], deg(55), deg(305), "Jacket")
+jc.data.transform(Matrix.Translation((0.0, -0.462, SEAT + 0.69)) @ Matrix.Rotation(NECK_TILT, 4, "X"))
+jc["ao"] = True
+
+# the bow tie at the front of the collar
+TIE_M = Matrix.Translation(COLLAR_C) @ Matrix.Rotation(deg(-10), 4, "X") @ Matrix.Translation((0.0, 0.06, -0.027))
+bm = bmesh.new()
 for sx in (-1, 1):
-    # ears stand out a little from the head, turned slightly forward
-    sphere(f"Ear{sx}", (0.011, 0.019, 0.029), (HX + sx * 0.071, HY - 0.006, HZ - 0.014), "Skin", rot=(tilt, 0, sx * math.radians(22)), seg=16, rings=10)["ao"] = True
-# the neck above the collar
-cyl("Neck", 0.047, 0.11, (HX, HY - 0.02, SEAT + 0.765), "Skin", rot=(math.radians(16), 0, 0), verts=24)
-# a stiff white collar showing just above the jacket's collar
-cyl("Collar", 0.058, 0.034, (HX, HY - 0.028, SEAT + 0.716), "Collar", rot=(math.radians(14), 0, 0), verts=32)
-jc = lathe("JacketCollar", [(0.1, -0.035), (0.08, -0.005), (0.066, 0.02), (0.061, 0.03)], (0, 0, 0), "Jacket", steps=40)
-jc.data.transform(Matrix.Rotation(math.radians(14), 4, "X"))
-jc.data.transform(Matrix.Translation((HX, HY - 0.04, SEAT + 0.69)))
+    # each wing widens from the knot to its end, like a bow
+    ring = []
+    for x, hh, ht in ((0.004, 0.0045, 0.003), (0.03, 0.0125, 0.0036)):
+        ring.append([bm.verts.new((sx * x, y, z)) for y, z in ((-ht, -hh), (ht, -hh), (ht, hh), (-ht, hh))])
+    a, b = ring
+    faces = [(a[0], a[1], a[2], a[3]), (b[3], b[2], b[1], b[0])] + [(a[i], b[i], b[(i + 1) % 4], a[(i + 1) % 4]) for i in range(4)]
+    for f in faces:
+        bm.faces.new(f if sx > 0 else tuple(reversed(f)))
+bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+me = bpy.data.meshes.new("BowTie")
+bm.to_mesh(me)
+bm.free()
+tie = bpy.data.objects.new("BowTie", me)
+scene.collection.objects.link(tie)
+modify(tie, "SUBSURF", levels=2, render_levels=2)
+knot = blob("tieKnot", (0.0, 0.0015, 0.0), (0.0062, 0.0048, 0.0072), seg=16, rings=10)
+tie = join([tie, knot], "BowTie")
+tie.data.transform(TIE_M)
+finish(tie, "Tie")
+tie["ao"] = True
+
+
+def decal(name, grid, material, lift):
+    """A thin panel laid on the front of the suit: grid[row][col] = (x, z), cast onto the chest."""
+    rows, cols = len(grid), len(grid[0])
+    bm = bmesh.new()
+    vs = []
+    for row in grid:
+        line = []
+        for x, z in row:
+            ok, loc, nor, _ = suit.ray_cast(Vector((x, 0.4, z)), Vector((0, -1, 0)))
+            p = loc + nor * lift if ok else Vector((x, -0.4, z))
+            line.append(bm.verts.new(p))
+        vs.append(line)
+    for i in range(rows - 1):
+        for j in range(cols - 1):
+            bm.faces.new((vs[i][j], vs[i][j + 1], vs[i + 1][j + 1], vs[i + 1][j]))
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    scene.collection.objects.link(o)
+    return finish(o, material)
+
+
+# a narrow V of white shirt front under the tie, framed by the jacket's lapels
+V_TOP, V_BOT = SEAT + 0.695, SEAT + 0.53
+vw = lambda k: 0.004 + 0.03 * (1 - k)  # half-width of the V, k = 0 at the top
+shirt = decal("ShirtFront", [[(vw(i / 10) * (j / 4 - 1), V_TOP + (V_BOT - V_TOP) * i / 10) for j in range(9)] for i in range(11)], "Shirt", 0.003)
+shirt["ao"] = True
+for side, sx in (("L", -1), ("R", 1)):
+    lw = lambda k: 0.012 + 0.024 * (1 - k)  # lapel width
+    grid = [[(sx * (vw(i / 12) + lw(i / 12) * j / 3), V_TOP - 0.006 + (V_BOT - 0.03 - V_TOP) * i / 12) for j in range(4)] for i in range(13)]
+    if sx < 0:
+        grid = [list(reversed(r)) for r in grid]
+    decal(f"Lapel{side}", grid, "Jacket", 0.005)["ao"] = True
 
 log(f"modelled {len(OBJS)} objects in {time.time()-t0:.1f}s")
 
@@ -416,39 +606,54 @@ for o in OBJS:
     o.data.materials.clear()
     o.data.materials.append(M[keep[o.name]])
     if o.name == "Head":
-        # short hair over the back, sides and top; a bare neck below the hairline and a high,
-        # receding forehead (as in his portraits). It is painted into the vertex colours on top of
-        # the baked shading, so the hairline is soft rather than following the polygons.
+        # painted into the vertex colours on top of the baked shading: grey hair cropped very short
+        # (thin on the sides), receding from a high forehead; a little colour in the cheeks and nose
         hair, skin = M["Hair"].diffuse_color, M["Skin"].diffuse_color
-        tint = [hair[j] / skin[j] for j in range(3)]
 
         def ss(a, b, x):
             k = min(1.0, max(0.0, (x - a) / (b - a)))
             return k * k * (3 - 2 * k)
 
+        # height of the hairline (u, head-heights of 0.1 m) all round the head (azimuth in degrees, 0 = face)
+        LINE = [(0, 0.66), (22, 0.7), (42, 0.8), (62, 0.45), (80, 0.2), (100, 0.12), (130, -0.25), (180, -0.36)]
+
+        def hairline(a):
+            a = abs(a)
+            for (a0, h0), (a1, h1) in zip(LINE, LINE[1:]):
+                if a <= a1:
+                    return h0 + (h1 - h0) * (a - a0) / (a1 - a0)
+            return LINE[-1][1]
+
         col = o.data.color_attributes["AO"].data
         for i, v in enumerate(o.data.vertices):
-            f = v.co.dot(HEAD_F) / 0.098  # (relative to the head's origin)
-            u = v.co.dot(HEAD_U) / 0.105
-            a = math.atan2(v.co.x, v.co.dot(HEAD_F))
-            low = -0.38 + 0.9 * max(0.0, f + 0.35) + 0.03 * math.sin(9 * a) + 0.015 * math.sin(23 * a)
-            front = 0.4 - 0.3 * max(0.0, u - 0.4)
-            m = ss(low - 0.05, low + 0.05, u) * (1 - ss(front - 0.05, front + 0.05, f))
+            q = HEAD_LOCAL @ v.co
+            u = q.z / 0.1
+            a = math.degrees(math.atan2(q.x, q.y))
+            h = hairline(a) + 0.02 * math.sin(math.radians(a) * 11)
+            cover = ss(h - 0.04, h + 0.05, u) * (0.55 + 0.35 * ss(0.3, 0.75, u))  # thin on the sides
+            if abs(q.x) > 0.062 and -0.05 < q.z < 0.04 and -0.04 < q.y < 0.025:
+                cover = 0.0  # the ears
+            flush = math.exp(-((q - Vector((0, 0.115, -0.03))).length / 0.02) ** 2) * 0.6
+            flush += sum(math.exp(-((q - Vector((sx * 0.045, 0.07, -0.02))).length / 0.022) ** 2) for sx in (-1, 1)) * 0.35
             c = col[i].color
-            col[i].color = tuple(c[j] * (1 + (tint[j] - 1) * m) for j in range(3)) + (1.0,)
+            out = []
+            for j in range(3):
+                t = 1 + (hair[j] / skin[j] - 1) * cover
+                t *= 1 - flush * (0, 0.12, 0.16)[j]
+                out.append(c[j] * t)
+            col[i].color = (*out, 1.0)
 tris = sum(tri_count(o) for o in OBJS)
 log("triangles", tris)
 
-def shot(path, eye, target, lens=32):
+def shot(path, eye, target, lens=32, color="MATERIAL", size=(1280, 720)):
     """Quick solid-colour render from a three.js study viewpoint (x, y, z) -> Blender (x, -z, y)."""
     sc = bpy.context.scene
     sc.render.engine = "BLENDER_WORKBENCH"
     sc.display.shading.light = "STUDIO"
-    sc.display.shading.color_type = "MATERIAL"
+    sc.display.shading.color_type = color
     sc.display.shading.show_shadows = True
     sc.display.shading.show_cavity = True
-    sc.render.resolution_x = 1280
-    sc.render.resolution_y = 720
+    sc.render.resolution_x, sc.render.resolution_y = size
     cd = bpy.data.cameras.new("shot")
     cd.lens = lens
     cam = bpy.data.objects.new("shot", cd)
@@ -475,8 +680,17 @@ if PREVIEW:
         ob = bpy.data.objects.new(nm, me)
         ob.data.materials.append(M["Paper"])
         bpy.context.scene.collection.objects.link(ob)
+    # his head close up, from the front, three-quarters, the side and behind (three.js axes)
+    hc = HEAD_C
+    H3 = Vector((hc.x, hc.z, -hc.y))
+    for nm, off in (("front", (0.0, -0.05, -0.55)), ("q", (0.42, 0.0, -0.36)), ("side", (0.55, 0.02, 0.0)), ("back", (0.3, 0.1, 0.5))):
+        eye = H3 + Vector(off)
+        shot(os.path.join(OUTDIR, f"head_{nm}.png"), tuple(eye), tuple(H3 + Vector((0, -0.04, 0))), 85, size=(640, 640))
+        shot(os.path.join(OUTDIR, f"head_{nm}_vc.png"), tuple(eye), tuple(H3 + Vector((0, -0.04, 0))), 85, color="VERTEX", size=(640, 640))
+    # candidate views of him for "Dr. Max Wilms"
+    for nm, eye, tgt in (("doctor", (0.55, 1.42, -0.4), (0.0, 1.24, 0.4)),):
+        shot(os.path.join(OUTDIR, f"view_{nm}.png"), eye, tgt, 38, size=(960, 540))
     shot(os.path.join(OUTDIR, "study_title.png"), (2.05, 1.8, 2.75), (-0.02, 1.0, 0.08), 38)
-    shot(os.path.join(OUTDIR, "study_doctor.png"), (1.3, 1.52, 1.5), (0.06, 1.08, 0.28), 40)
     shot(os.path.join(OUTDIR, "study_book.png"), (0.62, 1.72, 1.2), (0.0, 0.95, -0.13), 44)
 
 export_glb(os.path.join(OUTDIR, "study_raw.glb"), OBJS)

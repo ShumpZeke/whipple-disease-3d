@@ -2,14 +2,15 @@ import { useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { HINGE, journey, onJourneyFrame } from '../../app/journey';
+import { HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
+import { STOP_INDEX } from '../../content/story';
 import { ProfileCard, WordPartsCard } from '../../ui/HistoryCards';
 import { sharedOrganUniforms } from '../anatomy/organMaterial';
 import { useAnatomyRefs } from '../Director';
-import { hingeState } from '../hinge';
+import { hingeState, manLine } from '../hinge';
 import { Label3D } from '../Label3D';
 import { useLevels } from '../levels';
-import { PAGE } from '../nested';
+import { PAGE, pageFrame } from '../nested';
 import { worldPose } from '../presets';
 import { ensureNoiseTexture, NOISE_GLSL, noiseUniform } from '../shaders/noise';
 import { pageGeometry, platePage, titlePage } from './pages';
@@ -20,28 +21,55 @@ export const STUDY_LAYER = 1;
 
 /** Where the room's sweep line is (see hinge.ts); the whole room dissolves above it. */
 const uStudyReveal = { value: 1e3 };
+/** Max Wilms's own sweep line (a height in the study, see manLine), and a line that never moves. */
+const uManLine = { value: 1e3 };
+const uNoLine = { value: 1e3 };
+/** study ← world, to measure heights in the study */
+const uToStudy = { value: pageFrame() };
+
+const DEG = Math.PI / 180;
+/** The top of his neck, which his head turns about (study metres; see HEAD_C in build_study.py). */
+const NECK_TOP = new THREE.Vector3(0, 1.225, 0.435);
+
+/** The meshes that make up the man (he leaves before the room does). */
+const MAN = /^(Suit|Cuff|Shoe|Hand|Pen|Nib|Head|Eye|Moustache|Brow|Neck|Collar|JacketCollar|BowTie|ShirtFront|Lapel)/;
 
 /** The desk, the man and everything else in the room dissolve (with a burnt edge) above the sweep. */
-function withSweep<M extends THREE.Material>(m: M): M {
+function withSweep<M extends THREE.Material>(m: M, man = false): M {
   ensureNoiseTexture();
   m.onBeforeCompile = (shader) => {
-    Object.assign(shader.uniforms, { uNoise3D: noiseUniform, uRevealMin: sharedOrganUniforms.uRevealMin, uRevealMax: sharedOrganUniforms.uRevealMax, uStudyReveal });
+    Object.assign(shader.uniforms, {
+      uNoise3D: noiseUniform,
+      uRevealMin: sharedOrganUniforms.uRevealMin,
+      uRevealMax: sharedOrganUniforms.uRevealMax,
+      uStudyReveal,
+      uManLine: man ? uManLine : uNoLine,
+      uToStudy,
+    });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vSweepW;')
       .replace('#include <project_vertex>', '#include <project_vertex>\nvSweepW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\nvarying vec3 vSweepW;\nuniform float uStudyReveal; uniform float uRevealMin; uniform float uRevealMax;\n${NOISE_GLSL}`)
+      .replace(
+        '#include <common>',
+        `#include <common>\nvarying vec3 vSweepW;\nuniform float uStudyReveal; uniform float uRevealMin; uniform float uRevealMax; uniform float uManLine; uniform mat4 uToStudy;\n${NOISE_GLSL}`,
+      )
       .replace(
         '#include <clipping_planes_fragment>',
         `#include <clipping_planes_fragment>
+        float sweepN = snoise(vec3(vSweepW.xz * 2.0, vSweepW.y));
         float sweepY = (vSweepW.y - uRevealMin) / max(uRevealMax - uRevealMin, 1e-4);
-        float sweepEdge = uStudyReveal + snoise(vec3(vSweepW.xz * 2.0, vSweepW.y)) * 0.05;
-        if (sweepY > sweepEdge) discard;`,
+        float sweepEdge = uStudyReveal + sweepN * 0.05;
+        if (sweepY > sweepEdge) discard;
+        float manY = (uToStudy * vec4(vSweepW, 1.0)).y;
+        float manEdge = uManLine + sweepN * 0.03;
+        if (manY > manEdge) discard;`,
       )
       .replace(
         '#include <dithering_fragment>',
         `#include <dithering_fragment>
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.42, 0.26, 0.12), (1.0 - smoothstep(0.0, 0.05, sweepEdge - sweepY)) * 0.6 * step(uStudyReveal, 50.0));`,
+        float burn = max((1.0 - smoothstep(0.0, 0.05, sweepEdge - sweepY)) * step(uStudyReveal, 50.0), (1.0 - smoothstep(0.0, 0.03, manEdge - manY)) * step(uManLine, 50.0));
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.42, 0.26, 0.12), burn * 0.6);`,
       );
   };
   m.customProgramCacheKey = () => 'study-sweep';
@@ -78,8 +106,8 @@ function pageMaterial(map: THREE.Texture) {
 }
 
 /**
- * Max Wilms at his desk in 1899, seen over his shoulder (a model made for this exhibit, not a
- * likeness). His book lies open on a stand; the right-hand page's drawing is the 3D organs
+ * Max Wilms at his desk in 1899 (a simple likeness made for this exhibit from his portrait), seen
+ * over his shoulder. His book lies open on a stand; the right-hand page's drawing is the 3D organs
  * themselves, so zooming into it carries straight on into the rest of the exhibit.
  */
 export function StudyLevel({ visible }: { visible: boolean }) {
@@ -98,10 +126,11 @@ export function StudyLevel({ visible }: { visible: boolean }) {
       o.layers.set(STUDY_LAYER);
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
+      const man = MAN.test(mesh.name);
       const fix = (raw: THREE.Material) => {
         const name = raw.name.replace(/\.\d+$/, '');
         if (name === 'Flame') return flameMat;
-        const m = withSweep((raw as THREE.MeshStandardMaterial).clone());
+        const m = withSweep((raw as THREE.MeshStandardMaterial).clone(), man);
         m.envMapIntensity = 0.35;
         if (name === 'Glass') {
           m.transparent = true;
@@ -119,6 +148,30 @@ export function StudyLevel({ visible }: { visible: boolean }) {
       };
       mesh.material = Array.isArray(mesh.material) ? mesh.material.map(fix) : fix(mesh.material);
     });
+    // When we meet him ("Dr. Max Wilms") he looks up from his book at us, then back down: his head
+    // turns about the top of his neck, and his eyes (lids painted on) about their own centres.
+    const headPivot = new THREE.Group();
+    headPivot.position.copy(NECK_TOP);
+    root.add(headPivot);
+    root.updateMatrixWorld(true);
+    const heads: THREE.Mesh[] = [];
+    root.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh && /^(Head|Eye|Moustache|Brow)/.test(o.name)) heads.push(o as THREE.Mesh);
+    });
+    for (const o of heads) headPivot.attach(o);
+    const eyes: THREE.Group[] = [];
+    for (const side of ['L', 'R']) {
+      const eye = heads.find((o) => o.name === `Eye${side}`);
+      if (!eye) continue;
+      eye.updateMatrix();
+      eye.geometry.computeBoundingSphere();
+      const g = new THREE.Group();
+      g.position.copy(eye.geometry.boundingSphere!.center).applyMatrix4(eye.matrix);
+      headPivot.add(g);
+      g.attach(eye);
+      eyes.push(g);
+    }
+
     const w = PAGE.width;
     const h = PAGE.top - PAGE.bottom;
     const cy = (PAGE.top + PAGE.bottom) / 2;
@@ -129,7 +182,7 @@ export function StudyLevel({ visible }: { visible: boolean }) {
     left.layers.set(STUDY_LAYER);
     right.layers.set(STUDY_LAYER);
     left.renderOrder = right.renderOrder = -10;
-    return { root, left, right };
+    return { root, left, right, headPivot, eyes };
   }, [gltf]);
 
   useEffect(() => {
@@ -156,6 +209,10 @@ export function StudyLevel({ visible }: { visible: boolean }) {
     const apply = (t: number) => {
       const h = hingeState(t);
       uStudyReveal.value = h.studyReveal;
+      uManLine.value = manLine(t);
+      const look = 1 - smoothstep(0.22, 0.62, Math.abs(t - STOP_INDEX.doctor));
+      built.headPivot.rotation.set(DEG * 10 * look, DEG * -24 * look, 0, 'YXZ');
+      for (const g of built.eyes) g.rotation.set(DEG * 24 * look, DEG * -9 * look, 0, 'YXZ');
       if (group.current && group.current.visible !== h.study) {
         group.current.visible = h.study;
         invalidate();
@@ -168,7 +225,7 @@ export function StudyLevel({ visible }: { visible: boolean }) {
     };
     apply(journey.t);
     return onJourneyFrame(apply);
-  }, [invalidate]);
+  }, [invalidate, built]);
 
   const setMatrix = (g: THREE.Group | null) => {
     group.current = g;

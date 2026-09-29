@@ -64,7 +64,8 @@ const ORGANS: Rig = { amb: 0.14, hemi: 0.08, key: 1.55, rim: 1.3, fill: 0, fillA
 const STUDY: Rig = { amb: 0.05, hemi: 0.05, key: 0.22, rim: 0.35, fill: 0, fillAt: [0.4, 0.4, 0.6], fillColor: '#ffe8da' };
 const RIGS: Record<StopId, Rig> = {
   title: STUDY,
-  doctor: STUDY,
+  // a soft warm light on the side of his face we see (the lamp lights the other side)
+  doctor: { ...STUDY, fill: 0.9, fillAt: [0.35, 0.45, 0.55], fillColor: '#ffdcc0' },
   book: STUDY,
   name: { ...STUDY, key: 0.4 },
   body: ORGANS,

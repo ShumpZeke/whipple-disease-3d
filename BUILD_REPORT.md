@@ -35,9 +35,11 @@ git history.
   and the point being entered stays in view. The background is the same dark space throughout.
   Unit tests check that the nesting sizes are right and that no step of any transition jumps.
 - **The history is a place.** The home screen is Max Wilms writing at his desk in 1899, seen from
-  behind (a figure built for this exhibit in Blender, not a likeness). His profile hangs in the room
-  beside him; the camera then passes over his shoulder to his book on its stand, open at the real
-  title page and a plate. The plate’s drawing is the 3D model pressed flat as an engraving: zooming
+  behind. At “Dr. Max Wilms” the camera comes round to his face and he looks up at the class: a
+  simple likeness built in Blender from his portrait (cropped grey hair receding from a high
+  forehead, brush moustache, tall collar, bow tie), next to the portrait itself. The camera then
+  passes over his shoulder to his book on its stand, open at the real title page and a plate; as it
+  leans in he dissolves, leaving his book. The plate’s drawing is the 3D model pressed flat as an engraving: zooming
   into it, a sweep develops it into full colour while the paper and the room dissolve.
 - **The kidney opens like a book.** Its cut face is painted from the model’s real outline (cortex,
   pyramids, pelvis, vessels). Diving into the outer layer, the painted filters become real ones and
@@ -85,7 +87,7 @@ scenes are labelled “Illustration, not to scale”.
 | --- | --- |
 | Main bundle (home screen, captions, UI) | 285 kB (90 kB gzip) |
 | 3D bundle, loaded in the background while the home screen is up | 1.18 MB (330 kB gzip) |
-| Urinary model and study model (meshopt-compressed) | 0.32 MB and 0.36 MB |
+| Urinary model and study model (meshopt-compressed) | 0.32 MB and 0.47 MB |
 | Portrait (WebP) | 61 kB |
 
 ## Verification
@@ -94,7 +96,7 @@ scenes are labelled “Illustration, not to scale”.
 | --- | --- |
 | `npm run build` (type-check + build) | passes |
 | `npm run lint` (oxlint) | no warnings |
-| `npm test`, 36 unit tests | all pass: story order, caption length, plain wording, a script for every stop, terms with word parts, the four facts cited, every citation resolves, history facts, quiz answers, zoom maths, camera poses |
+| `npm test`, 37 unit tests | all pass: story order, caption length, plain wording, a script for every stop, terms with word parts, the four facts cited, every citation resolves, history facts, quiz answers, zoom maths, camera poses, the camera never flies through Max Wilms |
 | `npm run test:e2e`, 16 browser tests | all pass: home screen, Max Wilms at his desk and his book, word parts, clicker walk through all 18 stops, mouse wheel, kidney marker, quiz on the 3D model, sources and terms, reduced motion, lite mode, no-WebGL fallback, 1366×768 and 1920×1080, smart-board swiping and text size, summary to sources, presenter guide |
 | Console | no errors or warnings during a full scroll-through |
 | Shader programs | 57, all compiled while loading; none compile during a full scroll-through |
