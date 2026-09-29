@@ -19,15 +19,10 @@ await withPreview(async (base) => {
   const page = await context.newPage();
   const t0 = Date.now();
   await page.goto(`${base}?e2e`);
-  await page.waitForFunction(() => !!window.__exhibit, null, { timeout: 60000 });
-  // visit every scene once so all shaders are compiled before the tour starts
-  for (const t of [4, 6, 7, 8, 10, 11, 12, 13, 15, 0]) {
-    await page.evaluate((t) => window.scrollTo(0, t * innerHeight), t);
-    await page.waitForTimeout(t === 4 ? 5000 : 1500);
-  }
-  await page.reload();
-  await page.waitForTimeout(3500);
-  skip = (Date.now() - t0) / 1000 - 3.2;
+  // the stage compiles every shader and draws the key moments once before it shows itself
+  await page.waitForSelector('.canvas-layer.is-ready', { timeout: 120000 });
+  await page.waitForTimeout(1500);
+  skip = (Date.now() - t0) / 1000 - 1.2;
   const stops = await page.evaluate(() => document.querySelectorAll('.scroller .snap').length);
   for (let i = 1; i < stops; i++) {
     await page.keyboard.press('PageDown');

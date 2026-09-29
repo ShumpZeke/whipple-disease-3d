@@ -1569,6 +1569,9 @@ html::-webkit-scrollbar {
   scroll-snap-type: none;
   scrollbar-width: auto;
 }
+html.guide-mode {
+  color-scheme: light;
+}
 .guide {
   max-width: 900px;
   margin: 0 auto;
@@ -1691,6 +1694,11 @@ html::-webkit-scrollbar {
   padding-left: 1.3em;
 }
 @media print {
+  /* white paper, no dark page around the guide */
+  html,
+  body {
+    background: #fff !important;
+  }
   .guide__print {
     display: none;
   }

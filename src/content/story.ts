@@ -96,6 +96,7 @@ export const STOPS: Stop[] = [
     term: 'nephroblastoma',
     termLabel: 'Its medical name',
     note: 'Nephr means kidney, blast means bud and oma means tumor. {c:15}',
+    demo: 'Scroll slowly from here: the drawing in his book turns into the 3D model',
     say: 'He was not the first to describe it, but after his book the tumor became known by his name. That is what makes it an eponym. Doctors also call it nephroblastoma, which breaks down into kidney, bud and tumor.',
   },
   {

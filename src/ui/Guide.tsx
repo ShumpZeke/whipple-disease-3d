@@ -25,7 +25,14 @@ export function Guide() {
   useEffect(() => {
     document.documentElement.classList.add('guide-mode');
     document.title = 'Presenter guide, Wilms Tumor';
-    return () => document.documentElement.classList.remove('guide-mode');
+    // a light page, so printing does not fill the paper's margins with the exhibit's dark colour
+    const scheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
+    const was = scheme?.content;
+    if (scheme) scheme.content = 'light';
+    return () => {
+      document.documentElement.classList.remove('guide-mode');
+      if (scheme && was) scheme.content = was;
+    };
   }, []);
   return (
     <main className="guide">
@@ -42,7 +49,9 @@ export function Guide() {
         <h2>Before you start</h2>
         <ul>
           <li>
-            Open the link on the board and tap <b>Full screen</b> in the top-right corner (or press <b>F</b>).
+            Open the link on the board a minute before you start: the 3D takes a few seconds to load on a slow
+            computer, and after that nothing needs to load again. Then tap <b>Full screen</b> in the top-right corner
+            (or press <b>F</b>).
           </li>
           <li>
             There are no buttons to go forward. <b>Swipe up</b> on the board to zoom on to the next part and{' '}
