@@ -10,7 +10,7 @@ const citeRefs = (t: string) => [...t.matchAll(/\{c:([\d,\s]+)\}/g)].flatMap((m)
 const termRefs = (t: string) => [...t.matchAll(/\{t:([a-z-]+)(?:\|[^}]+)?\}/g)].map((m) => m[1]);
 
 describe('the one-page journey (storyboard order)', () => {
-  it('goes from Max Wilms into the kidney, down to its cells, then out to signs, scans, treatment and the self-check', () => {
+  it('goes from Max Wilms into the kidney, down to its cells, then out to signs, scans, treatment, a summary and the self-check', () => {
     expect(STOPS.map((s) => s.id)).toEqual([
       'title',
       'doctor',
@@ -28,8 +28,8 @@ describe('the one-page journey (storyboard order)', () => {
       'scans',
       'treatment',
       'outlook',
-      'quiz',
       'end',
+      'quiz',
     ]);
   });
 
@@ -41,10 +41,12 @@ describe('the one-page journey (storyboard order)', () => {
     }
   });
 
-  it('keeps every caption short enough to read out from the board', () => {
+  it('keeps every caption to a couple of short, simple sentences', () => {
     for (const s of STOPS) {
       const words = s.text.replace(/\{c:[^}]+\}/g, '').split(/\s+/).filter(Boolean).length;
-      expect(words, s.id).toBeLessThanOrEqual(45);
+      expect(words, s.id).toBeLessThanOrEqual(24);
+      const sentences = s.text.replace(/\{c:[^}]+\}/g, '').split(/[.?!](\s|$)/).filter((x) => x.trim().length > 1);
+      expect(sentences.length, s.id).toBeLessThanOrEqual(3);
       expect(s.title.split(/\s+/).length, s.id).toBeLessThanOrEqual(6);
     }
   });

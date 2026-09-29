@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { journey } from '../app/journey';
 import { QUALITY } from '../app/quality';
 import { useStory } from '../app/store';
+import { QUESTIONS } from '../content/quiz';
 import { STOPS } from '../content/story';
 import { MODEL_SCALE, useAnatomy } from './anatomy/useAnatomy';
 
@@ -14,6 +15,8 @@ declare global {
       renderInfo: () => { calls: number; triangles: number; programs: number; geometries: number; textures: number };
       /** The compiled shader programs (name and cache key), to check that nothing compiles late. */
       programs: () => string[];
+      /** The right answer to the current quick-check question (for the recorded tour), or null when done. */
+      quizAnswer: () => { kind: 'organ' } | { kind: 'choice'; text: string } | null;
       /** Render once and wait for the graphics card to finish (for timing). */
       renderNow: () => void;
       scene: () => unknown;
@@ -48,6 +51,11 @@ export function TestHooks() {
         gl.render(scene, camera);
         const ctx = gl.getContext();
         ctx.readPixels(0, 0, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, new Uint8Array(4));
+      },
+      quizAnswer: () => {
+        const q = QUESTIONS[useStory.getState().quizIndex];
+        if (!q) return null;
+        return q.kind === 'organ' ? { kind: 'organ' } : { kind: 'choice', text: q.options.find((o) => o.correct)!.text };
       },
       programs: () => (gl.info.programs ?? []).map((p) => `${p.name} ${(p as unknown as { cacheKey: string }).cacheKey}`),
       renderInfo: () => ({

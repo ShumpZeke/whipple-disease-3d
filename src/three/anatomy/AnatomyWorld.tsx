@@ -62,9 +62,9 @@ const LIFT = new THREE.Vector3(0.95, 0.3, 0.8);
 
 /** 0 → 1 while the tumor grows in, on the way to the "lump" stop. */
 const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.22, STOP_INDEX.lump, t) * (t < STOP_INDEX.outlook + 0.5 ? 1 : 0);
-/** 0 → 1 while the left kidney is taken out (treatment → outlook), 1 → 0 while it comes back for the quiz. */
+/** 0 → 1 while the left kidney is taken out (treatment → outlook), 1 → 0 while it comes back for the summary. */
 const removal = (t: number) =>
-  smoothstep(STOP_INDEX.treatment + 0.1, STOP_INDEX.outlook - 0.1, t) - smoothstep(STOP_INDEX.outlook + 0.1, STOP_INDEX.quiz - 0.1, t);
+  smoothstep(STOP_INDEX.treatment + 0.1, STOP_INDEX.outlook - 0.1, t) - smoothstep(STOP_INDEX.outlook + 0.1, STOP_INDEX.end - 0.1, t);
 
 /** A lumpy mass: a sphere pushed out by a few overlapping lobes (seeded, so always the same shape). */
 function tumorGeometry() {

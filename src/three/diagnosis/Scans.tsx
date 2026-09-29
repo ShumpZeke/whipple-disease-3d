@@ -208,7 +208,7 @@ export function Scans({ visible }: { visible: boolean }) {
         <div className="leader" style={{ animation: 'rise 700ms 450ms both' }}>
           <span className="leader__line" style={{ width: 34 }} />
           <span className="tag">
-            Probe <small>sends sound waves in</small> <Cites ids={[6]} />
+            Probe <small>sends sound in</small> <Cites ids={[6]} />
           </span>
         </div>
       </Label3D>

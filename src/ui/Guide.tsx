@@ -6,15 +6,15 @@ import { FACTS, QA, STOPS } from '../content/story';
 import { plainText } from './RichText';
 
 /** When to reach each stop in a five-minute talk (same order as STOPS). */
-const TIMES = ['0:00', '0:25', '0:45', '1:00', '1:20', '1:40', '1:55', '2:10', '2:25', '2:40', '2:55', '3:10', '3:25', '3:40', '3:55', '4:10', '4:25', '4:50'];
+const TIMES = ['0:00', '0:25', '0:45', '1:00', '1:20', '1:40', '1:55', '2:10', '2:25', '2:40', '2:55', '3:10', '3:25', '3:40', '3:55', '4:10', '4:25', '4:35'];
 
 const PARTS = [
   { time: '0:00 to 0:25', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
   { time: '0:25 to 1:20', name: 'History', what: 'Who Max Wilms was, his 1899 book, and why the tumor has his name' },
   { time: '1:20 to 2:25', name: 'The disease', what: 'The definition, then zoom into the kidney, its layers and its tiny filters' },
   { time: '2:25 to 4:25', name: 'The facts', what: 'The cause, the signs, how doctors find it, the treatment and the outlook' },
-  { time: '4:25 to 4:50', name: 'Quick check', what: 'Four questions, and classmates tap the answers' },
-  { time: '4:50 to 5:00', name: 'Summary', what: 'Sum it up, then show the sources' },
+  { time: '4:25 to 4:35', name: 'Summary', what: 'Sum it up in two sentences' },
+  { time: '4:35 to 5:00', name: 'Quick check', what: 'Four questions, classmates tap the answers, then show the sources' },
 ];
 
 /**

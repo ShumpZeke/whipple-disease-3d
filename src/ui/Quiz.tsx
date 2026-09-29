@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { creditLine } from '../app/config';
+import { scrollToStop } from '../app/journey';
 import { quizScore, useStory } from '../app/store';
+import { SOURCES_PAGE } from '../content/story';
 import { QUESTIONS } from '../content/quiz';
 import { ORGANS, ORGAN_IDS } from '../three/anatomy/organs';
 import { Cites } from './RichText';
@@ -14,6 +17,7 @@ export function Quiz() {
   const nextQuestion = useStory((s) => s.nextQuestion);
   const [picked, setPicked] = useState<Record<string, number[]>>({});
   const [showList, setShowList] = useState(false);
+  const restart = useStory((s) => s.restart);
 
   if (quizIndex >= QUESTIONS.length) {
     const score = quizScore(answers);
@@ -21,8 +25,17 @@ export function Quiz() {
       <div aria-live="polite" data-quiz="done">
         <h1 className="caption__title">Nicely done</h1>
         <p className="caption__body">
-          You found all {score.total} answers, {score.firstTry} of them on the first try. Keep scrolling for the summary.
+          All {score.total} answers found, {score.firstTry} on the first try.
         </p>
+        <div className="caption__links">
+          <button type="button" className="text-link" onClick={() => scrollToStop(SOURCES_PAGE)}>
+            Sources
+          </button>
+          <button type="button" className="text-link" onClick={restart}>
+            Start again
+          </button>
+        </div>
+        <p className="caption__credit">{creditLine()}</p>
       </div>
     );
   }

@@ -8,14 +8,14 @@ import { Cites, TermButton } from './RichText';
 
 const LIFE: { year: string; text: string; cites: number[] }[] = [
   { year: '1867', text: 'Born in Germany', cites: [10] },
-  { year: '1899', text: 'Wrote a book about this kidney tumor, at age 32', cites: [9] },
+  { year: '1899', text: 'Wrote his book on this tumor', cites: [9] },
   { year: '1904', text: 'Became a professor', cites: [11] },
-  { year: '1918', text: 'Died during World War I, from an infection he caught while operating', cites: [9] },
+  { year: '1918', text: 'Died during World War I', cites: [9] },
 ];
 
 const PARTS = [
   { part: 'nephro', meaning: 'kidney' },
-  { part: 'blast', meaning: 'bud, a young cell' },
+  { part: 'blast', meaning: 'young cell' },
   { part: 'oma', meaning: 'tumor' },
 ];
 

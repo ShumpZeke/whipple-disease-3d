@@ -2852,3 +2852,22 @@ body,
 .anchor-label .print {
   animation: none;
 }
+
+/* ------------------------------------------------------------------ immersive after the home screen */
+/* Only the scene and its words: the corner menu, the dot grid and the frame marks step away. The
+   menu comes back while a mouse is near the top edge (is-peek) or a key moves focus into it. */
+.hud-top,
+.dots,
+.frame {
+  transition: opacity 700ms var(--ease);
+}
+.is-immersive .hud-top:not(.is-peek):not(:focus-within) {
+  opacity: 0;
+}
+.is-immersive .hud-top:not(.is-peek):not(:focus-within) > * {
+  pointer-events: none;
+}
+.is-immersive .dots,
+.is-immersive .frame {
+  opacity: 0;
+}

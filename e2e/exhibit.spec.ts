@@ -65,7 +65,7 @@ test('the name stop splits nephroblastoma into its word parts', async ({ page })
   await waitForStage(page);
   const card = page.getByRole('article', { name: 'The word parts of nephroblastoma' });
   await expect(card).toBeVisible();
-  for (const part of ['kidney', 'bud', 'tumor']) await expect(card).toContainText(part);
+  for (const part of ['kidney', 'young cell', 'tumor']) await expect(card).toContainText(part);
   await expect(page.locator('section.caption[data-step="name"] .caption__note')).toContainText('Nephr means kidney');
 });
 
@@ -114,7 +114,7 @@ test('self-check: pick the organ on the 3D model, then answer the questions', as
   const errors = collectErrors(page);
   await page.goto('/?stop=quiz&e2e');
   await waitForStage(page);
-  await expect(page.locator('.quiz__prompt')).toContainText('tap the organ');
+  await expect(page.locator('.quiz__prompt')).toContainText('Tap the organ');
   await page.waitForTimeout(800);
   // a wrong organ first, then a kidney
   const bladder = await page.evaluate(() => window.__exhibit!.organPoint('Bladder'));
@@ -141,6 +141,9 @@ test('self-check: pick the organ on the 3D model, then answer the questions', as
 
 test('sources, medical terms and inline definitions', async ({ page }) => {
   await page.goto('/?stop=name');
+  // after the home screen the corner menu hides until the mouse comes near the top
+  await page.mouse.move(800, 400);
+  await page.mouse.move(800, 30);
   await page.locator('.hud-links').getByRole('button', { name: 'Sources' }).click();
   const sources = page.getByRole('dialog', { name: 'Sources' });
   await expect(sources).toBeVisible();
@@ -148,6 +151,8 @@ test('sources, medical terms and inline definitions', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(sources).toBeHidden();
 
+  await page.mouse.move(800, 400);
+  await page.mouse.move(800, 30);
   await page.locator('.hud-links').getByRole('button', { name: 'Terms' }).click();
   await expect(page.getByRole('dialog', { name: 'Medical terms' })).toBeVisible();
   await page.keyboard.press('Escape');
@@ -274,7 +279,7 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await expect(sources.locator('.endnotes__credits')).toContainText('Wellcome Collection');
     await expect(sources).toContainText('Vardhmansinh Rathod');
     expect(Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(SOURCES_PAGE);
-    // stepping back from the top of the list returns to the summary
+    // stepping back from the top of the list returns to the last stop (the quick check)
     await page.keyboard.press('PageUp');
     await expect.poll(async () => Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(STOPS.length - 1);
   });

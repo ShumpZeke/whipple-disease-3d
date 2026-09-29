@@ -450,7 +450,7 @@ export function NephronLevel({ visible }: { visible: boolean }) {
         <div className="leader" style={{ animation: 'rise 700ms 850ms both' }}>
           <span className="leader__line" style={{ width: 40 }} />
           <span className="tag">
-            Tubule <small>takes back what the body needs</small> <Cites ids={[12]} />
+            Tubule <small>takes back water</small> <Cites ids={[12]} />
           </span>
         </div>
       </Label3D>

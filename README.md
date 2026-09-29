@@ -5,7 +5,7 @@
 One continuous page. Scrolling is a camera zoom: from Max Wilms and his 1899 book, into the
 urinary system, inside a kidney, down to its tiny filters and the young cells where the tumor
 starts, then back out to the lump, the other signs, the scans, the operation and the outlook,
-ending with a short self-check and the sources.
+ending with a short summary, a quick quiz and the sources.
 
 ![The home screen](docs/preview.jpg)
 
@@ -67,8 +67,9 @@ themselves, and a device that starts lagging switches and remembers it. `?hq` fo
 
 Tip: to open straight at a part, add `?stop=` to the address, e.g. `…/?stop=nephron`.
 
-**Backup video.** If the classroom computer can’t run 3D, `node scripts/record-tour.mjs tour.mp4`
-records the whole zoom as an MP4 (needs ffmpeg). Without WebGL the page itself still works, with
+**Backup video.** If the classroom computer can’t run 3D, `node scripts/record-tour.mjs tour.mp4 1920 1080 4`
+records the whole zoom as an MP4 of about two minutes, ending with the quiz played through
+(needs ffmpeg). Without WebGL the page itself still works, with
 still pictures instead of 3D.
 
 ## Assignment checklist (from the project handout)

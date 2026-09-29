@@ -15,7 +15,7 @@ its word parts) → what Wilms tumor is (the urinary system) → the kidneys →
 medulla, pelvis, ureter) → a nephron (glomerulus and tubule) → how it starts (young cells that keep
 dividing) → changes in genes (WT1) → a lump in the belly (the tumor grows on the 3D kidney) → other
 signs (hematuria) → ultrasound → CT scan → treatment (nephrectomy: the kidney is lifted out) → the
-outlook (one kidney, about 9 in 10 survive) → quick check → summary → the list of sources, terms and
+outlook (one kidney, about 9 in 10 survive) → summary → quick check → the list of sources, terms and
 credits.
 
 This version replaces an earlier exhibit about Whipple’s disease, which was the wrong eponym for
@@ -47,10 +47,13 @@ git history.
 - **The story happens on the model.** The tumor grows on the lower half of the left kidney as the
   camera arrives at “A lump in the belly”; at “Treatment” that kidney glows, and scrolling on lifts it
   out with its ureter, leaving one kidney for “The outlook”. It comes back, healthy, for the quiz.
-- **Plain words.** Each part has a short heading and a few sentences written the way you would
-  explain it to a friend. No “Fact 1” labels, no em dashes or dots between words (a unit test checks
+- **Plain words.** Each part has a short heading and one or two short, simple sentences (a unit
+  test keeps every caption under 25 words), written the way you would explain it to a friend. No “Fact 1” labels, no em dashes or dots between words (a unit test checks
   this). Word parts are explained in the sentences, e.g. “Nephr means kidney and ectomy means
   removal.” The presenter’s own lines are in a printable guide (`?guide`), not on the big screen.
+- **Immersive.** After the home screen the corner menu, the dot grid and the frame marks step
+  away, so only the scene and its words are on screen; the menu comes back when a mouse moves to
+  the top edge.
 - **Type in the style of igloo.inc** on the exhibit’s own warm palette: IBM Plex Mono for small
   labels and links, IBM Plex Sans for reading, Unbounded for the title.
 - **Runs on slow computers without losing anything.** Every device gets the same scenes. While the
@@ -111,5 +114,5 @@ scenes are labelled “Illustration, not to scale”.
 | `npm run assets:models` | compress the Blender exports into `public/models/` (meshopt) |
 | `node scripts/fallback-shots.mjs` | re-render the no-WebGL still images into `public/fallback/` |
 | `node scripts/journey-shots.mjs <outDir> [w] [h] [t,…]` | screenshots at scroll positions for review |
-| `node scripts/record-tour.mjs [out.mp4]` | record the full zoom as an MP4 (backup for presenting; needs ffmpeg) |
+| `node scripts/record-tour.mjs [out.mp4] [w] [h] [seconds per stop]` | record the full zoom as an MP4 ending with the quiz played through (backup for presenting; needs ffmpeg) |
 | open `?guide` and print | the presenter guide |

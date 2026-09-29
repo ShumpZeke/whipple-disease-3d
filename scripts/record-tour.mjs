@@ -1,4 +1,5 @@
-// Record the whole zoom as a video (a backup for presenting on a computer without WebGL).
+// Record the whole zoom as a video (a backup for presenting on a computer without WebGL), ending
+// with the quick check played through: each question, a moment to think, then the right answer.
 //   node scripts/record-tour.mjs [out.mp4] [width] [height] [secondsPerStop]
 // Needs ffmpeg on the PATH to convert Playwright's WebM recording to MP4.
 import { chromium } from '@playwright/test';
@@ -24,11 +25,31 @@ await withPreview(async (base) => {
   await page.waitForTimeout(1500);
   skip = (Date.now() - t0) / 1000 - 1.2;
   const stops = await page.evaluate(() => document.querySelectorAll('.scroller .snap').length);
+  await page.waitForTimeout(+hold * 1000); // the home screen
   for (let i = 1; i < stops; i++) {
     await page.keyboard.press('PageDown');
     await page.waitForTimeout(1700 + +hold * 1000);
   }
-  await page.waitForTimeout(1500);
+  // the quick check at the end
+  for (;;) {
+    const a = await page.evaluate(() => window.__exhibit.quizAnswer());
+    if (!a) break;
+    await page.waitForTimeout(2600);
+    if (a.kind === 'organ') {
+      const pt = await page.evaluate(() => window.__exhibit.organPoint('LeftKidney'));
+      await page.mouse.move(pt.x - 60, pt.y + 40);
+      await page.mouse.click(pt.x, pt.y);
+    } else {
+      await page.getByRole('button', { name: a.text, exact: true }).click();
+    }
+    await page.waitForTimeout(2800);
+    // move the pointer to empty space so no hover hint is left on screen
+    await page.mouse.move(size.width - 40, size.height - 40);
+    await page.getByRole('button', { name: /Next question|See how you did/ }).click();
+    await page.mouse.move(size.width - 40, size.height - 40);
+    await page.waitForTimeout(700);
+  }
+  await page.waitForTimeout(4000);
   await context.close();
   await browser.close();
 });

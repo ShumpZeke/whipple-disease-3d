@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from '
 import { LAST_STOP, SOURCES_PAGE, STOPS, STOP_INDEX, type StopId } from '../content/story';
 import { ORGANS } from '../three/anatomy/organs';
 import { Caption } from '../ui/Caption';
+import { QUESTIONS } from '../content/quiz';
 import { Fallback, StageLoading } from '../ui/Fallback';
 import { Backdrops, HistoryLayer } from '../ui/History';
 import { EndSources } from '../ui/EndSources';
@@ -136,6 +137,11 @@ function useJourneyDriver() {
 function HoverTip() {
   const hovered = useStory((s) => s.hoveredOrgan);
   const stop = useStory((s) => s.stop);
+  // in the quick check, only while the "tap the organ" question is open
+  const organQuestion = useStory((s) => {
+    const q = QUESTIONS[s.quizIndex];
+    return q?.kind === 'organ' && !s.quizAnswers[q.id]?.solved;
+  });
   const [pt, setPt] = useState<{ x: number; y: number } | null>(null);
   useEffect(() => {
     const onMove = (e: PointerEvent) => setPt({ x: e.clientX, y: e.clientY });
@@ -143,7 +149,7 @@ function HoverTip() {
     return () => window.removeEventListener('pointermove', onMove);
   }, []);
   const id = STOPS[stop].id;
-  if (!hovered || !pt || !['body', 'end', 'quiz'].includes(id)) return null;
+  if (!hovered || !pt || !['body', 'end', 'quiz'].includes(id) || (id === 'quiz' && !organQuestion)) return null;
   return (
     <div className="hover-tip" style={{ left: pt.x, top: pt.y }} aria-hidden="true">
       {id === 'quiz' ? 'Select this organ' : ORGANS[hovered].name}
@@ -163,6 +169,7 @@ export default function App() {
   useKeyboard();
   useReducedMotion();
   useJourneyDriver();
+  const stop = useStory((s) => s.stop);
   const reduced = useStory((s) => s.reducedMotion);
   const webgl = useStory((s) => s.webgl);
   const stageReady = useStory((s) => s.stageReady);
@@ -194,7 +201,7 @@ export default function App() {
           <div key={s.id} id={`stop-${s.id}`} className="snap" style={{ top: `${i * 100}vh` }} />
         ))}
       </div>
-      <main className={`exhibit${reduced ? ' reduce-motion' : ''}`} aria-label="Wilms tumor interactive exhibit">
+      <main className={`exhibit${reduced ? ' reduce-motion' : ''}${stop > 0 ? ' is-immersive' : ''}`} aria-label="Wilms tumor interactive exhibit">
         <Backdrops />
         {!fallback && loadStage && (
           <div className={`canvas-layer${stageReady ? ' is-ready' : ''}`}>
