@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { creditLine, SUBMISSION, periodLabel } from '../app/config';
+import { creditLine, names, SUBMISSION, periodLabel } from '../app/config';
 import { useStory } from '../app/store';
 import { MEDIA_CREDITS, SOURCES } from '../content/citations';
 import { GLOSSARY } from '../content/glossary';
@@ -91,7 +91,7 @@ export function SourcesOverlay() {
 
         <div className="student-card">
           <div>
-            <b style={{ color: 'var(--ivory)' }}>{SUBMISSION.studentName}</b>
+            <b style={{ color: 'var(--ivory)' }}>{names()}</b>
           </div>
           <div>
             {SUBMISSION.course}, {periodLabel()}, eponym {SUBMISSION.assignedEponym}

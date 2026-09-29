@@ -1,7 +1,7 @@
 # Build report
 
 **Project:** Wilms tumor, interactive 3D exhibit (Medical Terminology, eponym #27)
-**Student:** Vardhmansinh Rathod · 3rd Block
+**Students:** Vardhmansinh Rathod, Eren Robinson and Shanya Prezy · 3rd Block
 **Report date:** September 28, 2026
 
 ## What was built

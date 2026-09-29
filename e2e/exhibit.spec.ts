@@ -27,6 +27,8 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   await expect(cover).toContainText('wilmz TOO-mer'); // how to say it
   await expect(cover.locator('.cover__def')).toContainText('kidney cancer');
   await expect(cover.locator('.cover__brand')).toContainText('Vardhmansinh Rathod');
+  await expect(cover.locator('.cover__brand')).toContainText('Eren Robinson');
+  await expect(cover.locator('.cover__brand')).toContainText('Shanya Prezy');
   await expect(cover.locator('.cover__brand')).toContainText('3rd Block');
   await expect(cover).toContainText('Scroll down to explore');
   // a pure scene: no slide buttons, arrows or counters

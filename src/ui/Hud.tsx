@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { periodLabel, SUBMISSION } from '../app/config';
+import { names, periodLabel, SUBMISSION } from '../app/config';
 import { useStory } from '../app/store';
 
 /** Full screen hides the browser's bars, which is best on a smart board or projector. */
@@ -37,7 +37,7 @@ export function HudTop() {
         <span className="wordmark__title">Wilms Tumor</span>
         <span className="wordmark__meta">// {SUBMISSION.course}, eponym 27</span>
         <span className="wordmark__meta">
-          {SUBMISSION.studentName}, {periodLabel()}.
+          {names()}, {periodLabel()}.
         </span>
       </div>
       <nav className="hud-links" aria-label="Exhibit tools">

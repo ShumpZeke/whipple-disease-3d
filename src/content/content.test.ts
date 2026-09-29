@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { periodLabel, SUBMISSION } from '../app/config';
+import { names, periodLabel, SUBMISSION } from '../app/config';
 import { MEDIA_CREDITS, SOURCES, SOURCE_BY_ID } from './citations';
 import { GLOSSARY, TERM_BY_KEY } from './glossary';
 import { QUESTIONS } from './quiz';
@@ -203,6 +203,7 @@ describe('quiz', () => {
 describe('submission details', () => {
   it('names the student and shows an editable class period', () => {
     expect(SUBMISSION.studentName).toBe('Vardhmansinh Rathod');
+    expect(names()).toBe('Vardhmansinh Rathod, Eren Robinson and Shanya Prezy');
     expect(SUBMISSION.course).toBe('Medical Terminology');
     expect(SUBMISSION.classPeriod).toBe('3rd Block');
     expect(periodLabel()).toBe('3rd Block');

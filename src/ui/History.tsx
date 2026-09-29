@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { periodLabel, SUBMISSION } from '../app/config';
+import { names, periodLabel, SUBMISSION } from '../app/config';
 import { scrollToStop, smoothstep } from '../app/journey';
 import { SECTIONS, STOPS } from '../content/story';
 import { Cites, RichText } from './RichText';
@@ -42,7 +42,7 @@ function Cover() {
         </h1>
         <p className="cover__meta">// {SUBMISSION.course}, eponym 27</p>
         <p className="cover__meta">
-          By {SUBMISSION.studentName}, {periodLabel()}.
+          By {names()}, {periodLabel()}.
         </p>
       </div>
       <div className="cover__about">

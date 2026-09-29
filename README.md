@@ -1,6 +1,6 @@
 # Wilms Tumor, an interactive 3D exhibit
 
-**Medical Terminology · Eponym #27 · Vardhmansinh Rathod · 3rd Block**
+**Medical Terminology · Eponym #27 · Vardhmansinh Rathod, Eren Robinson and Shanya Prezy · 3rd Block**
 
 One continuous page. Scrolling is a camera zoom: from Max Wilms and his 1899 book, into the
 urinary system, inside a kidney, down to its tiny filters and the young cells where the tumor
@@ -21,6 +21,7 @@ Your name and class are set in [`src/app/config.ts`](src/app/config.ts):
 
 ```ts
 studentName: 'Vardhmansinh Rathod',
+groupMembers: ['Eren Robinson', 'Shanya Prezy'],
 classPeriod: '3rd Block',   // shown on the home screen, the summary and the list of sources
 ```
 
@@ -106,7 +107,7 @@ still pictures instead of 3D.
 - [x] Only the assigned eponym, with all required content
 - [x] All interactive features work (checked by the browser tests)
 - [x] Reference page included (end of the exhibit)
-- [x] Student name and class period: “Vardhmansinh Rathod, 3rd Block” on the home screen, in the corner of every part, and at the end
+- [x] Student name and class period: “Vardhmansinh Rathod, Eren Robinson and Shanya Prezy, 3rd Block” on the home screen, in the corner of every part, and at the end
 - [ ] Proofread and practiced: use the presenter guide
 
 ## Running it

@@ -45,6 +45,6 @@ Commons Attribution 4.0 (CC BY 4.0). Resized and converted to WebP.
 
 ## Written content
 
-Made for Vardhmansinh Rathod’s Medical Terminology eponym project. The story, captions, definitions,
+Made for the Medical Terminology eponym project of Vardhmansinh Rathod, Eren Robinson and Shanya Prezy. The story, captions, definitions,
 quiz and code were produced with the help of Claude (Anthropic), an AI assistant; every fact is
 paraphrased from the references in [SOURCES.md](SOURCES.md).
