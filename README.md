@@ -147,27 +147,37 @@ of `dist/`.
   little damping. Everything (camera, captions, the history cards, the tumor growing, the kidney
   being taken out) is a pure function of `t`, so it can be scrubbed forwards and backwards
   ([`src/app/journey.ts`](src/app/journey.ts)).
-- **The zoom-through.** Within a scene the camera glides. Between scenes it accelerates into a
-  surface while that surface’s colour grows from the middle of the screen, then the next scene opens
-  up through a hole in the middle and comes towards the camera, like flying out of a tunnel.
-  Zooming back out plays the same thing in reverse. ([`src/three/presets.ts`](src/three/presets.ts),
-  [`src/three/Director.tsx`](src/three/Director.tsx), `ZoomVeil` in [`src/app/App.tsx`](src/app/App.tsx))
-- **History to 3D.** The urinary model first appears as an engraved plate on paper, then a sweep
-  “develops” it into the full-colour model.
+- **One world, one zoom.** Everything is one 3D scene, each scale nested inside the last, like
+  *Powers of Ten*: Max Wilms’s study holds his book; the drawing on the book’s plate is the 3D
+  urinary system; the cut-open left kidney holds one filter (a nephron) in its outer layer; beside
+  that filter’s tube sits a clump of young cells; one of those cells holds the DNA. The camera zooms
+  straight through the levels. The distance changes geometrically (every second of scrolling zooms
+  by the same factor) and the spot being dived into stays in view, so there are no cuts, fades or
+  veils, and the dark background never changes. ([`src/three/nested.ts`](src/three/nested.ts),
+  [`src/three/presets.ts`](src/three/presets.ts), [`src/three/Director.tsx`](src/three/Director.tsx))
+- **History to 3D.** The home screen is Max Wilms at his desk in 1899, seen from behind. The camera
+  passes over his shoulder to his book on its stand: the real title page, and a plate whose drawing
+  is the 3D model pressed flat as an engraving. Zooming into the plate, a sweep develops the drawing
+  into the full-colour model while the paper and the room dissolve behind it.
+- **Inside the kidney.** The left kidney opens like a book; its cut face is painted from the model’s
+  real outline. Diving into the outer layer, the painted filters become real ones and the surface
+  opens around the one the camera enters.
 - **3D.** three.js through React Three Fiber. The urinary organs come from BodyParts3D, cleaned up
   in Blender (holes filled, remeshed, smoothed, decimated, ambient occlusion baked) and compressed
-  with meshopt (0.3 MB). The tumor, the cut-open kidney, the nephron, the cells, the DNA and the two
-  scans are made in code.
+  with meshopt (0.3 MB). The study is built from simple shapes by a Blender script
+  (`scripts/build_study.py`, 0.35 MB). The tumor, the cut-open kidney, the nephron, the cells, the
+  DNA and the two scans are made in code.
 
 **Type:** in the style of igloo.inc: IBM Plex Mono for small labels and links (“//” and “//////”),
 IBM Plex Sans for everything people read, and Unbounded for the title like a logo. Headings decode
 into place. The warm colours are this exhibit’s own.
 
-**Performance:** the 3D code loads in the background while the home screen is up; each 3D world is
-mounted and its shaders compiled ahead of time; frames render only while something moves; every
-view draws fewer than 70,000 triangles in at most 10 draw calls; resolution adapts to the device;
-set-ups the camera is not looking at are not drawn at all; low-end devices get the same scenes in
-“lite” mode (see *Presenting it*).
+**Performance:** the 3D code loads in the background while the home screen is up. While it loads,
+every shader is compiled and the key moments of the journey are drawn once off screen, so nothing
+compiles or uploads in the middle of a zoom. Frames render only while something moves; parts far
+out of sight during the dive are not drawn; the heaviest views are the study (about 130,000
+triangles) and the cells around the DNA (about 210,000 triangles in 20 draw calls); resolution adapts
+to the device; low-end devices get the same scenes in “lite” mode (see *Presenting it*).
 **Accessibility:** full keyboard and clicker control, visible focus, captions announced to screen
 readers, `prefers-reduced-motion` (jumps instead of flying), and a still-image version with all the
 text, quiz and sources when WebGL is unavailable.
@@ -178,12 +188,12 @@ text, quiz and sources when WebGL is unavailable.
 src/
   app/        journey (scroll → t), store (state), config (name/period), App
   content/    story stops, sources, glossary, quiz
-  three/      Stage, Director (camera), presets (poses), anatomy/ kidney/ nephron/ cells/ diagnosis/ worlds
-  ui/         captions, history layer, HUD, quiz, overlays, references, term pop-over
+  three/      Stage, Director (camera), presets (poses), nested (how the scales fit), study/ anatomy/ kidney/ nephron/ diagnosis/
+  ui/         captions, home screen, history cards, HUD, quiz, overlays, references, term pop-over
   styles/     app.css
-public/       model (.glb), home-screen picture, portrait, textures, fallback stills
+public/       models (.glb), portrait, textures, fallback stills
 e2e/          Playwright tests
-scripts/      model processing (Blender) and screenshot helpers
+scripts/      model building (Blender), compression and screenshot helpers
 ```
 
 ## License notes

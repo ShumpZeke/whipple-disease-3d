@@ -1,30 +1,28 @@
 import { AdaptiveDpr, Environment, Lightformer, PerformanceMonitor } from '@react-three/drei';
-import { Canvas, useThree } from '@react-three/fiber';
-import { Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { registerInvalidate } from '../app/journey';
+import { journey, pokeJourney, registerInvalidate } from '../app/journey';
 import { LITE, rememberLite } from '../app/quality';
 import { useStory } from '../app/store';
-import { STOPS, type World } from '../content/story';
+import { LAST_STOP, STOPS, type StopId } from '../content/story';
 import { AnatomyWorld } from './anatomy/AnatomyWorld';
-import { CellsWorld } from './cells/CellsWorld';
-import { DiagnosisWorld } from './diagnosis/DiagnosisWorld';
-import { Director } from './Director';
-import { KidneyWorld } from './kidney/KidneyWorld';
-import { NephronWorld } from './nephron/NephronWorld';
+import { Scans } from './diagnosis/Scans';
+import { Director, view } from './Director';
+import { hingeState } from './hinge';
+import { useLevels } from './levels';
+import { StudyLevel } from './study/StudyLevel';
 import { TestHooks } from './TestHooks';
 
-const ANIMATED: World[] = ['nephron', 'cells', 'diagnosis'];
-const ORDER: World[] = ['anatomy', 'kidney', 'nephron', 'cells', 'diagnosis'];
+/** Stops whose scene moves by itself (flowing filter, dividing cells, spinning DNA, scans, turntable). */
+const ANIMATED: StopId[] = ['nephron', 'cause', 'genes', 'ultrasound', 'scans', 'end'];
 
 /**
  * Rendering only happens when something changes: while scrolling, and while a scene that moves by
- * itself (the filter, the dividing cells, the scans) is on screen. Those scenes are paced at 60 frames a
- * second at most (screens that refresh 120 times a second would otherwise draw twice as often),
- * and at 30 on slower devices.
+ * itself is on screen. Those scenes are paced at 60 frames a second at most (screens that refresh
+ * 120 times a second would otherwise draw twice as often), and at 30 on slower devices.
  */
 function LoopControl() {
-  const world = useStory((s) => s.displayWorld);
   const stop = useStory((s) => s.stop);
   const reduced = useStory((s) => s.reducedMotion);
   const lowPower = useStory((s) => s.lowPower);
@@ -38,8 +36,7 @@ function LoopControl() {
   useEffect(() => {
     setFrameloop('demand');
     invalidate();
-    const animated = ANIMATED.includes(world) || (world === 'anatomy' && STOPS[stop].id === 'end');
-    if (!animated || reduced) return;
+    if (!ANIMATED.includes(STOPS[stop].id) || reduced) return;
     const gap = 1000 / (LITE || lowPower ? 30 : 60) - 2;
     let last = 0;
     let raf = requestAnimationFrame(function tick(now) {
@@ -50,54 +47,97 @@ function LoopControl() {
       raf = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(raf);
-  }, [world, stop, reduced, lowPower, setFrameloop, invalidate]);
+  }, [stop, reduced, lowPower, setFrameloop, invalidate]);
   return null;
 }
 
-/* ------------------------------------------------------------------ light rig */
-
-type PointCfg = { pos: [number, number, number]; i: number; d: number; color: string };
-type LightCfg = { hemi: number; key: number; point: PointCfg };
-const OFF: PointCfg = { pos: [0, 0, 0], i: 0, d: 1, color: '#ffffff' };
-const RIG: Record<World, LightCfg> = {
-  none: { hemi: 0, key: 1.55, point: OFF },
-  anatomy: { hemi: 0.08, key: 1.55, point: OFF },
-  kidney: { hemi: 0.5, key: 1.6, point: { pos: [1.2, 1.4, 2.6], i: 2.2, d: 7, color: '#ffe8da' } },
-  nephron: { hemi: 0.35, key: 1.9, point: { pos: [0.9, 1.3, 2.6], i: 2.4, d: 6, color: '#ffe2d2' } },
-  cells: { hemi: 0.25, key: 1.2, point: { pos: [2, 3, 5], i: 2.6, d: 14, color: '#ffe9f2' } },
-  diagnosis: { hemi: 0.35, key: 1.7, point: { pos: [0.6, 1.6, 2.4], i: 2.0, d: 7, color: '#eef3ff' } },
-};
+/* ------------------------------------------------------------------ lights */
 
 /**
- * One fixed set of lights for every world (2 directional, 1 point, hemisphere, ambient).
- * Worlds change intensities, never the number of lights, so every shader program stays valid:
- * each world compiles once and switches instantly. Fewer lights also means smaller shaders.
+ * One fixed set of lights for the whole journey (ambient, hemisphere, a key and a rim light, a
+ * fill light that travels with the camera, and the oil lamp in the study). Each stop sets their
+ * strengths and the scroll blends between neighbouring stops, so the light changes as smoothly as
+ * the camera moves. The number of lights never changes, so every shader stays valid.
  */
+type Rig = { amb: number; hemi: number; key: number; rim: number; fill: number; fillAt: [number, number, number]; fillColor: string };
+const ORGANS: Rig = { amb: 0.14, hemi: 0.08, key: 1.55, rim: 1.3, fill: 0, fillAt: [0.4, 0.4, 0.6], fillColor: '#ffe8da' };
+const STUDY: Rig = { amb: 0.05, hemi: 0.05, key: 0.22, rim: 0.35, fill: 0, fillAt: [0.4, 0.4, 0.6], fillColor: '#ffe8da' };
+const RIGS: Record<StopId, Rig> = {
+  title: STUDY,
+  doctor: STUDY,
+  book: STUDY,
+  name: { ...STUDY, key: 0.4 },
+  body: ORGANS,
+  kidneys: ORGANS,
+  inside: { amb: 0.16, hemi: 0.5, key: 1.6, rim: 1.1, fill: 1.4, fillAt: [0.35, 0.4, 0.7], fillColor: '#ffe8da' },
+  nephron: { amb: 0.14, hemi: 0.35, key: 1.9, rim: 1.2, fill: 1.6, fillAt: [0.2, 0.35, 0.5], fillColor: '#ffe2d2' },
+  cause: { amb: 0.14, hemi: 0.25, key: 1.2, rim: 1.2, fill: 1.8, fillAt: [0.3, 0.45, 0.8], fillColor: '#ffe9f2' },
+  genes: { amb: 0.14, hemi: 0.25, key: 1.2, rim: 1.2, fill: 1.8, fillAt: [0.3, 0.45, 0.8], fillColor: '#ffe9f2' },
+  lump: ORGANS,
+  signs: ORGANS,
+  ultrasound: { ...ORGANS, hemi: 0.3, fill: 0.8, fillAt: [0.3, 0.5, 0.7], fillColor: '#eef3ff' },
+  scans: { ...ORGANS, hemi: 0.3, fill: 0.8, fillAt: [0.3, 0.5, 0.7], fillColor: '#eef3ff' },
+  treatment: ORGANS,
+  outlook: ORGANS,
+  quiz: ORGANS,
+  end: ORGANS,
+};
+const ease = (k: number) => k * k * (3 - 2 * k);
+/** The oil lamp's flame, in the study (metres, three.js axes). */
+const FLAME = new THREE.Vector3(-0.46, 1.09, -0.12);
+
 function LightRig() {
-  const world = useStory((s) => s.displayWorld);
-  const invalidate = useThree((s) => s.invalidate);
+  const levels = useLevels();
+  const amb = useRef<THREE.AmbientLight>(null);
   const hemi = useRef<THREE.HemisphereLight>(null);
   const key = useRef<THREE.DirectionalLight>(null);
-  const point = useRef<THREE.PointLight>(null);
-  useLayoutEffect(() => {
-    const c = RIG[world];
-    if (hemi.current) hemi.current.intensity = c.hemi;
-    if (key.current) key.current.intensity = c.key;
-    if (point.current) {
-      point.current.position.set(...c.point.pos);
-      point.current.intensity = c.point.i;
-      point.current.distance = c.point.d;
-      point.current.color.set(c.point.color);
+  const rim = useRef<THREE.DirectionalLight>(null);
+  const fill = useRef<THREE.PointLight>(null);
+  const lamp = useRef<THREE.PointLight>(null);
+  const camera = useThree((s) => s.camera);
+  const flame = useMemo(() => FLAME.clone().applyMatrix4(levels.study), [levels]);
+  const color = useMemo(() => ({ a: new THREE.Color(), b: new THREE.Color() }), []);
+  const v = useMemo(() => ({ right: new THREE.Vector3(), up: new THREE.Vector3(), back: new THREE.Vector3() }), []);
+  useFrame(() => {
+    const t = Math.min(LAST_STOP, Math.max(0, journey.t));
+    const i = Math.min(LAST_STOP - 1, Math.floor(t));
+    const k = ease(t - i);
+    const A = RIGS[STOPS[i].id];
+    const B = RIGS[STOPS[i + 1].id];
+    const mix = (a: number, b: number) => a + (b - a) * k;
+    if (amb.current) amb.current.intensity = mix(A.amb, B.amb);
+    if (hemi.current) hemi.current.intensity = mix(A.hemi, B.hemi);
+    if (key.current) key.current.intensity = mix(A.key, B.key);
+    if (rim.current) rim.current.intensity = mix(A.rim, B.rim);
+    if (fill.current) {
+      // travels with the camera and scales with the zoom, so it lights every scale the same way
+      const d = view.d;
+      v.back.copy(camera.position).sub(view.target).normalize();
+      v.up.copy(camera.up).normalize();
+      v.right.crossVectors(v.up, v.back).normalize();
+      const off = [0, 1, 2].map((j) => mix(A.fillAt[j], B.fillAt[j]));
+      fill.current.position
+        .copy(view.target)
+        .addScaledVector(v.right, off[0] * d)
+        .addScaledVector(v.up, off[1] * d)
+        .addScaledVector(v.back, off[2] * d);
+      const r2 = d * d * (off[0] ** 2 + off[1] ** 2 + off[2] ** 2);
+      fill.current.intensity = mix(A.fill, B.fill) * r2 * 1.6;
+      fill.current.color.copy(color.a.set(A.fillColor)).lerp(color.b.set(B.fillColor), k);
     }
-    invalidate();
-  }, [world, invalidate]);
+    if (lamp.current) {
+      lamp.current.position.copy(flame);
+      lamp.current.intensity = 42 * hingeState(journey.t).lamp;
+    }
+  });
   return (
     <>
-      <ambientLight intensity={0.14} />
+      <ambientLight ref={amb} intensity={0.14} />
       <hemisphereLight ref={hemi} args={['#fff1ea', '#3a1d22', 0]} />
       <directionalLight ref={key} position={[2.6, 4.2, 3.6]} intensity={1.55} color="#fff1e2" />
-      <directionalLight position={[-3.5, 1.8, -3.8]} intensity={1.3} color="#ffd6c6" />
-      <pointLight ref={point} intensity={0} decay={2} />
+      <directionalLight ref={rim} position={[-3.5, 1.8, -3.8]} intensity={1.3} color="#ffd6c6" />
+      <pointLight ref={fill} intensity={0} decay={2} distance={0} />
+      <pointLight ref={lamp} intensity={0} decay={2} distance={0} color="#ffc27a" />
       <Environment resolution={256} frames={1}>
         <Lightformer form="rect" intensity={2.4} color="#fff4e8" position={[0, 4.5, 2.5]} scale={[7, 2.4, 1]} rotation-x={Math.PI / 2.6} />
         <Lightformer form="rect" intensity={1.3} color="#ffd9c4" position={[-5, 1, 1.5]} scale={[3, 6, 1]} rotation-y={Math.PI / 2} />
@@ -110,108 +150,76 @@ function LightRig() {
   );
 }
 
-/* ------------------------------------------------------------------ worlds */
+/* ------------------------------------------------------------------ the one world */
 
 /**
- * Owns a world's visibility. On mount it compiles the world's shaders in parallel
- * (renderer.compileAsync) while the world is still hidden, then reports it ready.
+ * Moments of the journey drawn once, off screen, while the exhibit loads: some parts only take
+ * their final form while you scroll (the kidney's cut faces, the cells' colours, the scan
+ * pictures), so this compiles their shaders and uploads their textures before the first scroll
+ * instead of in the middle of a zoom.
  */
-function WorldShell({ name, children }: { name: World; children: ReactNode }) {
+const WARM_UP = [3.5, 5.7, 6.6, 7.6, 8.6, 9, 9.6, 11.7, 12.2, 12.9, 13.6, 14.2];
+
+/**
+ * Everything lives in one scene, each scale nested inside the last: the study holds the book, the
+ * book's drawing is the organs, the kidney holds the filter, and so on. On mount every shader is
+ * compiled in the background (renderer.compileAsync) and the journey's key moments are drawn once
+ * before the stage says it is ready.
+ */
+function World() {
   const ref = useRef<THREE.Group>(null);
-  const display = useStory((s) => s.displayWorld);
-  const setReady = useStory((s) => s.setWorldReady);
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const camera = useThree((s) => s.camera);
   const invalidate = useThree((s) => s.invalidate);
-
+  const advance = useThree((s) => s.advance);
+  const setStageReady = useStory((s) => s.setStageReady);
+  const setWorldReady = useStory((s) => s.setWorldReady);
   useLayoutEffect(() => {
     const g = ref.current;
     if (!g) return;
     let alive = true;
-    const was = g.visible;
-    g.visible = true;
+    // draw everything once, hidden parts too, so their shaders compile up front
+    const hidden: THREE.Object3D[] = [];
+    g.traverse((o) => {
+      if (!o.visible) {
+        hidden.push(o);
+        o.visible = true;
+      }
+    });
     const t0 = performance.now();
-    gl.compileAsync(g, camera, scene)
+    gl.compileAsync(scene, camera)
       .catch(() => undefined)
       .then(() => {
         if (!alive) return;
+        const t1 = performance.now();
+        const keep = journey.t;
+        for (const t of WARM_UP) {
+          journey.t = t;
+          pokeJourney();
+          advance(performance.now());
+        }
+        journey.t = keep;
+        pokeJourney();
+        advance(performance.now());
         if (import.meta.env.DEV || window.location.search.includes('e2e'))
-          console.info(`[stage] ${name} compiled in ${Math.round(performance.now() - t0)} ms (t=${Math.round(performance.now())})`);
-        setReady(name);
+          console.info(`[stage] compiled in ${Math.round(t1 - t0)} ms, warmed up in ${Math.round(performance.now() - t1)} ms`);
+        setWorldReady('anatomy');
+        setStageReady(true);
         invalidate();
       });
-    g.visible = was;
+    for (const o of hidden) o.visible = false;
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
-    <group ref={ref} visible={display === name}>
-      {children}
+    <group ref={ref}>
+      <StudyLevel visible />
+      <AnatomyWorld visible />
+      <Scans visible />
     </group>
-  );
-}
-
-/** Mount the needed world first, then the rest one at a time when the browser is idle. */
-function useProgressiveMount() {
-  const stop = useStory((s) => s.stop);
-  const display = useStory((s) => s.displayWorld);
-  const worldReady = useStory((s) => s.worldReady);
-  const [mounted, setMounted] = useState<World[]>(() => {
-    const w = STOPS[useStory.getState().stop].world;
-    return w === 'none' || w === 'anatomy' ? ['anatomy'] : ['anatomy', w];
-  });
-  // the world on screen (and the next stop's) must be mounted right away
-  useEffect(() => {
-    const need = [STOPS[stop].world, STOPS[Math.min(STOPS.length - 1, stop + 1)].world, display].filter(
-      (w) => w !== 'none' && !mounted.includes(w),
-    );
-    if (need.length) setMounted((m) => [...m, ...need.filter((w, i) => need.indexOf(w) === i)]);
-  }, [stop, display, mounted]);
-  // then warm up the rest in story order, once the previous one has compiled
-  useEffect(() => {
-    if (!worldReady.anatomy) return;
-    const pending = ORDER.filter((w) => !mounted.includes(w));
-    if (!pending.length) return;
-    const allReady = mounted.every((w) => worldReady[w]);
-    if (!allReady) return;
-    const go = () => setMounted((m) => (m.includes(pending[0]) ? m : [...m, pending[0]]));
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(go, { timeout: 1500 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const id = setTimeout(go, 300);
-    return () => clearTimeout(id);
-  }, [worldReady, mounted]);
-  return mounted;
-}
-
-function Worlds() {
-  const display = useStory((s) => s.displayWorld);
-  const mounted = useProgressiveMount();
-  const ready = useStory((s) => s.worldReady.anatomy);
-  const setStageReady = useStory((s) => s.setStageReady);
-  useEffect(() => {
-    if (ready) setStageReady(true);
-  }, [ready, setStageReady]);
-  return (
-    <>
-      {ORDER.filter((w) => mounted.includes(w)).map((w) => {
-        const vis = display === w;
-        return (
-          <WorldShell key={w} name={w}>
-            {w === 'anatomy' && <AnatomyWorld visible={vis} />}
-            {w === 'kidney' && <KidneyWorld visible={vis} />}
-            {w === 'nephron' && <NephronWorld visible={vis} />}
-            {w === 'cells' && <CellsWorld visible={vis} />}
-            {w === 'diagnosis' && <DiagnosisWorld visible={vis} />}
-          </WorldShell>
-        );
-      })}
-    </>
   );
 }
 
@@ -226,18 +234,23 @@ const DPR_CAP = LITE ? LITE_CAP : Math.min(1.5, Math.max(0.75, 2600 / CSS_WIDTH)
 
 /**
  * If a device that looked fast keeps dropping frames once everything has loaded, switch it to the
- * lighter settings now (fewer pixels, 30 fps, no screen effects) and remember that for next time.
+ * lighter settings now (fewer pixels, 30 fps) and remember that for next time. Frames are only
+ * watched once the stage is ready (loading and compiling the shaders stalls every device).
  */
-const started = performance.now();
+let readyAt = Infinity;
 let declines = 0;
 
 export default function Stage() {
   const setWebgl = useStory((s) => s.setWebgl);
   const setLowPower = useStory((s) => s.setLowPower);
+  const ready = useStory((s) => s.stageReady);
   const [dpr, setDpr] = useState(DPR_CAP);
+  useEffect(() => {
+    if (ready) readyAt = performance.now();
+  }, [ready]);
   const onDecline = () => {
     setDpr(Math.max(0.5, Math.min(DPR_CAP, LITE_CAP) * 0.85));
-    if (LITE || performance.now() - started < 10000 || ++declines < 2) return;
+    if (LITE || performance.now() - readyAt < 10000 || ++declines < 2) return;
     setLowPower();
     rememberLite();
     document.documentElement.classList.add('lite');
@@ -254,11 +267,12 @@ export default function Stage() {
         powerPreference: 'high-performance',
         preserveDrawingBuffer: false,
       }}
-      onCreated={({ gl }) => {
+      onCreated={({ gl, camera }) => {
         gl.setClearColor(0x000000, 0);
         gl.toneMapping = THREE.NeutralToneMapping;
         gl.toneMappingExposure = 1.05;
         gl.localClippingEnabled = true;
+        camera.layers.enableAll();
         // the picture is described by the captions; its labels and buttons stay reachable
         gl.domElement.setAttribute('aria-hidden', 'true');
         // if the graphics card drops the 3D and doesn't bring it back, switch to the still images
@@ -271,13 +285,13 @@ export default function Stage() {
         setWebgl('ok');
       }}
     >
-      <PerformanceMonitor onDecline={onDecline} onIncline={() => setDpr(useStory.getState().lowPower ? LITE_CAP : DPR_CAP)} flipflops={3} />
+      {ready && <PerformanceMonitor onDecline={onDecline} onIncline={() => setDpr(useStory.getState().lowPower ? LITE_CAP : DPR_CAP)} flipflops={3} />}
       <AdaptiveDpr pixelated={false} />
       <LoopControl />
-      <LightRig />
       <Suspense fallback={null}>
         <Director />
-        <Worlds />
+        <LightRig />
+        <World />
         <TestHooks />
       </Suspense>
     </Canvas>

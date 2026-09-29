@@ -1,7 +1,12 @@
 import { useStory } from '../app/store';
 import { STOPS } from '../content/story';
+import { ProfileCard, WordPartsCard } from './HistoryCards';
 
 const IMAGES: Record<string, { src: string; alt: string }> = {
+  none: {
+    src: '/fallback/study.webp',
+    alt: 'A 3D scene made for this exhibit: a doctor in a dark suit, seen from behind, writing at his desk by an oil lamp, with an old book open on a stand.',
+  },
   anatomy: {
     src: '/fallback/urinary.webp',
     alt: 'Rendered 3D model of the urinary system: two kidneys, the ureters and the bladder, with the aorta and the vena cava.',
@@ -24,15 +29,27 @@ const IMAGES: Record<string, { src: string; alt: string }> = {
   },
 };
 
-/** Shown when WebGL is unavailable: all text, quiz and sources still work. */
+/** Shown when WebGL is unavailable: all text, cards, quiz and sources still work. */
 export function Fallback() {
   const stop = useStory((s) => s.stop);
-  const img = IMAGES[STOPS[stop].world] ?? IMAGES.anatomy;
+  const { id, world } = STOPS[stop];
+  const img = IMAGES[world] ?? IMAGES.anatomy;
   return (
     <>
       <div className="fallback-img">
         <img src={img.src} alt={img.alt} onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
       </div>
+      {/* the cards that hang in the 3D study */}
+      {id === 'doctor' && (
+        <div className="fallback-card">
+          <ProfileCard className="profile--label" />
+        </div>
+      )}
+      {id === 'name' && (
+        <div className="fallback-card">
+          <WordPartsCard className="wordparts--label" />
+        </div>
+      )}
       <p className="fallback-note" role="status">
         Interactive 3D isn’t available on this device, so still images are shown. All facts, terms and sources still work.
       </p>
@@ -41,9 +58,8 @@ export function Fallback() {
 }
 
 export function StageLoading() {
-  const stop = useStory((s) => s.stop);
   const ready = useStory((s) => s.stageReady);
-  if (ready || STOPS[stop].world === 'none') return null;
+  if (ready) return null;
   return (
     <div className="loading" role="status" aria-live="polite">
       Loading the 3D model

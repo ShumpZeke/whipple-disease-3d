@@ -36,7 +36,7 @@ export const smoothstep = (a: number, b: number, x: number) => {
 };
 export const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
-/** The hinge between the 1899 history and the 3D model. */
+/** The hinge between the history (the book on Max Wilms's desk) and the 3D organs. */
 export const HINGE = STOPS.findIndex((s) => s.id === 'name');
 
 export interface FrameState {
@@ -44,28 +44,9 @@ export interface FrameState {
   f: number;
   a: Stop;
   b: Stop;
-  /** Scenes differ: the camera dives through a surface (veil at f = 0.5). */
-  cut: boolean;
-  hinge: boolean;
+  /** The part of the story the camera is in (for captions, notes and pacing). */
   world: World;
-  veil: number;
-  veilColor: string;
-  /** 'in' dives to a smaller scale, 'out' pulls back to a larger one (when scrolling forward). */
-  dir: 'in' | 'out';
 }
-
-const OUTWARD = new Set(['genes>lump', 'scans>treatment']);
-
-const VEIL: Record<string, string> = {
-  'kidneys>inside': '#7a2f27',
-  'inside>nephron': '#a4493d',
-  'nephron>cause': '#e9c3bb',
-  'cause>genes': '#2a1a3a',
-  'genes>lump': '#140d16',
-  'signs>ultrasound': '#0d0f12',
-  'ultrasound>scans': '#0d0f12',
-  'scans>treatment': '#15171a',
-};
 
 export function frameState(t: number): FrameState {
   const tt = Math.min(LAST_STOP, Math.max(0, t));
@@ -73,18 +54,7 @@ export function frameState(t: number): FrameState {
   const f = tt - i;
   const a = STOPS[i];
   const b = STOPS[i + 1];
-  const hinge = i === HINGE;
-  const cut = a.scene !== b.scene && !hinge && a.scene !== 'history';
-  let world: World = a.world;
-  let veil = 0;
-  if (hinge) {
-    world = f > 0.18 ? 'anatomy' : 'none';
-  } else if (cut) {
-    world = f < 0.5 ? a.world : b.world;
-    veil = smoothstep(0.22, 0.5, f) * (1 - smoothstep(0.5, 0.78, f));
-  }
-  const key = `${a.id}>${b.id}`;
-  return { i, f, a, b, cut, hinge, world, veil, veilColor: VEIL[key] ?? '#120f12', dir: OUTWARD.has(key) ? 'out' : 'in' };
+  return { i, f, a, b, world: f < 0.5 ? a.world : b.world };
 }
 
 /** Stop nearest to t (what the captions describe). */

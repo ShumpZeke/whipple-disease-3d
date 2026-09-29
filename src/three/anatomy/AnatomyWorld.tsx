@@ -3,23 +3,27 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { frameState, HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
+import { HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX, type StopId } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
 import { useJourney } from '../../ui/useJourney';
+import { hingeState } from '../hinge';
 import { Label3D } from '../Label3D';
+import { PAGE } from '../nested';
+import { NephronLevel } from '../nephron/NephronLevel';
+import { TUMOR_R } from '../presets';
 import { mulberry32 } from '../random';
+import { KidneyHalves } from './KidneyHalves';
 import { createOrganMaterial, sharedOrganUniforms } from './organMaterial';
 import { UrinaryModel } from './UrinaryModel';
 import { MODEL_SCALE, useAnatomy } from './useAnatomy';
 
-/* ------------------------------------------------------------ old plate → 3D model */
+/* ------------------------------------------------------------ the drawing becomes 3D */
 
 /**
- * Scroll-driven hinge between history and today. While scrolling from the "name" stop to the
- * "body" stop the paper page gives way to an engraved plate of the model, then a sweep "develops"
- * it into the realistic model (and the paper wipes away with it).
+ * Drives the organ shaders through the hinge from the book page to the 3D organs (see hinge.ts):
+ * engraved and pressed flat onto the page at first, then developed into colour and depth.
  */
 function HingeController() {
   const invalidate = useThree((s) => s.invalidate);
@@ -31,41 +35,21 @@ function HingeController() {
     const b = data.bounds;
     sharedOrganUniforms.uRevealMin.value = b.min.y * MODEL_SCALE;
     sharedOrganUniforms.uRevealMax.value = b.max.y * MODEL_SCALE;
+    // the drawing lies a hair in front of the paper
+    sharedOrganUniforms.uPageZ.value = PAGE.z + 0.012;
   }, [gl, data]);
 
   useEffect(() => {
     const u = sharedOrganUniforms;
-    const paper = document.querySelector<HTMLElement>('.hinge-paper');
-    const label = document.querySelector<HTMLElement>('.plate-label');
-    const main = document.querySelector<HTMLElement>('main.exhibit');
-    const layer = document.querySelector<HTMLElement>('.canvas-layer');
     const apply = (t: number) => {
-      const fs = frameState(t);
-      let engrave = 0;
-      let reveal = -0.2;
-      let paperOpacity = 0;
-      let canvasOpacity = t >= HINGE + 1 ? 1 : 0;
-      let labelOpacity = 0;
-      if (fs.hinge) {
-        const f = fs.f;
-        reveal = 1.3 - 1.45 * smoothstep(0.55, 0.95, f);
-        engrave = f < 0.985 ? 1 : 0;
-        paperOpacity = smoothstep(0.06, 0.34, f);
-        canvasOpacity = smoothstep(0.2, 0.44, f);
-        labelOpacity = smoothstep(0.24, 0.42, f) * (1 - smoothstep(0.52, 0.62, f));
-      }
-      u.uEngrave.value = engrave;
-      u.uReveal.value = reveal;
-      // model height maps to roughly 15%–85% of the viewport in the plate framing
-      paper?.style.setProperty('--sweep', String(0.15 + (1 - reveal) * 0.7));
-      if (paper) paper.style.opacity = String(paperOpacity);
-      if (label) label.style.opacity = String(labelOpacity);
-      if (layer) layer.style.opacity = String(canvasOpacity);
-      main?.classList.toggle('is-paper', fs.hinge && fs.f > 0.16 && reveal > 0.45);
+      const h = hingeState(t);
+      u.uEngrave.value = h.engrave;
+      u.uReveal.value = h.reveal;
+      u.uFlatten.value = h.flatten;
       invalidate();
     };
     apply(journey.t);
-    return onJourneyFrame((t) => apply(t));
+    return onJourneyFrame(apply);
   }, [invalidate]);
 
   return null;
@@ -73,13 +57,11 @@ function HingeController() {
 
 /* ------------------------------------------------------------ the tumor and the operation */
 
-/** Tumor size in world units (the model is shown ×5, so 0.13 is about 2.6 cm on the real-size model). */
-const TUMOR_R = 0.13;
 /** Where the removed kidney goes: out of the body towards the viewer and off to the side. */
 const LIFT = new THREE.Vector3(0.95, 0.3, 0.8);
 
 /** 0 → 1 while the tumor grows in, on the way to the "lump" stop. */
-const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.4, STOP_INDEX.lump, t) * (t < STOP_INDEX.outlook + 0.5 ? 1 : 0);
+const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.22, STOP_INDEX.lump, t) * (t < STOP_INDEX.outlook + 0.5 ? 1 : 0);
 /** 0 → 1 while the left kidney is taken out (treatment → outlook), 1 → 0 while it comes back for the quiz. */
 const removal = (t: number) =>
   smoothstep(STOP_INDEX.treatment + 0.1, STOP_INDEX.outlook - 0.1, t) - smoothstep(STOP_INDEX.outlook + 0.1, STOP_INDEX.quiz - 0.1, t);
@@ -120,6 +102,7 @@ function Tumor() {
   const stopId = useStopId();
   const group = useRef<THREE.Group>(null);
   const mass = useRef<THREE.Mesh>(null);
+  const tag = useRef<HTMLDivElement>(null);
   // the kidney turns about its own centre as it is lifted out; the tumor turns with it
   const pivot = useMemo(
     () => ((data.meshes.LeftKidney?.userData.base as THREE.Vector3 | undefined)?.clone() ?? new THREE.Vector3(0.06, 0.075, -0.015)).multiplyScalar(MODEL_SCALE),
@@ -166,6 +149,7 @@ function Tumor() {
         mass.current.visible = s > 0.001 && e < 0.999;
         mass.current.scale.setScalar(Math.max(0.001, s) * TUMOR_R);
       }
+      if (tag.current) tag.current.style.opacity = smoothstep(0.85, 1, s).toFixed(3);
       if (group.current) {
         group.current.position.copy(pivot).addScaledVector(LIFT, e);
         group.current.rotation.set(0, 0, -0.5 * e);
@@ -198,8 +182,8 @@ function Tumor() {
     <group ref={group} position={pivot}>
       <group position={pivot.clone().negate()}>
         <mesh ref={mass} geometry={built.geo} material={built.mat} position={built.center} quaternion={built.q} visible={false} />
-        <Label3D visible={stopId === 'lump' || stopId === 'signs'} position={built.labelAt} interactive>
-          <div className="leader">
+        <Label3D visible at={['lump', 'signs']} position={built.labelAt} interactive>
+          <div ref={tag} className="leader" style={{ opacity: 0 }}>
             <span className="leader__line" style={{ width: 36 }} />
             <span className="tag">
               Wilms tumor <Cites ids={[1]} />
@@ -215,7 +199,6 @@ function Tumor() {
 
 /** At the "body" stop, a single marker invites the visitor to zoom in on the kidneys. */
 function KidneyMarker({ visible }: { visible: boolean }) {
-  const stopId = useStopId();
   const data = useAnatomy();
   const box = useRef<HTMLDivElement | null>(null);
   // only once the engraving has fully "developed" into the 3D model
@@ -235,7 +218,7 @@ function KidneyMarker({ visible }: { visible: boolean }) {
   if (!a) return null;
   const p = a.position.clone().multiplyScalar(MODEL_SCALE);
   return (
-    <Label3D visible={visible && stopId === 'body'} position={p} center interactive>
+    <Label3D visible={visible} at="body" position={p} center interactive>
       <div ref={attach} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: 0 }}>
         <button
           type="button"
@@ -308,7 +291,6 @@ const LABELS: { stop: StopId; anchor: string; left?: boolean; width?: number; bo
 ];
 
 function OrganLabels({ visible }: { visible: boolean }) {
-  const stopId = useStopId();
   const data = useAnatomy();
   return (
     <>
@@ -316,7 +298,7 @@ function OrganLabels({ visible }: { visible: boolean }) {
         const a = data.anchors[l.anchor];
         if (!a) return null;
         return (
-          <Label3D key={i} visible={visible && stopId === l.stop} position={a.position.clone().multiplyScalar(MODEL_SCALE)} interactive>
+          <Label3D key={i} visible={visible} at={l.stop} position={a.position.clone().multiplyScalar(MODEL_SCALE)} interactive>
             <div className={`leader${l.left ? ' leader--left' : ''}`} style={{ animation: `rise 700ms ${300 + i * 120}ms both` }}>
               <span className="leader__line" style={{ width: l.width ?? 32 }} />
               <span className="tag">{l.body}</span>
@@ -353,27 +335,35 @@ export function AnatomyWorld({ visible }: { visible: boolean }) {
     }
   });
 
+  // the soft shadow appears once the drawing has become 3D (drawn once: kept out of re-renders,
+  // which would redraw it)
+  const shadow = useRef<THREE.Group>(null);
+  const shadowPlane = useMemo(
+    () => <ContactShadows position={[0, -0.9, 0]} scale={3.2} blur={2.6} far={1.4} resolution={512} opacity={0.5} color="#050404" frames={1} />,
+    [],
+  );
+  useEffect(
+    () =>
+      onJourneyFrame((t) => {
+        if (shadow.current) shadow.current.visible = hingeState(t).shadow > 0.02 && (t < STOP_INDEX.ultrasound - 0.3 || t > STOP_INDEX.scans + 0.45);
+      }),
+    [],
+  );
+
   return (
     <group>
       <group ref={g}>
         <UrinaryModel />
+        <KidneyHalves visible={visible} />
         <Tumor />
       </group>
+      <NephronLevel visible={visible} />
       <KidneyMarker visible={visible} />
       <OrganLabels visible={visible} />
       <HingeController />
-      {visible && (
-        <ContactShadows
-          position={[0, -0.9, 0]}
-          scale={3.2}
-          blur={2.6}
-          far={1.4}
-          resolution={512}
-          opacity={id === 'body' ? 0.45 : 0.55}
-          color="#050404"
-          frames={1}
-        />
-      )}
+      <group ref={shadow} visible={false}>
+        {shadowPlane}
+      </group>
     </group>
   );
 }

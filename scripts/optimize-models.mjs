@@ -2,7 +2,7 @@
 // dedup -> prune (keeps named anchor nodes) -> reorder -> quantize -> EXT_meshopt_compression.
 //
 // Usage: node scripts/optimize-models.mjs [rawDir]
-//   rawDir defaults to ../wilms-asset-work/out (output of build_urinary.py, see BUILD_REPORT.md)
+//   rawDir defaults to ../wilms-asset-work/out (output of build_urinary.py and build_study.py)
 import { NodeIO } from '@gltf-transform/core';
 import { ALL_EXTENSIONS, EXTMeshoptCompression } from '@gltf-transform/extensions';
 import { dedup, prune, quantize, reorder } from '@gltf-transform/functions';
@@ -22,7 +22,7 @@ const io = new NodeIO()
   .registerExtensions(ALL_EXTENSIONS)
   .registerDependencies({ 'meshopt.decoder': MeshoptDecoder, 'meshopt.encoder': MeshoptEncoder });
 
-const models = ['urinary'];
+const models = ['urinary', 'study'];
 for (const name of models) {
   const src = join(rawDir, `${name}_raw.glb`);
   if (!existsSync(src)) {

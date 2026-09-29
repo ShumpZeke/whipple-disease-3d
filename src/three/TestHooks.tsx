@@ -12,6 +12,8 @@ declare global {
       organPoint: (organ: string) => { x: number; y: number } | null;
       state: () => { stop: number; id: string; t: number; world: string; quality: string };
       renderInfo: () => { calls: number; triangles: number; programs: number; geometries: number; textures: number };
+      /** The compiled shader programs (name and cache key), to check that nothing compiles late. */
+      programs: () => string[];
       /** Render once and wait for the graphics card to finish (for timing). */
       renderNow: () => void;
       scene: () => unknown;
@@ -47,6 +49,7 @@ export function TestHooks() {
         const ctx = gl.getContext();
         ctx.readPixels(0, 0, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, new Uint8Array(4));
       },
+      programs: () => (gl.info.programs ?? []).map((p) => `${p.name} ${(p as unknown as { cacheKey: string }).cacheKey}`),
       renderInfo: () => ({
         calls: gl.info.render.calls,
         triangles: gl.info.render.triangles,

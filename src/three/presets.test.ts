@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { frameState } from '../app/journey';
 import { LAST_STOP, STOPS } from '../content/story';
-import { entryPose, exitPose, PLATE, stopPose, type AnatomyRefs, type Pose } from './presets';
+import { nestLevels, type Levels } from './levels';
+import { localPose, makePose, worldPose, zoomLerp, type AnatomyRefs } from './presets';
 
 // the anchors as they come out of public/models/urinary.glb (×5)
 const refs: AnatomyRefs = {
@@ -12,38 +12,49 @@ const refs: AnatomyRefs = {
   tumor: new THREE.Vector3(0.364, 0.27, 0.008),
   tn: new THREE.Vector3(0.33, 0.05, 0.94).normalize(),
 };
-const dist = (p: Pose, target: Pose['target']) => Math.hypot(p.pos[0] - target[0], p.pos[1] - target[1], p.pos[2] - target[2]);
+// the left kidney at rest: 5 × (its node position, scale 0.0528)
+const kidney = new THREE.Matrix4().makeScale(5, 5, 5).multiply(new THREE.Matrix4().compose(new THREE.Vector3(0.0601, 0.0751, -0.015), new THREE.Quaternion(), new THREE.Vector3(0.0528, 0.0528, 0.0528)));
+const levels = { section: null, ...nestLevels(kidney, { x: 0.3, y: -0.5, r: 0.002 }) } as unknown as Levels;
 
 describe('camera poses', () => {
-  it('frames every modern stop with its own pose', () => {
+  it('gives every stop a finite pose in its own scene', () => {
     for (const s of STOPS) {
-      const p = stopPose(s.id, refs);
-      if (s.scene === 'history') expect(p).toBe(PLATE);
-      else expect(p, s.id).not.toBe(PLATE);
-      for (const v of [...p.pos, ...p.target, p.fov]) expect(Number.isFinite(v), s.id).toBe(true);
+      const p = worldPose(s.id, refs, levels);
+      for (const v of [...p.pos.toArray(), ...p.target.toArray(), ...p.up.toArray(), p.fov]) expect(Number.isFinite(v), s.id).toBe(true);
+      expect(p.pos.distanceTo(p.target), s.id).toBeGreaterThan(0);
+      const level = localPose(s.id, refs).level;
+      if (s.scene === 'history' && s.id !== 'name') expect(level, s.id).toBe('study');
+      else expect(level, s.id).not.toBe('study');
     }
   });
 
-  it('keeps the zoom moving in one direction through each veil', () => {
+  it('nests each scene far inside the one before it', () => {
+    expect(levels.size.nephron).toBeLessThan(levels.size.kidney / 100);
+    expect(levels.size.clump).toBeLessThan(levels.size.nephron);
+    expect(levels.size.dna).toBeLessThan(levels.size.clump / 10);
+    expect(levels.size.study).toBeGreaterThan(1);
+  });
+
+  it('moves between every pair of stops in one smooth, unbroken camera move', () => {
+    const cur = makePose();
+    const prev = makePose();
     for (let i = 0; i < LAST_STOP; i++) {
-      const fs = frameState(i + 0.5);
-      if (!fs.cut) continue;
-      const a = fs.a.id;
-      const b = fs.b.id;
-      const from = stopPose(a, refs);
-      const to = stopPose(b, refs);
-      const exit = exitPose(a, refs);
-      const entry = entryPose(b, refs);
-      expect(exit, `exit ${a}`).not.toBeNull();
-      expect(entry, `entry ${b}`).not.toBeNull();
-      if (fs.dir === 'in') {
-        // head into a surface, then the next scene comes towards us
-        expect(dist(exit!, from.target), `${a}>${b}`).toBeLessThan(dist(from, from.target));
-        expect(dist(entry!, to.target), `${a}>${b}`).toBeGreaterThan(dist(to, to.target));
-      } else {
-        // back away, then settle back from close up in the larger scene
-        expect(dist(exit!, from.target), `${a}>${b}`).toBeGreaterThan(dist(from, from.target));
-        expect(dist(entry!, to.target), `${a}>${b}`).toBeLessThan(dist(to, to.target));
+      const a = worldPose(STOPS[i].id, refs, levels);
+      const b = worldPose(STOPS[i + 1].id, refs, levels);
+      zoomLerp(a, b, 0, cur);
+      expect(cur.pos.distanceTo(a.pos) / a.pos.distanceTo(a.target), `${STOPS[i].id} start`).toBeLessThan(1e-6);
+      zoomLerp(a, b, 1, cur);
+      expect(cur.pos.distanceTo(b.pos) / b.pos.distanceTo(b.target), `${STOPS[i + 1].id} end`).toBeLessThan(1e-6);
+      for (let s = 0; s <= 200; s++) {
+        zoomLerp(a, b, s / 200, cur);
+        const d = cur.pos.distanceTo(cur.target);
+        if (s > 0) {
+          // each small step of scroll moves the camera by only a small part of what it sees
+          const step = cur.pos.distanceTo(prev.pos) / Math.min(d, prev.pos.distanceTo(prev.target));
+          expect(step, `${STOPS[i].id}>${STOPS[i + 1].id} at ${s}`).toBeLessThan(0.25);
+        }
+        prev.pos.copy(cur.pos);
+        prev.target.copy(cur.target);
       }
     }
   });

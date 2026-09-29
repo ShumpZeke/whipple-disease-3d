@@ -8,6 +8,10 @@ import type { OrganLook } from './organs';
  */
 export const sharedOrganUniforms = {
   uEngrave: { value: 0 },
+  /** 1 = full depth; near 0 = pressed flat onto the book page (the organs start as a drawing). */
+  uFlatten: { value: 1 },
+  /** The page plane the organs are pressed onto (world z). */
+  uPageZ: { value: -0.23 },
   /** 0..1 normalised world height of the develop sweep; above it the organ is "developed". */
   uReveal: { value: 1 },
   uRevealMin: { value: -1 },
@@ -24,14 +28,28 @@ export interface OrganMaterial extends THREE.MeshPhysicalMaterial {
       uHighlight: { value: number };
       uHighlightColor: { value: THREE.Color };
       uObjMatrix: { value: THREE.Matrix4 };
+      uCut: { value: THREE.Vector4 };
     };
   };
 }
+
+/**
+ * Planes that slice the organs for the scans (the ultrasound's plane, the CT's slice). Shared by
+ * every organ material; a plane that is not in use sits far away so it cuts nothing.
+ */
+export const slicePlanes = {
+  sagittal: new THREE.Plane(new THREE.Vector3(-1, 0, 0), 1e6),
+  axial: new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e6),
+};
 
 /** `scale` is the world scale applied to the model, so bump heights stay in world units. */
 export function createOrganMaterial(look: OrganLook, scale = 1, hasAO = true): OrganMaterial {
   ensureNoiseTexture();
   const mat = new THREE.MeshPhysicalMaterial({
+    // transparent so the engraved drawing can show the paper through its hatching; organs are
+    // drawn front to back (renderOrder), so while solid they still hide what is behind them
+    transparent: true,
+    clippingPlanes: [slicePlanes.sagittal, slicePlanes.axial],
     color: new THREE.Color(look.color),
     roughness: look.roughness,
     metalness: 0,
@@ -57,6 +75,11 @@ export function createOrganMaterial(look: OrganLook, scale = 1, hasAO = true): O
     uHasAO: { value: hasAO ? 1 : 0 },
     /** Mesh-local → model-space transform (undoes KHR_mesh_quantization) so noise is in metres. */
     uObjMatrix: { value: new THREE.Matrix4() },
+    /**
+     * Cut away a box corner of the organ (world space): x = on, y = keep z below this, z = only above
+     * this y, w = only right of this x. Used to open the left kidney's collecting system.
+     */
+    uCut: { value: new THREE.Vector4(0, 0, 0, 0) },
   };
   mat.userData.uniforms = local;
 
@@ -69,6 +92,8 @@ export function createOrganMaterial(look: OrganLook, scale = 1, hasAO = true): O
         /* glsl */ `#include <common>
         attribute vec4 color;
         uniform mat4 uObjMatrix;
+        uniform float uFlatten;
+        uniform float uPageZ;
         varying vec3 vObjPos;
         varying vec3 vWorldPos;
         varying float vAO;`,
@@ -78,7 +103,13 @@ export function createOrganMaterial(look: OrganLook, scale = 1, hasAO = true): O
         /* glsl */ `#include <project_vertex>
         vObjPos = (uObjMatrix * vec4(position, 1.0)).xyz;
         vWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
-        vAO = color.r;`,
+        vAO = color.r;
+        if (uFlatten < 0.999) {
+          // pressed onto the page: squash depth towards the page plane (lighting keeps the true shape)
+          vec4 wp = vec4(vWorldPos, 1.0);
+          wp.z = uPageZ + (wp.z - uPageZ) * uFlatten;
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }`,
       );
 
     shader.fragmentShader = shader.fragmentShader
@@ -104,7 +135,13 @@ export function createOrganMaterial(look: OrganLook, scale = 1, hasAO = true): O
         uniform vec3 uInk;
         uniform float uPixelRatio;
         uniform float uAOStrength;
+        uniform vec4 uCut;
         ${NOISE_GLSL}`,
+      )
+      .replace(
+        '#include <clipping_planes_fragment>',
+        /* glsl */ `#include <clipping_planes_fragment>
+        if (uCut.x > 0.5 && vWorldPos.z > uCut.y && vWorldPos.y > uCut.z && vWorldPos.x > uCut.w) discard;`,
       )
       .replace(
         '#include <color_fragment>',

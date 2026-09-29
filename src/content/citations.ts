@@ -231,7 +231,7 @@ export interface MediaCredit {
 
 export const MEDIA_CREDITS: MediaCredit[] = [
   {
-    what: '3D kidneys, ureters, bladder, adrenal glands and blood vessels (also the home-screen picture)',
+    what: '3D kidneys, ureters, bladder, adrenal glands and blood vessels (also the drawing in the book)',
     creator: 'BodyParts3D, © The Database Center for Life Science (DBCLS)',
     license: 'CC BY-SA 2.1 Japan',
     url: 'https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html',
@@ -244,10 +244,10 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     url: 'https://commons.wikimedia.org/wiki/File:Portrait_of_Max_Wilms._Wellcome_M0017800.jpg',
   },
   {
-    what: 'Tumor, kidney cross-section, nephron, cells, DNA, ultrasound and CT scenes; paper and grain textures',
-    creator: 'Created for this project (procedural 3D and code)',
+    what: 'The study with Max Wilms at his desk and his book; the tumor, kidney cross-section, nephron, cells, DNA, ultrasound and CT scenes; paper and grain textures',
+    creator: 'Created for this project (modelled in code; the study built with Blender)',
     license: 'Original work',
-    note: 'Illustrations, not to scale, with colors chosen for clarity. The scans are drawings, not patient images.',
+    note: 'Illustrations, not to scale, with colors chosen for clarity. The figure at the desk is not a likeness. The scans are drawings, not patient images.',
   },
   {
     what: 'Exhibit text, code and 3D scenes',

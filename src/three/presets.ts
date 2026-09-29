@@ -1,17 +1,33 @@
 import * as THREE from 'three';
 import type { StopId } from '../content/story';
+import type { Levels } from './levels';
+import { CAUSE_MID } from './nested';
 
 export type V3 = [number, number, number];
-export interface Pose {
+
+/** Which scene's units a pose is written in (see nested.ts). */
+export type LevelId = 'study' | 'organs' | 'kidney' | 'nephron' | 'dna';
+
+export interface LocalPose {
+  level: LevelId;
   pos: V3;
   target: V3;
+  fov: number;
+  /** "Up" on screen, in the scene's units (default +Y). */
+  up?: V3;
+}
+
+export interface WorldPose {
+  pos: THREE.Vector3;
+  target: THREE.Vector3;
+  up: THREE.Vector3;
   fov: number;
 }
 
 /**
- * Anatomy anchors are resolved at runtime (the model is scaled ×5 in the world).
- * `enter` is a front-facing point on the left kidney and `n` its outward normal;
- * `tumor` is where the tumor sits on that kidney's lower half and `tn` its outward normal.
+ * Organ-scene anchors resolved at runtime (the model is scaled ×5). `enter` is a front-facing
+ * point on the left kidney and `n` its outward normal; `tumor` is where the tumor sits on that
+ * kidney's lower half and `tn` its outward normal.
  */
 export interface AnatomyRefs {
   kidney: THREE.Vector3;
@@ -21,167 +37,180 @@ export interface AnatomyRefs {
   tn: THREE.Vector3;
 }
 
+/** Tumor radius in organ-scene units, and where its centre sits along the surface normal. */
+export const TUMOR_R = 0.13;
+export const tumorCenter = (r: AnatomyRefs) => r.tumor.clone().addScaledVector(r.tn, TUMOR_R * 0.45);
+
 const add = (a: THREE.Vector3, d: V3): V3 => [a.x + d[0], a.y + d[1], a.z + d[2]];
-const along = (a: THREE.Vector3, n: THREE.Vector3, k: number): V3 => [a.x + n.x * k, a.y + n.y * k, a.z + n.z * k];
 
 /**
  * Where each stop's subject sits on a landscape screen, as a fraction of half the screen
  * (x: + moves it right, y: + moves it up): clear of the big caption in the bottom-left corner.
  */
 const LAYOUT: Partial<Record<StopId, [number, number]>> = {
+  title: [0.18, -0.04],
+  doctor: [0.22, 0.02],
   body: [0.3, 0],
   kidneys: [0.3, 0.02],
   inside: [0.25, 0.02],
   nephron: [0.25, 0],
-  cause: [0.12, 0.08],
+  cause: [0.12, 0.06],
   genes: [0.22, 0.05],
   lump: [0.3, 0.04],
   signs: [0.3, 0],
-  ultrasound: [0.28, 0.02],
-  scans: [0.26, 0.02],
+  ultrasound: [0.26, 0.02],
+  scans: [0.26, 0],
   treatment: [0.3, 0],
   outlook: [0.3, 0],
   quiz: [0.3, 0],
   end: [0.3, 0],
 };
 
+/** The pose each stop rests at, in its own scene's units. */
+export function localPose(id: StopId, r: AnatomyRefs): LocalPose {
+  const organs = (pos: V3, target: V3, fov: number, up?: V3): LocalPose => ({ level: 'organs', pos, target, fov, up });
+  switch (id) {
+    // the study: Max Wilms at his desk (metres)
+    case 'title':
+      return { level: 'study', pos: [2.05, 1.8, 2.75], target: [-0.02, 1.0, 0.08], fov: 30 };
+    case 'doctor':
+      return { level: 'study', pos: [1.3, 1.52, 1.5], target: [0.06, 1.08, 0.28], fov: 30 };
+    case 'book':
+      // over his right shoulder, looking at the open book on its stand
+      return { level: 'study', pos: [0.5, 1.5, 0.66], target: [0.0, 0.95, -0.13], fov: 30 };
+    // the name: square on to the open book, between Max Wilms and his book (half a metre from the
+    // page, in front of his face), the book on the right of the screen, clear of the caption and the
+    // word card (organ-scene units: the page is the scene)
+    case 'name':
+      return organs([-1.8, 0.02, 4.77], [-1.8, 0, 0], 38);
+    case 'body':
+      return organs([0.45, 0.2, 4.0], [0, -0.02, 0], 30);
+    case 'kidneys':
+      return organs([0.28, 0.5, 2.55], [0, 0.2, -0.04], 30);
+    // inside the left kidney, cut in half (kidney units: it is 2 tall)
+    case 'inside':
+      return { level: 'kidney', pos: [0.3, 0.12, 4.1], target: [0.02, -0.02, 0], fov: 34 };
+    // one filter in the outer layer (nephron units)
+    case 'nephron':
+      return { level: 'nephron', pos: [0.75, 0.3, 6.3], target: [0.45, -0.3, 0], fov: 34 };
+    case 'cause':
+      return { level: 'nephron', pos: add(CAUSE_MID, [0.1, 0.18, 1.35]), target: CAUSE_MID.toArray() as V3, fov: 36 };
+    // inside the nucleus of a young cell (DNA units)
+    case 'genes':
+      return { level: 'dna', pos: [0.2, 0.15, 5.2], target: [0, 0, 0], fov: 34 };
+    case 'lump':
+      return organs(add(r.tumor, [0.75, 0.22, 2.1]), add(r.tumor, [-0.1, 0.08, 0]), 30);
+    case 'signs':
+      return organs([0.6, 0.05, 3.9], [0.06, -0.08, 0], 30);
+    case 'ultrasound': {
+      // from the left side, looking at the scan's fan face-on; the probe (at the front) is at the top
+      const c = tumorCenter(r);
+      const t: V3 = [ULTRASOUND_X(r), c.y - 0.02, c.z + 0.16];
+      return organs([t[0] + 2.7, t[1] + 0.05, t[2] + 0.1], t, 34, [0, 0, 1]);
+    }
+    case 'scans': {
+      // from the feet, looking up at the slice (front of the body at the top, as doctors view it)
+      const y = tumorCenter(r).y;
+      return organs([0.15, y - 3.4, 0.7], [0.05, y, 0], 36, [0, 0, 1]);
+    }
+    case 'treatment':
+      return organs([0.75, 0.42, 2.7], [0.15, 0.22, 0], 30);
+    case 'outlook':
+      return organs([-0.35, 0.42, 2.7], [-0.05, 0.2, 0], 30);
+    case 'quiz':
+      return organs([0.4, 0.18, 4.1], [0, -0.02, 0], 30);
+    case 'end':
+      return organs([0.8, 0.28, 4.2], [0, -0.02, 0], 30);
+  }
+}
+
+/** The ultrasound's slice: a plane at this x through the tumor (organ-scene units). */
+export const ULTRASOUND_X = (r: AnatomyRefs) => tumorCenter(r).x - 0.03;
+
 /** Slide the camera sideways/up so the subject lands at (fx, fy) of the half-screen. */
-function frameAt(p: Pose, fx: number, fy: number, aspect: number): Pose {
+function frameAt(p: LocalPose, fx: number, fy: number, aspect: number): LocalPose {
   const pos = new THREE.Vector3(...p.pos);
   const target = new THREE.Vector3(...p.target);
+  const up0 = new THREE.Vector3(...(p.up ?? [0, 1, 0]));
   const fwd = target.clone().sub(pos);
   const halfH = Math.tan(THREE.MathUtils.degToRad(p.fov / 2)) * fwd.length();
   fwd.normalize();
-  const right = new THREE.Vector3().crossVectors(fwd, THREE.Object3D.DEFAULT_UP).normalize();
+  const right = new THREE.Vector3().crossVectors(fwd, up0).normalize();
   const up = new THREE.Vector3().crossVectors(right, fwd);
   const off = right.multiplyScalar(-fx * halfH * aspect).addScaledVector(up, -fy * halfH);
-  return { pos: pos.add(off).toArray() as V3, target: target.add(off).toArray() as V3, fov: p.fov };
+  return { ...p, pos: pos.add(off).toArray() as V3, target: target.add(off).toArray() as V3 };
 }
 
-/** The pose the camera rests at for each stop (`aspect` = viewport width / height). */
-export function stopPose(id: StopId, r: AnatomyRefs, aspect = 16 / 9): Pose {
-  const p = basePose(id, r);
+/** The local pose with the screen layout applied (`aspect` = viewport width / height). */
+export function stopPose(id: StopId, r: AnatomyRefs, aspect = 16 / 9): LocalPose {
+  const p = localPose(id, r);
   const at = aspect >= 1 ? LAYOUT[id] : undefined;
   return at ? frameAt(p, at[0], at[1], aspect) : p;
 }
 
-function basePose(id: StopId, r: AnatomyRefs): Pose {
-  switch (id) {
-    case 'body':
-      return { pos: [0.45, 0.2, 4.0], target: [0, -0.02, 0], fov: 30 };
-    case 'kidneys':
-      return { pos: [0.28, 0.5, 2.55], target: [0, 0.2, -0.04], fov: 30 };
-    case 'inside':
-      return { pos: [0.35, 0.15, 4.2], target: [0, 0, 0], fov: 34 };
-    case 'nephron':
-      return { pos: [0.75, 0.3, 6.3], target: [0.45, -0.3, 0], fov: 34 };
-    case 'cause':
-      return { pos: [0, 0.25, 6.6], target: [0, 0, 0], fov: 36 };
-    case 'genes':
-      return { pos: [20.2, 0.15, 5.2], target: [20, 0, 0], fov: 34 };
-    case 'lump':
-      return { pos: add(r.tumor, [0.75, 0.22, 2.1]), target: add(r.tumor, [-0.1, 0.08, 0]), fov: 30 };
-    case 'signs':
-      return { pos: [0.6, 0.05, 3.9], target: [0.06, -0.08, 0], fov: 30 };
-    case 'ultrasound':
-      return { pos: [0.35, 0.3, 5.3], target: [0, 0.1, 0], fov: 34 };
-    case 'scans':
-      return { pos: [20.45, 0.35, 7.6], target: [20, -0.05, 0], fov: 34 };
-    case 'treatment':
-      return { pos: [0.75, 0.42, 2.7], target: [0.15, 0.22, 0], fov: 30 };
-    case 'outlook':
-      return { pos: [-0.35, 0.42, 2.7], target: [-0.05, 0.2, 0], fov: 30 };
-    case 'quiz':
-      return { pos: [0.4, 0.18, 4.1], target: [0, -0.02, 0], fov: 30 };
-    case 'end':
-      return { pos: [0.8, 0.28, 4.2], target: [0, -0.02, 0], fov: 30 };
-    default:
-      // history stops: the engraved-plate framing (telephoto, like a flat atlas plate)
-      return PLATE;
-  }
+export function levelMatrix(level: LevelId, levels: Levels | null): THREE.Matrix4 | null {
+  if (level === 'organs' || !levels) return null;
+  return levels[level];
 }
 
-/** Flat, telephoto framing used while the model is still an engraving. */
-export const PLATE: Pose = { pos: [0, 0, 8.7], target: [0, 0, 0], fov: 16 };
-
-/** Where the camera dives to when leaving a stop through a surface (end of the zoom-in). */
-export function exitPose(id: StopId, r: AnatomyRefs): Pose | null {
-  switch (id) {
-    case 'kidneys':
-      return { pos: along(r.enter, r.n, 0.06), target: along(r.enter, r.n, -0.1), fov: 30 };
-    case 'inside':
-      // into the outer layer, where the filters are
-      return { pos: [0.56, 0.32, 0.26], target: [0.56, 0.32, 0], fov: 34 };
-    case 'nephron':
-      // into the wall of the tube, down to its cells
-      return { pos: [1.28, -0.95, 0.55], target: [1.28, -0.95, 0.1], fov: 34 };
-    case 'cause':
-      // into the nucleus of a young cell
-      return { pos: [1.45, 0.2, 0.9], target: [1.45, 0.2, 0], fov: 36 };
-    case 'genes':
-      return { pos: [20.2, 0.2, 14], target: [20, 0, 0], fov: 36 };
-    case 'signs':
-      return { pos: along(r.tumor, r.tn, 0.1), target: along(r.tumor, r.tn, -0.08), fov: 30 };
-    case 'ultrasound':
-      // into the lump on the scan
-      return { pos: [0.38, -0.55, 0.6], target: [0.38, -0.55, 0], fov: 34 };
-    case 'scans':
-      return { pos: [20.3, 0.3, 17], target: [20, 0, 0], fov: 36 };
-    default:
-      return null;
+/** A stop's pose in world units (the organ scene). */
+export function worldPose(id: StopId, r: AnatomyRefs, levels: Levels | null, aspect = 16 / 9): WorldPose {
+  const p = stopPose(id, r, aspect);
+  const m = levelMatrix(p.level, levels);
+  const pos = new THREE.Vector3(...p.pos);
+  const target = new THREE.Vector3(...p.target);
+  const up = new THREE.Vector3(...(p.up ?? [0, 1, 0]));
+  if (m) {
+    pos.applyMatrix4(m);
+    target.applyMatrix4(m);
+    up.transformDirection(m);
   }
+  return { pos, target, up, fov: p.fov };
+}
+
+const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+
+const tmpA = new THREE.Vector3();
+const q = new THREE.Quaternion();
+const qa = new THREE.Quaternion();
+const qb = new THREE.Quaternion();
+const m4 = new THREE.Matrix4();
+
+/** Camera orientation (as a quaternion) looking from `pos` at `target` with `up`. */
+function orientation(p: WorldPose, out: THREE.Quaternion) {
+  m4.lookAt(p.pos, p.target, p.up);
+  return out.setFromRotationMatrix(m4);
 }
 
 /**
- * Arriving by diving in: the next scene comes towards the camera from farther away (along a
- * slightly turned line, for parallax), so the whole journey keeps moving forward.
+ * A continuous zoom from pose A to pose B, even when they are at very different scales: the
+ * viewing distance changes geometrically (every second of the move zooms by the same factor), the
+ * point we look at travels in step with the zoom so the spot we dive into stays in view, and the
+ * camera turns smoothly (quaternion slerp). `k` is 0..1 (eased inside).
  */
-function approach(p: Pose, k: number, yaw = 0.2): Pose {
-  const dx = p.pos[0] - p.target[0];
-  const dy = p.pos[1] - p.target[1];
-  const dz = p.pos[2] - p.target[2];
-  const c = Math.cos(yaw);
-  const s = Math.sin(yaw);
-  return {
-    pos: [p.target[0] + (dx * c + dz * s) * k, p.target[1] + dy * k, p.target[2] + (dz * c - dx * s) * k],
-    target: p.target,
-    fov: p.fov,
-  };
+export function zoomLerp(a: WorldPose, b: WorldPose, k: number, out: WorldPose) {
+  const e = easeInOut(Math.min(1, Math.max(0, k)));
+  const dA = a.pos.distanceTo(a.target);
+  const dB = b.pos.distanceTo(b.target);
+  const la = Math.log(dA);
+  const lb = Math.log(dB);
+  const d = Math.exp(la + (lb - la) * e);
+  const span = Math.abs(lb - la);
+  const wLog = span > 1e-4 ? (d - dA) / (dB - dA) : e;
+  const w = e + (wLog - e) * Math.min(1, span / 1.2);
+  out.target.copy(a.target).lerp(b.target, w);
+  qa.copy(orientation(a, qa));
+  qb.copy(orientation(b, qb));
+  q.slerpQuaternions(qa, qb, e);
+  // the camera looks down its −Z: the camera sits at +Z (in its own frame) from the target
+  tmpA.set(0, 0, 1).applyQuaternion(q);
+  out.pos.copy(out.target).addScaledVector(tmpA, d);
+  out.up.set(0, 1, 0).applyQuaternion(q);
+  out.fov = a.fov + (b.fov - a.fov) * e;
+  return out;
 }
 
-/**
- * Where the camera appears when arriving at a stop through the veil. Dive-ins approach from
- * farther away; pull-backs start close to a surface of the larger scene and back away from it.
- */
-export function entryPose(id: StopId, r: AnatomyRefs): Pose | null {
-  switch (id) {
-    case 'inside':
-      return approach(stopPose(id, r), 1.9);
-    case 'nephron':
-      return approach(stopPose(id, r), 2.0, -0.22);
-    case 'cause':
-      return approach(stopPose(id, r), 2.1);
-    case 'genes':
-      return approach(stopPose(id, r), 2.2, 0.12);
-    case 'ultrasound':
-      return approach(stopPose(id, r), 2.0, -0.2);
-    case 'scans':
-      return approach(stopPose(id, r), 2.1, 0.12);
-    case 'lump':
-      return { pos: along(r.tumor, r.tn, 0.14), target: along(r.tumor, r.tn, -0.04), fov: 30 };
-    case 'treatment':
-      return { pos: along(r.enter, r.n, 0.18), target: along(r.enter, r.n, -0.02), fov: 30 };
-    default:
-      return null;
-  }
+export function makePose(): WorldPose {
+  return { pos: new THREE.Vector3(), target: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0), fov: 30 };
 }
 
-export function lerpPose(a: Pose, b: Pose, k: number, out: { pos: THREE.Vector3; target: THREE.Vector3 }) {
-  out.pos.set(a.pos[0] + (b.pos[0] - a.pos[0]) * k, a.pos[1] + (b.pos[1] - a.pos[1]) * k, a.pos[2] + (b.pos[2] - a.pos[2]) * k);
-  out.target.set(
-    a.target[0] + (b.target[0] - a.target[0]) * k,
-    a.target[1] + (b.target[1] - a.target[1]) * k,
-    a.target[2] + (b.target[2] - a.target[2]) * k,
-  );
-  return a.fov + (b.fov - a.fov) * k;
-}

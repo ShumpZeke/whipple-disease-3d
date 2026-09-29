@@ -40,22 +40,27 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   expect(errors).toEqual([]);
 });
 
-test('the history begins with a profile of Max Wilms, then his 1899 book', async ({ page }) => {
-  await page.goto('/?stop=doctor');
+test('the history begins with a profile of Max Wilms at his desk, then his 1899 book', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?stop=doctor&e2e');
+  await waitForStage(page);
+  // the profile hangs in the room next to him (a label pinned in the 3D scene)
   const card = page.getByRole('article', { name: 'Profile of Max Wilms' });
   await expect(card).toBeVisible();
   for (const year of ['1867', '1899', '1904', '1918']) await expect(card).toContainText(year);
   await expect(page.locator('section.caption[data-step="doctor"] .caption__body')).toContainText('German surgeon');
 
-  await page.goto('/?stop=book');
-  const book = page.getByRole('article', { name: 'Max Wilms’s 1899 book' });
-  await expect(book).toBeVisible();
-  await expect(book).toContainText('Die Mischgeschwülste der Niere');
-  await expect(book).toContainText('The Mixed Tumors of the Kidney');
+  // scrolling on zooms over his shoulder to the book on his desk; the profile goes with the room
+  await page.keyboard.press('PageDown');
+  await expect.poll(async () => (await state(page))?.id).toBe('book');
+  await expect(page.locator('section.caption[data-step="book"] .caption__body')).toContainText('The Mixed Tumors of the Kidney');
+  await expect(card).toBeHidden();
+  expect(errors).toEqual([]);
 });
 
 test('the name stop splits nephroblastoma into its word parts', async ({ page }) => {
-  await page.goto('/?stop=name');
+  await page.goto('/?stop=name&e2e');
+  await waitForStage(page);
   const card = page.getByRole('article', { name: 'The word parts of nephroblastoma' });
   await expect(card).toBeVisible();
   for (const part of ['kidney', 'bud', 'tumor']) await expect(card).toContainText(part);
@@ -189,6 +194,10 @@ test('falls back to still images when WebGL is unavailable', async ({ page }) =>
   await expect(page.locator('.fallback-img img')).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Interactive 3D isn’t available' })).toBeVisible();
   await expect(page.locator('section.caption[data-step="nephron"]')).toBeVisible();
+  // the cards that hang in the 3D study are still there
+  await page.goto('/?stop=doctor');
+  await expect(page.getByRole('article', { name: 'Profile of Max Wilms' })).toBeVisible();
+  await expect(page.locator('.fallback-img img')).toHaveAttribute('src', '/fallback/study.webp');
 });
 
 for (const vp of [

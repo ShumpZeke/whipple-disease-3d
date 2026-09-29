@@ -1,10 +1,13 @@
 import { Bvh } from '@react-three/drei';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { journey } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { QUESTIONS } from '../../content/quiz';
-import type { StopId } from '../../content/story';
+import { STOP_INDEX, type StopId } from '../../content/story';
+import { view } from '../Director';
+import { useLevels } from '../levels';
 import { isKidney, ORGANS, type OrganId } from './organs';
 import { MODEL_SCALE, useAnatomy } from './useAnatomy';
 
@@ -14,6 +17,7 @@ function emphasis(id: StopId, hovered: OrganId | null, quizOrgan: boolean) {
   return {
     pickable,
     dim: (o: OrganId): number => {
+      if (id === 'inside') return o === 'LeftKidney' ? 0 : 0.55;
       if (id === 'kidneys') return isKidney(o) || o === 'Ureters' || o === 'Adrenals' ? 0 : 0.35;
       if (id === 'lump') return o === 'LeftKidney' ? 0 : 0.45;
       if (id === 'treatment') return o === 'LeftKidney' ? 0 : 0.3;
@@ -66,6 +70,18 @@ export function UrinaryModel() {
   useEffect(() => {
     invalidate();
   }, [stepId, hovered, quizIndex, invalidate]);
+
+  // deep inside the left kidney (a filter, cells, DNA) the other organs are far out of sight
+  const levels = useLevels();
+  const others = useMemo(
+    () => [...Object.entries(data.meshes).filter(([id]) => id !== 'LeftKidney').map(([, m]) => m!), ...(data.leftUreter ? [data.leftUreter] : [])],
+    [data],
+  );
+  useFrame(() => {
+    const t = journey.t;
+    const deep = t > STOP_INDEX.inside && t < STOP_INDEX.lump && view.d / levels.size.nephron < 40;
+    for (const m of others) if (m.visible === deep) m.visible = !deep;
+  });
 
   // cursor feedback
   useEffect(() => {

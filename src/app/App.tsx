@@ -1,15 +1,14 @@
-import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { LAST_STOP, SOURCES_PAGE, STOPS, STOP_INDEX, type StopId } from '../content/story';
 import { ORGANS } from '../three/anatomy/organs';
 import { Caption } from '../ui/Caption';
 import { Fallback, StageLoading } from '../ui/Fallback';
-import { Backdrops, HistoryLayer, PlateLabel } from '../ui/History';
+import { Backdrops, HistoryLayer } from '../ui/History';
 import { EndSources } from '../ui/EndSources';
 import { HudTop, toggleFullscreen } from '../ui/Hud';
 import { GlossaryOverlay, SourcesOverlay } from '../ui/Overlays';
 import { TermPopover } from '../ui/TermPopover';
-import { useJourney } from '../ui/useJourney';
-import { currentTargetStop, frameState, journey, scrollToStop, smoothstep, startJourney } from './journey';
+import { currentTargetStop, journey, scrollToStop, startJourney } from './journey';
 import { useStory } from './store';
 
 const Stage = lazy(() => import('../three/Stage'));
@@ -152,43 +151,6 @@ function HoverTip() {
   );
 }
 
-/**
- * The "fly-through" between scenes. Diving in, the surface we head for grows from the centre of
- * the screen until it fills it, then the next scene opens up through a hole in the middle, like
- * coming out of a tunnel. Pulling back out plays the same thing in reverse.
- */
-function ZoomVeil() {
-  const ref = useRef<HTMLDivElement>(null);
-  const layer = useRef<HTMLElement | null>(null);
-  useJourney((t) => {
-    const fs = frameState(t);
-    const el = ref.current;
-    if (!el) return;
-    layer.current ??= document.querySelector<HTMLElement>('.canvas-layer');
-    if (!fs.cut || fs.f <= 0.2 || fs.f >= 0.8) {
-      el.style.visibility = 'hidden';
-      if (layer.current) layer.current.style.transform = '';
-      return;
-    }
-    const first = fs.f < 0.5;
-    const p = first ? smoothstep(0.2, 0.5, fs.f) : smoothstep(0.5, 0.8, fs.f);
-    const inward = fs.dir === 'in';
-    const disc = first === inward;
-    const full = Math.hypot(window.innerWidth, window.innerHeight) / 2 + 2;
-    const soft = full * 0.38;
-    const r = inward ? -soft + (full + soft) * p : full - (full + soft) * p;
-    const c = fs.veilColor;
-    el.style.background = disc
-      ? `radial-gradient(circle at 50% 50%, ${c} ${r.toFixed(1)}px, transparent ${(r + soft).toFixed(1)}px)`
-      : `radial-gradient(circle at 50% 50%, transparent ${r.toFixed(1)}px, ${c} ${(r + soft).toFixed(1)}px)`;
-    el.style.visibility = 'visible';
-    // the picture itself surges forward while diving in, and settles back when pulling out
-    const s = inward ? (first ? 1 + 0.12 * p * p : 1) : first ? 1 : 1 + 0.12 * (1 - p) * (1 - p);
-    if (layer.current) layer.current.style.transform = s > 1.0005 ? `scale(${s.toFixed(4)})` : '';
-  });
-  return <div ref={ref} className="veil" aria-hidden="true" />;
-}
-
 function ScaleNote() {
   const stop = useStory((s) => s.stop);
   const world = STOPS[stop].world;
@@ -201,12 +163,11 @@ export default function App() {
   useKeyboard();
   useReducedMotion();
   useJourneyDriver();
-  const stop = useStory((s) => s.stop);
   const reduced = useStory((s) => s.reducedMotion);
   const webgl = useStory((s) => s.webgl);
+  const stageReady = useStory((s) => s.stageReady);
   const [canWebgl] = useState(webglAvailable);
   const [loadStage, setLoadStage] = useState(false);
-  const worldNeeded = STOPS[stop].world !== 'none';
 
   // start downloading the 3D stage while the visitor is still on the history pages
   useEffect(() => {
@@ -236,7 +197,7 @@ export default function App() {
       <main className={`exhibit${reduced ? ' reduce-motion' : ''}`} aria-label="Wilms tumor interactive exhibit">
         <Backdrops />
         {!fallback && loadStage && (
-          <div className="canvas-layer" style={{ opacity: 0 }}>
+          <div className={`canvas-layer${stageReady ? ' is-ready' : ''}`}>
             <StageBoundary>
               <Suspense fallback={null}>
                 <Stage />
@@ -244,11 +205,9 @@ export default function App() {
             </StageBoundary>
           </div>
         )}
-        {fallback && worldNeeded && <Fallback />}
+        {fallback && <Fallback />}
         {!fallback && <StageLoading />}
         <div className="dots" aria-hidden="true" />
-        <ZoomVeil />
-        <PlateLabel />
         <HistoryLayer />
         <Caption />
         <ScaleNote />

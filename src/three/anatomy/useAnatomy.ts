@@ -90,6 +90,12 @@ export function useAnatomy(): AnatomyData {
         anchors[name] = { position, normal };
       }
     });
+    // front to back, so the engraved drawing (drawn with see-through hatching) hides what is behind
+    const DEPTH_ORDER: OrganId[] = ['Veins', 'Arteries', 'Bladder', 'Ureters', 'Adrenals', 'RightKidney', 'LeftKidney'];
+    root.traverse((o) => {
+      const organ = o.userData.organ as OrganId | undefined;
+      if (organ) o.renderOrder = DEPTH_ORDER.indexOf(organ);
+    });
     const bounds = new THREE.Box3().setFromObject(root);
     const data = { meshes, materials, anchors, root, bounds, leftUreter };
     cache.set(gltf.scene, data);

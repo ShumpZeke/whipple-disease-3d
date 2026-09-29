@@ -6,6 +6,7 @@ import { mkdirSync } from 'node:fs';
 import { withPreview } from './serve.mjs';
 
 const shots = [
+  ['title', 'study'],
   ['body', 'urinary'],
   ['inside', 'kidney'],
   ['nephron', 'nephron'],
@@ -22,7 +23,7 @@ await withPreview(async (base) => {
     await page.waitForFunction(() => !!window.__exhibit, null, { timeout: 60000 });
     await page.waitForTimeout(4000);
     await page.addStyleTag({
-      content: `.hud-top,.rail,.pnav,.caption,.scale-note,.anchor-label,.grain,.loading,.veil{display:none!important}`,
+      content: `.hud-top,.rail,.pnav,.caption,.cover,.scale-note,.anchor-label,.grain,.loading,.veil{display:none!important}`,
     });
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${out}/${name}.png` });

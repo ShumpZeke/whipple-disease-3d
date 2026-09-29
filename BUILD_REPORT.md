@@ -27,11 +27,21 @@ git history.
 - **One page, not slides.** The scroll position drives the camera directly, so wheel, trackpad,
   touch, keyboard and presenter clickers all move the same zoom, and it can be scrubbed backwards.
   No arrows, Next buttons, page numbers or side rail.
-- **The zoom illusion.** Inside a scene the camera glides. Between scenes it dives into a surface
-  (the kidney, its cortex, the tubule wall, a nucleus, the tumor, the scan) whose colour grows from
-  the centre of the screen; the next scene then opens through a hole in the middle. Pull-backs
-  (DNA → the kidney, CT → the operation) play the same effect in reverse. A unit test checks that
-  every transition keeps moving in one direction.
+- **One world, one continuous zoom.** Every scene is nested inside the one before it, like *Powers
+  of Ten*: the study holds Max Wilms’s book, the drawing on its plate is the 3D urinary system, the
+  cut-open left kidney holds one filter (a nephron) in its outer layer, beside it sits a clump of
+  young cells, and one cell holds the DNA. The camera flies through the levels without cuts, fades
+  or veils. Distance changes geometrically, so every second of scrolling zooms by the same factor,
+  and the point being entered stays in view. The background is the same dark space throughout.
+  Unit tests check that the nesting sizes are right and that no step of any transition jumps.
+- **The history is a place.** The home screen is Max Wilms writing at his desk in 1899, seen from
+  behind (a figure built for this exhibit in Blender, not a likeness). His profile hangs in the room
+  beside him; the camera then passes over his shoulder to his book on its stand, open at the real
+  title page and a plate. The plate’s drawing is the 3D model pressed flat as an engraving: zooming
+  into it, a sweep develops it into full colour while the paper and the room dissolve.
+- **The kidney opens like a book.** Its cut face is painted from the model’s real outline (cortex,
+  pyramids, pelvis, vessels). Diving into the outer layer, the painted filters become real ones and
+  the surface opens around the one the camera enters.
 - **The story happens on the model.** The tumor grows on the lower half of the left kidney as the
   camera arrives at “A lump in the belly”; at “Treatment” that kidney glows, and scrolling on lifts it
   out with its ureter, leaving one kidney for “The outlook”. It comes back, healthy, for the quiz.
@@ -41,10 +51,13 @@ git history.
   removal.” The presenter’s own lines are in a printable guide (`?guide`), not on the big screen.
 - **Type in the style of igloo.inc** on the exhibit’s own warm palette: IBM Plex Mono for small
   labels and links, IBM Plex Sans for reading, Unbounded for the title.
-- **Runs on slow computers without losing anything.** Every device gets the same scenes. The heaviest
-  view draws about 70,000 triangles in 10 draw calls (the earlier exhibit peaked at 610,000). Weak
-  devices draw at the screen’s own resolution and pace moving scenes at 30 frames a second; a device
-  that keeps dropping frames steps down and remembers it. `?lite` and `?hq` force either mode.
+- **Runs on slow computers without losing anything.** Every device gets the same scenes. While the
+  page loads, every shader is compiled and the key moments of the journey are drawn once off screen,
+  so nothing compiles in the middle of a zoom (the usual cause of a stutter). The heaviest views are
+  the study (about 130,000 triangles) and the cells around the DNA (about 210,000 triangles in 20
+  draw calls); parts far out of sight during the dive are not drawn. Weak devices draw at the
+  screen’s own resolution and pace moving scenes at 30 frames a second; a device that keeps dropping
+  frames once loaded steps down and remembers it. `?lite` and `?hq` force either mode.
 
 ### Content accuracy
 
@@ -52,8 +65,8 @@ Every medical statement has an inline marker pointing to one of 17 references (N
 Institute, American Cancer Society, MedlinePlus, NIDDK, OpenStax, the NCI dictionary, and three
 peer-reviewed articles on Max Wilms). The history uses only what those articles state: born 1867,
 the 1899 book at age 32 while a young surgeon in training, professor in 1904, died in 1918 during
-World War I from an infection caught while operating. The 1899 book is described in words, not shown
-as a scan. The scans are drawings labelled “Illustration, not a patient image”; the zoomed-in
+World War I from an infection caught while operating. The 1899 book appears with its real German
+title, typeset for the exhibit (not a scan of the original). The scans are drawings labelled “Illustration, not a patient image”; the zoomed-in
 scenes are labelled “Illustration, not to scale”.
 
 ## Technology
@@ -63,17 +76,17 @@ scenes are labelled “Illustration, not to scale”.
 | App | React 19, TypeScript, Vite |
 | 3D | three.js r186 via React Three Fiber 9 and drei 10 |
 | State | zustand |
-| Model | BodyParts3D → Blender (fill holes, voxel remesh, smooth, decimate, AO bake, anchors) → glTF + meshopt |
+| Models | BodyParts3D → Blender (fill holes, voxel remesh, smooth, decimate, AO bake, anchors) → glTF + meshopt; the study modelled by a Blender script (AO baked into vertex colours) |
 | Tests | Vitest (unit), Playwright (browser) |
 
 ## Sizes
 
 | Asset | Size |
 | --- | --- |
-| Main bundle (home screen, history, captions, UI) | 288 kB (91 kB gzip) |
-| 3D bundle, loaded in the background while the home screen is up | 1.16 MB (321 kB gzip) |
-| Urinary model (meshopt-compressed) | 0.31 MB |
-| Home-screen picture and portrait (WebP) | 66 kB and 61 kB |
+| Main bundle (home screen, captions, UI) | 285 kB (90 kB gzip) |
+| 3D bundle, loaded in the background while the home screen is up | 1.18 MB (330 kB gzip) |
+| Urinary model and study model (meshopt-compressed) | 0.32 MB and 0.36 MB |
+| Portrait (WebP) | 61 kB |
 
 ## Verification
 
@@ -81,9 +94,10 @@ scenes are labelled “Illustration, not to scale”.
 | --- | --- |
 | `npm run build` (type-check + build) | passes |
 | `npm run lint` (oxlint) | no warnings |
-| `npm test`, 37 unit tests | all pass: story order, caption length, plain wording, a script for every stop, terms with word parts, the four facts cited, every citation resolves, history facts, quiz answers, zoom maths, camera poses |
-| `npm run test:e2e`, 16 browser tests | all pass: home screen, Max Wilms profile and book, word parts, clicker walk through all 18 stops, mouse wheel, kidney marker, quiz on the 3D model, sources and terms, reduced motion, lite mode, no-WebGL fallback, 1366×768 and 1920×1080, smart-board swiping and text size, summary to sources, presenter guide |
+| `npm test`, 36 unit tests | all pass: story order, caption length, plain wording, a script for every stop, terms with word parts, the four facts cited, every citation resolves, history facts, quiz answers, zoom maths, camera poses |
+| `npm run test:e2e`, 16 browser tests | all pass: home screen, Max Wilms at his desk and his book, word parts, clicker walk through all 18 stops, mouse wheel, kidney marker, quiz on the 3D model, sources and terms, reduced motion, lite mode, no-WebGL fallback, 1366×768 and 1920×1080, smart-board swiping and text size, summary to sources, presenter guide |
 | Console | no errors or warnings during a full scroll-through |
+| Shader programs | 57, all compiled while loading; none compile during a full scroll-through |
 | Visual review | screenshots of every stop and transition at 1600×900 |
 
 ## Regenerating assets
@@ -91,8 +105,8 @@ scenes are labelled “Illustration, not to scale”.
 | Script | Purpose |
 | --- | --- |
 | `blender -b --python scripts/build_urinary.py -- <outdir>` | build the urinary model from BodyParts3D (set `BP3D_DIR`) |
-| `npm run assets:models` | compress the Blender export into `public/models/` (meshopt) |
-| `node scripts/cover-art.mjs` | re-render the home-screen picture |
+| `blender -b --factory-startup --python scripts/build_study.py -- <outdir> [preview]` | build the study (desk, figure, lamp, book stand) |
+| `npm run assets:models` | compress the Blender exports into `public/models/` (meshopt) |
 | `node scripts/fallback-shots.mjs` | re-render the no-WebGL still images into `public/fallback/` |
 | `node scripts/journey-shots.mjs <outDir> [w] [h] [t,…]` | screenshots at scroll positions for review |
 | `node scripts/record-tour.mjs [out.mp4]` | record the full zoom as an MP4 (backup for presenting; needs ffmpeg) |

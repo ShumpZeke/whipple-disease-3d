@@ -172,11 +172,11 @@ html::-webkit-scrollbar {
   position: absolute;
   inset: 0;
   z-index: 2;
-  transform-origin: 50% 50%;
-}
-.canvas-layer.is-hidden {
   opacity: 0;
-  pointer-events: none;
+  transition: opacity 1200ms var(--ease);
+}
+.canvas-layer.is-ready {
+  opacity: 1;
 }
 .canvas-layer canvas {
   /* vertical swipes scroll the page (the zoom); horizontal drags turn the model */
@@ -822,9 +822,6 @@ html::-webkit-scrollbar {
 .is-paper .hud-top::before {
   opacity: 0;
 }
-.is-paper .caption {
-  pointer-events: none;
-}
 .is-paper .wordmark__title,
 .is-paper .link-btn,
 .is-paper .icon-btn {
@@ -1064,6 +1061,13 @@ html::-webkit-scrollbar {
   max-height: 80vh;
   -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+}
+/* without 3D, the study's cards sit where they hang in the 3D scene: top left */
+.fallback-card {
+  position: absolute;
+  z-index: 14;
+  left: var(--gutter);
+  top: max(96px, calc(var(--u) * 7.5));
 }
 .fallback-note {
   position: absolute;
@@ -2824,4 +2828,19 @@ body,
   font-family: var(--sans);
   font-size: max(14px, calc(var(--u) * 0.95));
   color: #5d4a36;
+}
+
+/* ---- the history cards, pinned in the 3D study */
+.profile--label {
+  width: max(380px, calc(var(--u) * 33));
+}
+.wordparts--label {
+  width: max(320px, calc(var(--u) * 27));
+}
+.wordparts--label .wordparts__word {
+  flex-wrap: nowrap;
+  font-size: max(24px, calc(var(--u) * 2.25));
+}
+.anchor-label .print {
+  animation: none;
 }

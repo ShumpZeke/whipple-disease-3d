@@ -10,3 +10,7 @@ Changes: selected parts were combined, hole-filled, voxel-remeshed, smoothed, si
 given baked ambient-occlusion shading and label anchors in Blender, then compressed with
 meshopt (glTF Transform). The modified model is distributed under the same license,
 CC BY-SA 2.1 JP.
+
+study.glb (Max Wilms's study: the desk, the figure writing at it, the lamp, books and the book
+stand) is original work made for this exhibit by scripts/build_study.py in Blender. It is not
+derived from BodyParts3D and is licensed with the code (MIT, see LICENSE in the repository root).
