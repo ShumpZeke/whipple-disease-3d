@@ -5,6 +5,8 @@ import { SECTIONS, STOPS } from '../content/story';
 import { Cites, RichText } from './RichText';
 import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
+import { HEADLINE } from '../content/figures';
+import { StatRow } from './Charts';
 
 /* ------------------------------------------------------------------ backdrop */
 
@@ -35,27 +37,26 @@ function Cover() {
     el.style.transform = `scale(${(1 + t * 0.12).toFixed(4)})`;
   });
   return (
-    <section ref={ref} className="cover fly" aria-labelledby="cover-title">
+    <section ref={ref} className="cover cover--min fly" aria-labelledby="cover-title">
       <div className="cover__brand">
+        <p className="cover__meta">
+          // {SUBMISSION.course}, eponym 27
+        </p>
         <h1 id="cover-title" className="cover__title">
           <Scramble text="Wilms Tumor" duration={1100} />
         </h1>
-        <p className="cover__meta">// {SUBMISSION.course}, eponym 27</p>
-        <p className="cover__meta">
-          By {names()}, {periodLabel()}.
-        </p>
-      </div>
-      <div className="cover__about">
-        <p className="cover__label">About</p>
         <p className="cover__def">
           <RichText text={STOPS[0].text} />
         </p>
         <p className="cover__say">
-          Say it wilmz TOO-mer. Named after Max Wilms, a German surgeon. <Cites ids={[16, 9]} />
+          Say it <b>WILMZ TOO-mer</b>. Named after Max Wilms, a German surgeon. <Cites ids={[16, 9]} />
+        </p>
+        <p className="cover__meta">
+          {names()}, {periodLabel()}
         </p>
       </div>
+      <StatRow items={HEADLINE} className="cover__stats" />
       <nav className="cover__toc" aria-label="What’s inside">
-        <p className="cover__label">Inside</p>
         <ol>
           {SECTIONS.map((sec, i) => (
             <li key={sec.title}>
@@ -67,7 +68,6 @@ function Cover() {
           ))}
         </ol>
       </nav>
-      <p className="cover__scroll">Scroll down to explore.</p>
     </section>
   );
 }

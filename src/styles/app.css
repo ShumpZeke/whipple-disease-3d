@@ -2871,3 +2871,388 @@ body,
 .is-immersive .frame {
   opacity: 0;
 }
+
+/* ==================================================================
+   Minimal infographic: fewer things on screen, and the facts as numbers and small charts.
+   Flat, thin lines, one accent colour, mono labels, big numbers in the logo face.
+   ================================================================== */
+.dots,
+.frame {
+  display: none !important;
+}
+.caption__note {
+  border-left: 0;
+  padding: 0;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- home screen */
+.cover--min {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cover--min > * {
+  pointer-events: auto;
+}
+.cover--min .cover__brand {
+  position: absolute;
+  left: var(--gutter);
+  top: max(64px, calc(var(--u) * 5.6));
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.55);
+  max-width: min(44vw, 640px);
+}
+.cover--min .cover__title {
+  margin: calc(var(--u) * 0.4) 0 calc(var(--u) * 0.8);
+  font-size: clamp(46px, calc(var(--u) * 7), 124px);
+  line-height: 0.92;
+  color: var(--ivory);
+  background-image: none;
+  opacity: 1;
+}
+.cover--min .cover__def {
+  margin: 0;
+  max-width: 28em;
+  font-size: max(16px, calc(var(--u) * 1.3));
+  line-height: 1.4;
+  color: var(--read);
+}
+.cover--min .cover__say {
+  margin: 0;
+  font-size: max(13px, calc(var(--u) * 0.95));
+  color: var(--muted);
+}
+.cover--min .cover__say b {
+  color: var(--ivory-soft);
+  font-weight: 500;
+}
+.cover--min .cover__meta {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: max(11px, calc(var(--u) * 0.76));
+  color: var(--muted);
+}
+.cover--min .cover__meta:last-child {
+  margin-top: calc(var(--u) * 0.8);
+}
+.cover__stats {
+  position: absolute;
+  left: var(--gutter);
+  bottom: max(88px, calc(var(--u) * 8.4));
+}
+.cover--min .cover__toc {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: max(28px, calc(var(--u) * 2.8));
+  padding-top: calc(var(--u) * 0.9);
+  border-top: 1px solid var(--hair);
+}
+.cover--min .cover__toc ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px calc(var(--u) * 1.8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cover--min .cover__toc button {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: max(11px, calc(var(--u) * 0.76));
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ivory-soft);
+  cursor: pointer;
+}
+.cover--min .cover__toc button:hover,
+.cover--min .cover__toc button:focus-visible {
+  color: var(--ivory);
+}
+.cover--min .cover__n {
+  margin-right: 6px;
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- charts */
+.figs {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.9);
+  max-width: var(--cap-w);
+  margin-top: calc(var(--u) * 1.1);
+}
+.fig {
+  padding-top: calc(var(--u) * 0.7);
+  border-top: 1px solid var(--hair);
+}
+.fig__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 calc(var(--u) * 0.6);
+  font-family: var(--mono);
+  font-size: max(10px, calc(var(--u) * 0.7));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fig__num {
+  font-family: var(--logo);
+  font-weight: 800;
+  font-size: max(26px, calc(var(--u) * 2.5));
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ivory);
+}
+.fig__label {
+  font-family: var(--mono);
+  font-size: max(11px, calc(var(--u) * 0.78));
+  line-height: 1.4;
+  color: var(--ivory-soft);
+}
+.fig-stats {
+  display: flex;
+  gap: calc(var(--u) * 2.6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fig-stats li {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.45);
+  max-width: 11em;
+}
+.fig--big {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.45);
+}
+.fig--big .fig__num {
+  font-size: max(32px, calc(var(--u) * 3.4));
+}
+
+.fig-bars {
+  display: grid;
+  gap: calc(var(--u) * 0.5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fig-bars li {
+  display: grid;
+  grid-template-columns: minmax(9em, 16em) 1fr 3.6em;
+  align-items: center;
+  gap: 12px;
+}
+.fig-bars__label {
+  font-size: max(12px, calc(var(--u) * 0.86));
+  line-height: 1.25;
+  color: var(--read);
+}
+.fig-bars__track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--hair);
+  overflow: hidden;
+}
+.fig-bars__fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.fig-bars__value {
+  font-family: var(--mono);
+  font-size: max(11px, calc(var(--u) * 0.8));
+  text-align: right;
+  color: var(--ivory);
+}
+
+.fig-ages__track {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--hair);
+}
+.fig-ages__band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(224, 178, 125, 0.35);
+}
+.fig-ages__band.is-strong {
+  border-radius: 5px 0 0 5px;
+  background: var(--accent);
+}
+.fig-ages__avg {
+  position: absolute;
+  top: -5px;
+  width: 2px;
+  height: 20px;
+  margin-left: -1px;
+  background: var(--ivory);
+}
+.fig-ages__ticks {
+  position: relative;
+  height: 1.4em;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: max(10px, calc(var(--u) * 0.68));
+  color: var(--muted);
+}
+.fig-ages__ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.fig-ages__ticks span:first-child {
+  transform: none;
+}
+.fig-ages__ticks span:last-child {
+  transform: translateX(-100%);
+}
+.fig-ages__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-size: max(10px, calc(var(--u) * 0.74));
+  color: var(--ivory-soft);
+}
+.fig-ages__key i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  border-radius: 2px;
+  background: rgba(224, 178, 125, 0.35);
+}
+.fig-ages__key i.is-strong {
+  background: var(--accent);
+}
+.fig-ages__key i.is-avg {
+  width: 2px;
+  background: var(--ivory);
+}
+
+.fig-split {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--hair);
+}
+.fig-split__a {
+  background: var(--accent);
+}
+.fig-split__b {
+  background: rgba(224, 178, 125, 0.35);
+}
+
+.fig--dots {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.4);
+}
+.fig--dots > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.4);
+}
+.fig--dots .fig__head {
+  margin: 0;
+}
+.fig-dots {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  width: max(118px, calc(var(--u) * 10.5));
+}
+.fig-dots i {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--hair);
+}
+.fig-dots i.is-on {
+  background: var(--accent);
+}
+
+.fig-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px calc(var(--u) * 2);
+  margin: 0;
+  padding-top: calc(var(--u) * 0.7);
+  border-top: 1px solid var(--hair);
+}
+.fig-meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fig-meta dt {
+  font-family: var(--mono);
+  font-size: max(10px, calc(var(--u) * 0.7));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fig-meta dd {
+  margin: 0;
+  font-size: max(12px, calc(var(--u) * 0.9));
+  line-height: 1.4;
+  color: var(--read);
+}
+
+/* chart text sized for the back of a classroom */
+.fig__num {
+  white-space: nowrap;
+}
+.fig__head {
+  font-size: max(11px, calc(var(--u) * 0.78));
+}
+.fig__label {
+  font-size: max(12px, calc(var(--u) * 0.88));
+}
+.fig-bars li {
+  grid-template-columns: minmax(9em, 17em) 1fr minmax(3.6em, auto);
+}
+.fig-bars__label {
+  font-size: max(13px, calc(var(--u) * 0.96));
+}
+.fig-bars__value {
+  font-size: max(12px, calc(var(--u) * 0.9));
+  white-space: nowrap;
+}
+.fig-ages__ticks {
+  font-size: max(10px, calc(var(--u) * 0.74));
+}
+.fig-ages__key {
+  font-size: max(11px, calc(var(--u) * 0.84));
+}
+.fig-meta dt {
+  font-size: max(10px, calc(var(--u) * 0.74));
+}
+.fig-meta dd {
+  font-size: max(13px, calc(var(--u) * 0.98));
+}
+/* a soft shade under the home screen's list of parts */
+.cover--min::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: max(160px, calc(var(--u) * 16));
+  background: linear-gradient(0deg, rgba(10, 9, 10, 0.72), rgba(10, 9, 10, 0));
+  pointer-events: none;
+  z-index: -1;
+}

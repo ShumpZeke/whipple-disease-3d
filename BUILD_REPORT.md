@@ -51,6 +51,11 @@ git history.
   test keeps every caption under 25 words), written the way you would explain it to a friend. No “Fact 1” labels, no em dashes or dots between words (a unit test checks
   this). Word parts are explained in the sentences, e.g. “Nephr means kidney and ectomy means
   removal.” The presenter’s own lines are in a printable guide (`?guide`), not on the big screen.
+- **An infographic.** The home screen and the summary lead with three numbers (about 600 children
+  a year in the U.S., 5% of childhood cancers, 93% alive 5 years later), and the stops carry small,
+  flat charts: age at diagnosis, blood filtered vs urine made, a million filters per kidney, 90% not
+  inherited, 5 to 10% in both kidneys, signs at diagnosis, and 93 of 100 dots. Every number is
+  copied from a cited source (a unit test checks each chart cites one).
 - **Immersive.** After the home screen the corner menu, the dot grid and the frame marks step
   away, so only the scene and its words are on screen; the menu comes back when a mouse moves to
   the top edge.

@@ -82,11 +82,12 @@ still pictures instead of 3D.
 | Origin: the person it is named for | Part 2: profile card of **Max Wilms** (1867 to 1918), a German surgeon |
 | Brief historical profile and why the name stuck | Parts 2 to 4: his life in four dates, his 1899 book *The Mixed Tumors of the Kidney*, and why the tumor carries his name |
 | A clear definition in your own words | Home screen and part 5, “What is Wilms tumor?” |
-| Body system or medical specialty | Part 5: a cancer of the kidney, part of the urinary system (the guide adds pediatric oncology) |
+| Body system or medical specialty | Part 5: “Body system: urinary” and “Specialty: pediatric oncology”; the care team at Treatment |
 | At least four clinical facts | The cause (young cells, gene changes), the signs (a lump, blood in the urine), how doctors find it (ultrasound, CT or MRI) and the treatment (nephrectomy, chemotherapy, radiation), plus the outlook |
 | At least three terms, word parts, abbreviations or pronunciation tips | Explained in plain words on screen (“Nephr means kidney, blast means bud and oma means tumor”), 14 terms with pronunciation in the **Terms** panel and at the end, the abbreviation CT |
-| At least two visuals with captions or labels | Labeled 3D scenes: the urinary system, the tumor, a kidney cut in half, a nephron, young cells, DNA, an ultrasound and a CT scanner; the captioned portrait |
+| At least two visuals with captions or labels | Labeled 3D scenes (the urinary system, the tumor, a kidney cut in half, a nephron, young cells, DNA, an ultrasound and a CT scanner), the captioned portrait, and titled charts: age at diagnosis, blood filtered vs urine made, inherited or not, signs at diagnosis, 93 in 100 survive |
 | Purposeful interactive elements | The list of parts, the + marker, organs you can tap, term pop-ups, source numbers, the 3D model you can turn, the quiz |
+| Accuracy check (spelling, attribution) | Part 4: “Spelled Wilms tumor, no apostrophe. Others described it first; his book made his name stick.” with sources |
 | Source numbers that connect to the reference list | Every fact has a small source number; the full list is at the end |
 
 **Design, research and presenting**

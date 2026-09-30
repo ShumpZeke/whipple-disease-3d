@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { names, periodLabel, SUBMISSION } from '../app/config';
 import { MEDIA_CREDITS, SOURCES, SOURCE_BY_ID } from './citations';
 import { GLOSSARY, TERM_BY_KEY } from './glossary';
+import { FIGURES, HEADLINE } from './figures';
 import { QUESTIONS } from './quiz';
 import { FACTS, QA, SECTIONS, STOPS, STOP_INDEX } from './story';
 
@@ -146,6 +147,30 @@ describe('citations', () => {
     expect(text).toMatch(/Wellcome Collection/);
     expect(text).toMatch(/CC BY 4\.0/);
     expect(text).toMatch(/AI assistant/);
+  });
+});
+
+describe('infographic figures', () => {
+  const all = Object.values(FIGURES).flat();
+  it('cites a real source for every number', () => {
+    const cites = [...HEADLINE.flatMap((s) => s.cites), ...all.flatMap((f) => ('cites' in f ? f.cites : f.items.flatMap((s) => s.cites)))];
+    expect(cites.length).toBeGreaterThan(0);
+    for (const id of cites) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
+  });
+
+  it('draws percentages between 0 and 100', () => {
+    const values = all.flatMap((f) => (f.kind === 'bars' ? f.rows.map((r) => r.value) : f.kind === 'split' || f.kind === 'dots' ? [f.value] : []));
+    expect(values.length).toBeGreaterThan(0);
+    for (const v of values) {
+      expect(v).toBeGreaterThan(0);
+      expect(v).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it('names the body system and the specialty', () => {
+    const meta = all.flatMap((f) => (f.kind === 'meta' ? f.rows : []));
+    expect(meta.find((r) => r.label === 'Body system')?.value).toMatch(/urinary/i);
+    expect(meta.find((r) => r.label === 'Specialty')?.value).toMatch(/oncology/i);
   });
 });
 

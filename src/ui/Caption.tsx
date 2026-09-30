@@ -3,6 +3,7 @@ import { creditLine } from '../app/config';
 import { scrollToStop, stopPresence } from '../app/journey';
 import { useStory } from '../app/store';
 import { SOURCES_PAGE, STOPS } from '../content/story';
+import { StopFigures } from './Charts';
 import { Quiz } from './Quiz';
 import { RichText } from './RichText';
 import { Scramble } from './Scramble';
@@ -73,6 +74,7 @@ export function Caption() {
           <RichText text={s.note} />
         </p>
       )}
+      <StopFigures id={s.id} />
       <Extras id={s.id} />
     </section>
   );

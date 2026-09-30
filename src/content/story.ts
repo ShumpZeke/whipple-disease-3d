@@ -64,7 +64,7 @@ export const STOPS: Stop[] = [
     eyebrow: 'Home',
     title: 'Wilms Tumor',
     text: 'A kidney cancer in young children. Its medical name is nephroblastoma. {c:1,3}',
-    demo: 'Point to the list of parts, then scroll down',
+    demo: 'Point to the three numbers, then the list of parts along the bottom, then scroll down',
     say: 'My eponym is Wilms tumor. An eponym is a medical term named after a person. As I scroll, we go from the doctor it is named after all the way into the kidney where it grows.',
   },
   {
@@ -105,9 +105,9 @@ export const STOPS: Stop[] = [
     world: 'anatomy',
     eyebrow: 'The disease',
     title: 'What is Wilms tumor?',
-    text: 'A cancer that starts in a kidney. It is the most common kidney cancer in kids, usually ages 2 to 5. {c:1,4}',
+    text: 'A cancer that starts in a kidney, part of the urinary system. It is the most common kidney cancer in kids. {c:1,3}',
     demo: 'Drag the model to turn it, then tap the + on the kidney',
-    say: 'Here is my definition. Wilms tumor is a cancer that starts in a kidney, which is part of the urinary system. It is the most common kidney cancer in kids, and most of them are between 2 and 5. About 600 children get it each year in the United States.',
+    say: 'Here is my definition. Wilms tumor is a cancer that starts in a kidney, which is part of the urinary system, and it is treated by pediatric oncologists, doctors for children with cancer. The chart shows that 2 out of 3 cases are found before age 5, and the average age is 3 to 4.',
   },
   {
     id: 'kidneys',
@@ -117,7 +117,7 @@ export const STOPS: Stop[] = [
     title: 'The kidneys',
     text: 'Two bean-shaped organs that clean the blood and make urine. {c:12}',
     term: 'kidney',
-    say: 'These are the kidneys. They are about the size of a fist and sit below the ribs on either side of the spine. Every day they clean about 150 quarts of blood and turn the waste into urine.',
+    say: 'These are the kidneys. They are about the size of a fist and sit below the ribs on either side of the spine. As the chart shows, every day they filter about 150 quarts of blood, and only 1 to 2 quarts of it becomes urine.',
   },
   {
     id: 'inside',
@@ -157,7 +157,7 @@ export const STOPS: Stop[] = [
     title: 'Changes in genes',
     text: 'A change in a {t:gene} like WT1 keeps them growing. Most of the time it is not inherited. {c:8}',
     term: 'gene',
-    say: 'What makes them keep growing is a change in their genes, like a gene called WT1. About 9 out of 10 times the change just happens by chance. It is not something passed down from parents.',
+    say: 'What makes them keep growing is a change in their genes, like a gene called WT1. The bar shows that about 90 percent of the time the change just happens by chance. Only about 10 percent are inherited.',
   },
   {
     id: 'lump',
@@ -178,7 +178,7 @@ export const STOPS: Stop[] = [
     term: 'hematuria',
     note: 'Hemat means blood, uria means urine. {c:15}',
     demo: 'Tap the underlined word hematuria to show how to say it',
-    say: 'Other signs are blood in the urine, which is called hematuria, a fever, high blood pressure, or not wanting to eat.',
+    say: 'The chart shows other signs doctors see when it is found: belly pain in about 40 out of 100 kids, high blood pressure in 25, and blood in the urine, called hematuria, in about 1 in 5.',
   },
   {
     id: 'ultrasound',
@@ -218,7 +218,7 @@ export const STOPS: Stop[] = [
     eyebrow: 'Treatment',
     title: 'The outlook',
     text: 'You can live a healthy life with one kidney. About 9 in 10 kids with Wilms tumor survive. {c:13,2,9}',
-    say: 'Here is the good news. You can live a healthy life with one kidney, and today about 9 out of 10 kids with Wilms tumor survive. Treating it with medicine even helped open the door to chemotherapy for cancer.',
+    say: 'Here is the good news. You can live a healthy life with one kidney, and each dot here is a child: 93 out of 100 are alive five years later. Treating it with medicine even helped open the door to chemotherapy for cancer.',
   },
   {
     id: 'end',
