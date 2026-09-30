@@ -11,6 +11,7 @@ import { Scans } from './diagnosis/Scans';
 import { Director, view } from './Director';
 import { hingeState } from './hinge';
 import { useLevels } from './levels';
+import { Motes } from './Motes';
 import { StudyLevel } from './study/StudyLevel';
 import { TestHooks } from './TestHooks';
 
@@ -221,6 +222,7 @@ function World() {
       <StudyLevel visible />
       <AnatomyWorld visible />
       <Scans visible />
+      <Motes />
     </group>
   );
 }
