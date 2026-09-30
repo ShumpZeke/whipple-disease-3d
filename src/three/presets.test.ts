@@ -41,8 +41,8 @@ describe('camera poses', () => {
     const head = WILMS_HEAD.clone().applyMatrix4(levels.study);
     const scale = levels.size.study; // world units per metre
     const cur = makePose();
-    const hinge = STOPS.findIndex((s) => s.id === 'name');
-    for (let i = 0; i <= hinge; i++) {
+    // on the way in to his book, and on the way back out of it at the end
+    for (let i = 0; i < LAST_STOP; i++) {
       const a = worldPose(STOPS[i].id, refs, levels);
       const b = worldPose(STOPS[i + 1].id, refs, levels);
       for (let s = 0; s <= 100; s++) {

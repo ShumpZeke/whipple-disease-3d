@@ -2,7 +2,7 @@ import { useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
+import { journey, onJourneyFrame, smoothstep } from '../../app/journey';
 import { STOP_INDEX } from '../../content/story';
 import { ProfileCard, WordPartsCard } from '../../ui/HistoryCards';
 import { sharedOrganUniforms } from '../anatomy/organMaterial';
@@ -210,14 +210,15 @@ export function StudyLevel({ visible }: { visible: boolean }) {
       const h = hingeState(t);
       uStudyReveal.value = h.studyReveal;
       uManLine.value = manLine(t);
-      const look = 1 - smoothstep(0.22, 0.62, Math.abs(t - STOP_INDEX.doctor));
+      // he looks up at the class when we meet him, and again when we are back at his desk at the end
+      const look = Math.max(1 - smoothstep(0.22, 0.62, Math.abs(t - STOP_INDEX.doctor)), smoothstep(STOP_INDEX.end - 0.5, STOP_INDEX.end - 0.1, t));
       built.headPivot.rotation.set(DEG * 10 * look, DEG * -24 * look, 0, 'YXZ');
       for (const g of built.eyes) g.rotation.set(DEG * 24 * look, DEG * -9 * look, 0, 'YXZ');
       if (group.current && group.current.visible !== h.study) {
         group.current.visible = h.study;
         invalidate();
       }
-      const showPages = t < HINGE + 1;
+      const showPages = h.page > 0;
       if (pages.current && pages.current.visible !== showPages) {
         pages.current.visible = showPages;
         invalidate();

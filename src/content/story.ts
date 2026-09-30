@@ -2,7 +2,8 @@
  * The whole exhibit is ONE continuous zoom. Scrolling moves a camera through these stops in order:
  * home → Max Wilms → his 1899 book → the name → the disease → the kidneys → inside a kidney →
  * a nephron → young cells → genes → the lump → other signs → ultrasound → CT → treatment →
- * outlook → summary → a quick check (then the list of sources).
+ * outlook → summary → a quick check (then the list of sources). It starts and ends at Max Wilms's
+ * desk: the camera goes into the drawing in his book, and at the end comes back out of it.
  *
  * On screen each stop is just a short heading and a few plain sentences, the way you would explain
  * it to a friend. `say` is the presenter's line for that stop and `demo` what to tap there; both
@@ -237,17 +238,18 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'end',
-    scene: 'anatomy',
-    world: 'anatomy',
+    scene: 'history',
+    world: 'none',
     eyebrow: 'Summary',
     title: 'In short',
     text: 'A kidney cancer in young kids, named after Max Wilms. Scans find it, surgery and chemotherapy treat it, and most kids are cured. {c:1,2,9}',
+    demo: 'Point out that the camera came back out of his book to Max Wilms, where the talk began',
     say: 'So: a kidney cancer in young kids, named after Max Wilms, and most kids are cured. Now a quick quiz.',
   },
   {
     id: 'quiz',
-    scene: 'anatomy',
-    world: 'anatomy',
+    scene: 'history',
+    world: 'none',
     eyebrow: 'Quick check',
     title: 'Quick check',
     text: '',

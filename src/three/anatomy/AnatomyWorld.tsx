@@ -8,7 +8,7 @@ import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX, type StopId } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
 import { useJourney } from '../../ui/useJourney';
-import { hingeState } from '../hinge';
+import { hingeState, kidneyBack, RETURN } from '../hinge';
 import { Label3D } from '../Label3D';
 import { PAGE } from '../nested';
 import { NephronLevel } from '../nephron/NephronLevel';
@@ -60,11 +60,13 @@ function HingeController() {
 /** Where the removed kidney goes: out of the body towards the viewer and off to the side. */
 const LIFT = new THREE.Vector3(0.95, 0.3, 0.8);
 
-/** 0 → 1 while the tumor grows in, on the way to the "lump" stop. */
-const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.22, STOP_INDEX.lump, t) * (t < STOP_INDEX.outlook + 0.5 ? 1 : 0);
-/** 0 → 1 while the left kidney is taken out (treatment → outlook), 1 → 0 while it comes back for the summary. */
-const removal = (t: number) =>
-  smoothstep(STOP_INDEX.treatment + 0.1, STOP_INDEX.outlook - 0.1, t) - smoothstep(STOP_INDEX.outlook + 0.1, STOP_INDEX.end - 0.1, t);
+/** 0 → 1 while the tumor grows in, on the way to the "lump" stop (it leaves with the kidney). */
+const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.22, STOP_INDEX.lump, t) * (t < RETURN ? 1 : 0);
+/**
+ * 0 → 1 while the left kidney is taken out (treatment → outlook). On the way back out of the book
+ * it comes back, healthy, so the drawing on the page is whole again (see hinge.ts).
+ */
+const removal = (t: number) => smoothstep(STOP_INDEX.treatment + 0.1, STOP_INDEX.outlook - 0.1, t) - kidneyBack(t);
 
 /** A lumpy mass: a sphere pushed out by a few overlapping lobes (seeded, so always the same shape). */
 function tumorGeometry() {
@@ -94,7 +96,8 @@ function tumorGeometry() {
 
 /**
  * The left kidney's lower half grows a tumor on the way to the "lump" stop. At "treatment" the
- * kidney (with its ureter and the tumor) is lifted out, and it is back, healthy, for the quiz.
+ * kidney (with its ureter and the tumor) is lifted out; it comes back, healthy, as the organs go
+ * back into the drawing in Max Wilms's book.
  */
 function Tumor() {
   const data = useAnatomy();
@@ -313,28 +316,6 @@ function OrganLabels({ visible }: { visible: boolean }) {
 /* ------------------------------------------------------------ world */
 
 export function AnatomyWorld({ visible }: { visible: boolean }) {
-  const id = useStopId();
-  const idle = useRef(0);
-  const g = useRef<THREE.Group>(null);
-  const invalidate = useThree((s) => s.invalidate);
-  const reduced = useStory((s) => s.reducedMotion);
-  const interacted = useStory((s) => s.interacted);
-
-  // gentle turntable only on the final summary, until the visitor takes over
-  useFrame((_, dt) => {
-    if (!g.current) return;
-    if (id === 'end' && !reduced && !interacted) {
-      idle.current += dt;
-      g.current.rotation.y = Math.sin(idle.current * 0.25) * 0.35;
-      invalidate();
-    } else if (Math.abs(g.current.rotation.y) > 0.0005) {
-      g.current.rotation.y *= 0.9;
-      invalidate();
-    } else {
-      g.current.rotation.y = 0;
-    }
-  });
-
   // the soft shadow appears once the drawing has become 3D (drawn once: kept out of re-renders,
   // which would redraw it)
   const shadow = useRef<THREE.Group>(null);
@@ -352,11 +333,9 @@ export function AnatomyWorld({ visible }: { visible: boolean }) {
 
   return (
     <group>
-      <group ref={g}>
-        <UrinaryModel />
-        <KidneyHalves visible={visible} />
-        <Tumor />
-      </group>
+      <UrinaryModel />
+      <KidneyHalves visible={visible} />
+      <Tumor />
       <NephronLevel visible={visible} />
       <KidneyMarker visible={visible} />
       <OrganLabels visible={visible} />

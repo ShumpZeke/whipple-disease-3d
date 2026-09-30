@@ -14,8 +14,8 @@ import { useLevels } from './levels';
 import { StudyLevel } from './study/StudyLevel';
 import { TestHooks } from './TestHooks';
 
-/** Stops whose scene moves by itself (flowing filter, dividing cells, spinning DNA, scans, turntable). */
-const ANIMATED: StopId[] = ['nephron', 'cause', 'genes', 'ultrasound', 'scans', 'end'];
+/** Stops whose scene moves by itself (flowing filter, dividing cells, spinning DNA, scans). */
+const ANIMATED: StopId[] = ['nephron', 'cause', 'genes', 'ultrasound', 'scans'];
 
 /**
  * Rendering only happens when something changes: while scrolling, and while a scene that moves by
@@ -80,8 +80,9 @@ const RIGS: Record<StopId, Rig> = {
   scans: { ...ORGANS, hemi: 0.3, fill: 0.8, fillAt: [0.3, 0.5, 0.7], fillColor: '#eef3ff' },
   treatment: ORGANS,
   outlook: ORGANS,
-  quiz: ORGANS,
-  end: ORGANS,
+  // back at his desk: the lamp is lit again, and a soft light on his face as he looks up at us
+  end: { ...STUDY, fill: 0.7, fillAt: [0.3, 0.45, 0.6], fillColor: '#ffdcc0' },
+  quiz: { ...STUDY, fill: 0.7, fillAt: [0.3, 0.45, 0.6], fillColor: '#ffdcc0' },
 };
 const ease = (k: number) => k * k * (3 - 2 * k);
 /** The oil lamp's flame, in the study (metres, three.js axes). */
@@ -159,7 +160,7 @@ function LightRig() {
  * pictures), so this compiles their shaders and uploads their textures before the first scroll
  * instead of in the middle of a zoom.
  */
-const WARM_UP = [3.5, 5.7, 6.6, 7.6, 8.6, 9, 9.6, 11.7, 12.2, 12.9, 13.6, 14.2];
+const WARM_UP = [3.5, 5.7, 6.6, 7.6, 8.6, 9, 9.6, 11.7, 12.2, 12.9, 13.6, 14.2, 15.4, 15.7];
 
 /**
  * Everything lives in one scene, each scale nested inside the last: the study holds the book, the

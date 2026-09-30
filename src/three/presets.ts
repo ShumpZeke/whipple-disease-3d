@@ -62,7 +62,7 @@ const LAYOUT: Partial<Record<StopId, [number, number]>> = {
   scans: [0.26, 0],
   treatment: [0.3, 0],
   outlook: [0.3, 0],
-  quiz: [0.3, 0],
+  quiz: [0.44, 0.02],
   end: [0.3, 0],
 };
 
@@ -118,10 +118,11 @@ export function localPose(id: StopId, r: AnatomyRefs): LocalPose {
       return organs([0.75, 0.42, 2.7], [0.15, 0.22, 0], 30);
     case 'outlook':
       return organs([-0.35, 0.42, 2.7], [-0.05, 0.2, 0], 30);
-    case 'quiz':
-      return organs([0.4, 0.18, 4.1], [0, -0.02, 0], 30);
+    // back out of the book, at his desk again: from the front and to his right, as he looks up at us
     case 'end':
-      return organs([0.8, 0.28, 4.2], [0, -0.02, 0], 30);
+      return { level: 'study', pos: [1.55, 1.62, -1.25], target: [0.02, 1.08, 0.2], fov: 30 };
+    case 'quiz':
+      return { level: 'study', pos: [2.05, 1.55, -1.15], target: [0.0, 1.05, 0.2], fov: 30 };
   }
 }
 

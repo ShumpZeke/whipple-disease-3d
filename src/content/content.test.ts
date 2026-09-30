@@ -92,7 +92,9 @@ describe('the one-page journey (storyboard order)', () => {
       expect(STOPS[STOP_INDEX[id]].world).toBe('none');
       expect(STOPS[STOP_INDEX[id]].scene).toBe('history');
     }
-    for (const s of STOPS.slice(STOP_INDEX.body)) expect(s.world, s.id).not.toBe('none');
+    for (const s of STOPS.slice(STOP_INDEX.body, STOP_INDEX.end)) expect(s.world, s.id).not.toBe('none');
+    // and it ends back at Max Wilms's desk, where it began
+    for (const id of ['end', 'quiz'] as const) expect(STOPS[STOP_INDEX[id]].scene).toBe('history');
   });
 
   it('lists the parts of the talk on the home screen, ending with the sources', () => {
