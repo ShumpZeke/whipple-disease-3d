@@ -2919,15 +2919,6 @@ body,
   line-height: 1.4;
   color: var(--read);
 }
-.cover--min .cover__say {
-  margin: 0;
-  font-size: max(13px, calc(var(--u) * 0.95));
-  color: var(--muted);
-}
-.cover--min .cover__say b {
-  color: var(--ivory-soft);
-  font-weight: 500;
-}
 .cover--min .cover__meta {
   margin: 0;
   font-family: var(--mono);
@@ -2936,11 +2927,6 @@ body,
 }
 .cover--min .cover__meta:last-child {
   margin-top: calc(var(--u) * 0.8);
-}
-.cover__stats {
-  position: absolute;
-  left: var(--gutter);
-  bottom: max(88px, calc(var(--u) * 8.4));
 }
 .cover--min .cover__toc {
   position: absolute;

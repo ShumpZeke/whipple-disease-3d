@@ -1,12 +1,10 @@
 import { useRef } from 'react';
-import { names, periodLabel, SUBMISSION } from '../app/config';
+import { names, periodLabel } from '../app/config';
 import { scrollToStop, smoothstep } from '../app/journey';
 import { SECTIONS, STOPS } from '../content/story';
-import { Cites, RichText } from './RichText';
+import { RichText } from './RichText';
 import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
-import { HEADLINE } from '../content/figures';
-import { StatRow } from './Charts';
 
 /* ------------------------------------------------------------------ backdrop */
 
@@ -21,9 +19,9 @@ export function Backdrops() {
 /* ------------------------------------------------------------------ home screen */
 
 /**
- * The home screen: the eponym's name, how to say it, a one-line definition, who made the project,
- * and a menu of the parts (each one jumps there), over the 3D study where Max Wilms is at work.
- * It fades as the camera moves in towards him.
+ * The home screen: the eponym's name, a one-line definition, who made the project, and a menu of
+ * the parts (each one jumps there), over the 3D study where Max Wilms is at work. It fades as the
+ * camera moves in towards him.
  */
 function Cover() {
   const ref = useRef<HTMLElement>(null);
@@ -39,23 +37,16 @@ function Cover() {
   return (
     <section ref={ref} className="cover cover--min fly" aria-labelledby="cover-title">
       <div className="cover__brand">
-        <p className="cover__meta">
-          // {SUBMISSION.course}, eponym 27
-        </p>
         <h1 id="cover-title" className="cover__title">
           <Scramble text="Wilms Tumor" duration={1100} />
         </h1>
         <p className="cover__def">
           <RichText text={STOPS[0].text} />
         </p>
-        <p className="cover__say">
-          Say it <b>WILMZ TOO-mer</b>. Named after Max Wilms, a German surgeon. <Cites ids={[16, 9]} />
-        </p>
         <p className="cover__meta">
           {names()}, {periodLabel()}
         </p>
       </div>
-      <StatRow items={HEADLINE} className="cover__stats" />
       <nav className="cover__toc" aria-label="What’s inside">
         <ol>
           {SECTIONS.map((sec, i) => (

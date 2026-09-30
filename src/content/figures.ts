@@ -11,13 +11,6 @@ export interface Stat {
   cites: number[];
 }
 
-/** The three headline numbers on the home screen and the summary. */
-export const HEADLINE: Stat[] = [
-  { value: '600', label: 'children a year in the U.S.', cites: [4] },
-  { value: '5%', label: 'of all childhood cancers', cites: [4] },
-  { value: '93%', label: 'alive 5 years later', cites: [2] },
-];
-
 export type Figure =
   | { kind: 'stats'; title: string; items: Stat[] }
   | { kind: 'ages'; title: string; cites: number[] }

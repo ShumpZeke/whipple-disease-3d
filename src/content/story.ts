@@ -69,7 +69,7 @@ export const STOPS: Stop[] = [
     eyebrow: 'Home',
     title: 'Wilms Tumor',
     text: 'A kidney cancer in young children. Its medical name is nephroblastoma. {c:1,3}',
-    demo: 'Point to the three numbers, then the list of parts along the bottom, then scroll down',
+    demo: 'Point to the list of parts along the bottom, then scroll down',
     say: 'Our eponym is Wilms tumor, a kidney cancer in young children. It is also called nephroblastoma.',
   },
   {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { names, periodLabel, SUBMISSION } from '../app/config';
 import { MEDIA_CREDITS, SOURCES, SOURCE_BY_ID } from './citations';
 import { GLOSSARY, TERM_BY_KEY } from './glossary';
-import { FIGURES, HEADLINE } from './figures';
+import { FIGURES } from './figures';
 import { QUESTIONS } from './quiz';
 import { FACTS, QA, SECTIONS, STOPS, STOP_INDEX } from './story';
 
@@ -153,7 +153,7 @@ describe('citations', () => {
 describe('infographic figures', () => {
   const all = Object.values(FIGURES).flat();
   it('cites a real source for every number', () => {
-    const cites = [...HEADLINE.flatMap((s) => s.cites), ...all.flatMap((f) => ('cites' in f ? f.cites : f.items.flatMap((s) => s.cites)))];
+    const cites = all.flatMap((f) => ('cites' in f ? f.cites : f.items.flatMap((s) => s.cites)));
     expect(cites.length).toBeGreaterThan(0);
     for (const id of cites) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
   });

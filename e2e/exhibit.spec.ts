@@ -24,14 +24,13 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   await expect(page.getByRole('heading', { name: 'Wilms Tumor', level: 1 })).toBeVisible();
   const cover = page.locator('.cover');
   await expect(cover).toContainText('nephroblastoma'); // the other name
-  await expect(cover).toContainText('WILMZ TOO-mer'); // how to say it
   await expect(cover.locator('.cover__def')).toContainText('kidney cancer');
   await expect(cover.locator('.cover__brand')).toContainText('Vardhmansinh Rathod');
   await expect(cover.locator('.cover__brand')).toContainText('Eren Robinson');
   await expect(cover.locator('.cover__brand')).toContainText('Shanya Prezy');
   await expect(cover.locator('.cover__brand')).toContainText('3rd Block');
-  // the headline numbers, as an infographic
-  await expect(cover.locator('.cover__stats li')).toHaveCount(3);
+  // kept short: a title, one line, the names and the list of parts
+  await expect(cover.locator('p')).toHaveCount(2);
   // a pure scene: no slide buttons, arrows or counters
   await expect(page.getByRole('button', { name: /^(Next|Back|Start)$/ })).toHaveCount(0);
   // the list of parts jumps straight to one
