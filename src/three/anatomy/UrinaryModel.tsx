@@ -4,16 +4,15 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { journey } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
-import { QUESTIONS } from '../../content/quiz';
 import { STOP_INDEX, type StopId } from '../../content/story';
 import { view } from '../Director';
 import { useLevels } from '../levels';
-import { isKidney, ORGANS, type OrganId } from './organs';
+import { isKidney, type OrganId } from './organs';
 import { MODEL_SCALE, useAnatomy } from './useAnatomy';
 
 /** How much each organ is highlighted (warm rim) or dimmed (greyed) at each stop. */
-function emphasis(id: StopId, hovered: OrganId | null, quizOrgan: boolean) {
-  const pickable = id === 'body' || id === 'end' || quizOrgan;
+function emphasis(id: StopId, hovered: OrganId | null) {
+  const pickable = id === 'body' || id === 'end';
   return {
     pickable,
     dim: (o: OrganId): number => {
@@ -41,11 +40,9 @@ export function UrinaryModel() {
   const gl = useThree((s) => s.gl);
   const stepId = useStopId();
   const hovered = useStory((s) => s.hoveredOrgan);
-  const quizIndex = useStory((s) => s.quizIndex);
-  const quizOrgan = stepId === 'quiz' && QUESTIONS[quizIndex]?.kind === 'organ';
   const target = useRef<Record<string, { dim: number; hl: number }>>({});
 
-  const em = emphasis(stepId, hovered, quizOrgan);
+  const em = emphasis(stepId, hovered);
   for (const id of Object.keys(data.meshes) as OrganId[]) {
     target.current[id] = { dim: em.dim(id), hl: em.highlight(id) };
   }
@@ -69,7 +66,7 @@ export function UrinaryModel() {
 
   useEffect(() => {
     invalidate();
-  }, [stepId, hovered, quizIndex, invalidate]);
+  }, [stepId, hovered, invalidate]);
 
   // deep inside the left kidney (a filter, cells, DNA) the other organs are far out of sight
   const levels = useLevels();
@@ -106,7 +103,6 @@ export function UrinaryModel() {
     const st = useStory.getState();
     st.markInteracted();
     if (stepId === 'body' && isKidney(organ)) st.goToId('kidneys');
-    else if (quizOrgan) st.answerOrgan(organ, ORGANS[organ].name);
     else st.setHovered(organ);
   };
 

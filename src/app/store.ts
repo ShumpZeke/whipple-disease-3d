@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { QUESTIONS } from '../content/quiz';
-import { STOPS, STOP_INDEX, type StopId, type World } from '../content/story';
+import { nextPause, prevPause, STOPS, STOP_INDEX, type StopId, type World } from '../content/story';
 import type { OrganId } from '../three/anatomy/organs';
 import { currentTargetStop, scrollToStop } from './journey';
 
@@ -10,8 +10,8 @@ export interface TermAnchor {
   rect: { left: number; top: number; width: number; height: number };
 }
 
-/** firstTry: was the first attempt right? solved: has the right answer been found? */
-export type QuizAnswer = { firstTry: boolean; solved: boolean };
+/** The one answer given to a question (the index of the option picked) and whether it was right. */
+export type QuizAnswer = { picked: number; correct: boolean };
 
 interface State {
   /** Stop nearest to the current scroll position (changes only when the nearest stop changes). */
@@ -23,7 +23,7 @@ interface State {
   hoveredOrgan: OrganId | null;
   quizIndex: number;
   quizAnswers: Record<string, QuizAnswer | undefined>;
-  quizFeedback: { text: string; correct: boolean } | null;
+  quizFeedback: { correct: boolean } | null;
   reducedMotion: boolean;
   /** The device turned out to be slow while running: render less from now on. */
   lowPower: boolean;
@@ -48,8 +48,8 @@ interface State {
   closeOverlays: () => void;
   closeTerm: () => void;
   setHovered: (o: OrganId | null) => void;
-  answerOrgan: (organ: OrganId, organName: string) => void;
   answerChoice: (optionIndex: number) => void;
+  retryQuiz: () => void;
   nextQuestion: () => void;
   setReducedMotion: (v: boolean) => void;
   setLowPower: () => void;
@@ -62,10 +62,6 @@ interface State {
   setWorldReady: (w: World) => void;
 }
 
-function record(prev: QuizAnswer | undefined, correct: boolean): QuizAnswer {
-  if (!prev) return { firstTry: correct, solved: correct };
-  return { firstTry: prev.firstTry, solved: prev.solved || correct };
-}
 
 export const useStory = create<State>((set, get) => ({
   stop: 0,
@@ -92,8 +88,8 @@ export const useStory = create<State>((set, get) => ({
     set({ stop: i, term: null, historyNote: null, quizFeedback: null });
   },
   goToId: (id) => scrollToStop(STOP_INDEX[id]),
-  next: () => scrollToStop(currentTargetStop() + 1),
-  back: () => scrollToStop(currentTargetStop() - 1),
+  next: () => scrollToStop(nextPause(currentTargetStop())),
+  back: () => scrollToStop(prevPause(currentTargetStop())),
   restart: () => {
     set({
       quizIndex: 0,
@@ -112,25 +108,14 @@ export const useStory = create<State>((set, get) => ({
   closeOverlays: () => set({ sourcesOpen: false, glossaryOpen: false, term: null, sourceFocus: null }),
   closeTerm: () => set({ term: null }),
   setHovered: (o) => set({ hoveredOrgan: o }),
-  answerOrgan: (organ, organName) => {
-    const q = QUESTIONS[get().quizIndex];
-    if (!q || q.kind !== 'organ') return;
-    const correct = q.answer.includes(organ);
-    set((s) => ({
-      quizAnswers: { ...s.quizAnswers, [q.id]: record(s.quizAnswers[q.id], correct) },
-      quizFeedback: { correct, text: correct ? q.correct : q.retry.replace('{organ}', organName) },
-    }));
-  },
   answerChoice: (i) => {
     const q = QUESTIONS[get().quizIndex];
-    if (!q || q.kind !== 'choice') return;
-    const opt = q.options[i];
-    const correct = !!opt.correct;
-    set((s) => ({
-      quizAnswers: { ...s.quizAnswers, [q.id]: record(s.quizAnswers[q.id], correct) },
-      quizFeedback: { correct, text: correct ? q.correct : opt.why ?? 'Not quite. Try another answer.' },
-    }));
+    // one try per question, like a real test
+    if (!q || get().quizAnswers[q.id]) return;
+    const correct = !!q.options[i]?.correct;
+    set((s) => ({ quizAnswers: { ...s.quizAnswers, [q.id]: { picked: i, correct } }, quizFeedback: { correct } }));
   },
+  retryQuiz: () => set({ quizIndex: 0, quizAnswers: {}, quizFeedback: null }),
   nextQuestion: () => set((s) => ({ quizIndex: Math.min(QUESTIONS.length, s.quizIndex + 1), quizFeedback: null })),
   setReducedMotion: (v) => set({ reducedMotion: v }),
   setLowPower: () => set({ lowPower: true }),
@@ -149,11 +134,7 @@ export const useStory = create<State>((set, get) => ({
 export const useStopId = () => useStory((s) => STOPS[s.stop].id);
 
 export function quizScore(answers: State['quizAnswers']) {
-  let firstTry = 0;
-  let solved = 0;
-  for (const q of QUESTIONS) {
-    if (answers[q.id]?.firstTry) firstTry++;
-    if (answers[q.id]?.solved) solved++;
-  }
-  return { firstTry, solved, total: QUESTIONS.length };
+  const right = QUESTIONS.filter((q) => answers[q.id]?.correct).length;
+  const total = QUESTIONS.length;
+  return { right, total, percent: Math.round((right / total) * 100) };
 }

@@ -5,7 +5,7 @@
 One continuous page. Scrolling is a camera zoom: from Max Wilms and his 1899 book, into the
 urinary system, inside a kidney, down to its tiny filters and the young cells where the tumor
 starts, then back out to the lump, the other signs, the scans, the operation and the outlook,
-ending with a short summary, a quick quiz and the sources.
+ending with a short summary, a quick quiz and the sources. The talk pauses at ten stops (about a minute); the camera flies through the rest on its own.
 
 ![The home screen](docs/preview.jpg)
 
@@ -86,7 +86,7 @@ still pictures instead of 3D.
 | At least four clinical facts | The cause (young cells, gene changes), the signs (a lump, blood in the urine), how doctors find it (ultrasound, CT or MRI) and the treatment (nephrectomy, chemotherapy, radiation), plus the outlook |
 | At least three terms, word parts, abbreviations or pronunciation tips | Explained in plain words on screen (“Nephr means kidney, blast means bud and oma means tumor”), 14 terms with pronunciation in the **Terms** panel and at the end, the abbreviation CT |
 | At least two visuals with captions or labels | Labeled 3D scenes (the urinary system, the tumor, a kidney cut in half, a nephron, young cells, DNA, an ultrasound and a CT scanner), the captioned portrait, and titled charts: age at diagnosis, blood filtered vs urine made, inherited or not, signs at diagnosis, 93 in 100 survive |
-| Purposeful interactive elements | The list of parts, the + marker, organs you can tap, term pop-ups, source numbers, the 3D model you can turn, the quiz |
+| Purposeful interactive elements | The list of parts, the + marker, organs you can tap, term pop-ups, source numbers, the 3D model you can turn, the five-question quiz with a results screen |
 | Accuracy check (spelling, attribution) | Part 4: “Spelled Wilms tumor, no apostrophe. Others described it first; his book made his name stick.” with sources |
 | Source numbers that connect to the reference list | Every fact has a small source number; the full list is at the end |
 

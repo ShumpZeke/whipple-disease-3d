@@ -1,20 +1,21 @@
 import { useEffect } from 'react';
 import { creditLine } from '../app/config';
 import { TERM_BY_KEY } from '../content/glossary';
-import { QUESTIONS } from '../content/quiz';
+import { answerOf, QUESTIONS } from '../content/quiz';
 import { FACTS, QA, STOPS } from '../content/story';
+
+/** The stops the talk pauses at (the camera flies through the others on its own). */
+const TALK = STOPS.filter((s) => !s.pass);
 import { plainText } from './RichText';
 
-/** When to reach each stop in a five-minute talk (same order as STOPS). */
-const TIMES = ['0:00', '0:25', '0:45', '1:00', '1:20', '1:40', '1:55', '2:10', '2:25', '2:40', '2:55', '3:10', '3:25', '3:40', '3:55', '4:10', '4:25', '4:35'];
+/** When to reach each stop in a one-minute talk, before the quiz (same order as TALK). */
+const TIMES = ['0:00', '0:06', '0:12', '0:19', '0:26', '0:33', '0:40', '0:47', '0:54', '1:00'];
 
 const PARTS = [
-  { time: '0:00 to 0:25', name: 'Home', what: 'Who you are, your eponym, and how the page is organized' },
-  { time: '0:25 to 1:20', name: 'History', what: 'Who Max Wilms was, his 1899 book, and why the tumor has his name' },
-  { time: '1:20 to 2:25', name: 'The disease', what: 'The definition, then zoom into the kidney, its layers and its tiny filters' },
-  { time: '2:25 to 4:25', name: 'The facts', what: 'The cause, the signs, how doctors find it, the treatment and the outlook' },
-  { time: '4:25 to 4:35', name: 'Summary', what: 'Sum it up in two sentences' },
-  { time: '4:35 to 5:00', name: 'Quick check', what: 'Four questions, classmates tap the answers, then show the sources' },
+  { time: '0:00 to 0:19', name: 'History', what: 'Your eponym, Max Wilms, and why the tumor has his name' },
+  { time: '0:19 to 0:47', name: 'The disease', what: 'What it is, how it starts, the first signs, how doctors find it, the treatment' },
+  { time: '0:47 to 1:00', name: 'Summary', what: 'Sum it up in one sentence' },
+  { time: 'After 1:00', name: 'Quick check', what: 'Five questions, classmates call out the answers, then the results and the sources' },
 ];
 
 /**
@@ -72,7 +73,7 @@ export function Guide() {
       </section>
 
       <section className="guide__plan">
-        <h2>The five-minute plan</h2>
+        <h2>The one-minute plan</h2>
         <table>
           <tbody>
             {PARTS.map((p) => (
@@ -88,7 +89,7 @@ export function Guide() {
 
       <h2 className="guide__h">Stop by stop</h2>
       <ol className="guide__stops">
-        {STOPS.map((s, i) => {
+        {TALK.map((s, i) => {
           const t = s.term ? TERM_BY_KEY.get(s.term) : undefined;
           return (
             <li key={s.id} className="guide__stop">
@@ -121,7 +122,7 @@ export function Guide() {
                     <ol>
                       {QUESTIONS.map((q) => (
                         <li key={q.id}>
-                          {q.prompt} → <b>{q.kind === 'organ' ? 'a kidney (either one)' : q.options.find((o) => o.correct)?.text}</b>
+                          {q.prompt} → <b>{answerOf(q)}</b>
                         </li>
                       ))}
                     </ol>

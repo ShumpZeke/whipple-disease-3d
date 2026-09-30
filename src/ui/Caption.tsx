@@ -52,7 +52,8 @@ export function Caption() {
     },
     [stop],
   );
-  if (s.id === 'title') return null;
+  // no words on the home screen (it has its own) or on stops the camera only flies through
+  if (s.id === 'title' || s.pass) return null;
   if (s.id === 'quiz')
     return (
       <section ref={ref} className="caption caption--quiz" data-step="quiz">

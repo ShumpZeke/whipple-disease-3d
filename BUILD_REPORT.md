@@ -51,6 +51,8 @@ git history.
   test keeps every caption under 25 words), written the way you would explain it to a friend. No “Fact 1” labels, no em dashes or dots between words (a unit test checks
   this). Word parts are explained in the sentences, e.g. “Nephr means kidney and ectomy means
   removal.” The presenter’s own lines are in a printable guide (`?guide`), not on the big screen.
+- **A one-minute talk.** The page still zooms through every scene, but the clicker, keyboard and swipes stop at ten of them (home, Max Wilms, the name, what it is, how it starts, the lump, finding it, treatment, the summary, the quiz); the camera flies through the others.
+- **A real quiz.** Five big multiple-choice questions (A to D), one try each, green or red, then the results: the score, the percentage and every answer.
 - **An infographic.** The home screen and the summary lead with three numbers (about 600 children
   a year in the U.S., 5% of childhood cancers, 93% alive 5 years later), and the stops carry small,
   flat charts: age at diagnosis, blood filtered vs urine made, a million filters per kidney, 90% not

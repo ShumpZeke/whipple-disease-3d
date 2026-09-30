@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef, type ReactNode } from 'react';
 import { journey, stopPresence } from '../app/journey';
-import { STOP_INDEX, type StopId } from '../content/story';
+import { STOP_INDEX, STOPS, type StopId } from '../content/story';
 
 type V3 = [number, number, number] | { x: number; y: number; z: number };
 
@@ -38,7 +38,8 @@ export function Label3D({
     const el = box.current;
     if (!el || !visible) return;
     if (at) {
-      const k = (Array.isArray(at) ? at : [at]).reduce((m, id) => Math.max(m, stopPresence(journey.t, STOP_INDEX[id])), 0);
+      // (labels of stops the camera only flies through stay hidden)
+      const k = (Array.isArray(at) ? at : [at]).reduce((m, id) => (STOPS[STOP_INDEX[id]].pass ? m : Math.max(m, stopPresence(journey.t, STOP_INDEX[id]))), 0);
       const wrap = el.parentElement;
       if (wrap) wrap.style.display = k > 0.01 ? 'block' : 'none';
       el.style.opacity = k.toFixed(3);

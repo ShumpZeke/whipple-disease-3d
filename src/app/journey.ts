@@ -1,4 +1,4 @@
-import { LAST_STOP, SOURCES_PAGE, STOPS, type Stop, type World } from '../content/story';
+import { LAST_STOP, PAUSES, SOURCES_PAGE, STOPS, type Stop, type World } from '../content/story';
 
 /**
  * The scroll-driven zoom. `journey.t` is a continuous position along the story:
@@ -144,9 +144,12 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
     if (tween || touching || !settling) return;
     const r = window.scrollY / vh();
     if (r >= SOURCES_PAGE - 0.01) return;
-    const near = Math.round(r);
-    if (Math.abs(r - near) < 0.01) return;
-    scrollToStop(dir > 0 ? Math.ceil(r - 0.15) : dir < 0 ? Math.floor(r + 0.15) : near);
+    // come to rest on a stop the talk pauses at (the others are flown through)
+    if (PAUSES.some((p) => Math.abs(r - p) < 0.01)) return;
+    const ahead = PAUSES.find((p) => p >= r - 0.15) ?? LAST_STOP;
+    const behind = [...PAUSES].reverse().find((p) => p <= r + 0.15) ?? 0;
+    const near = PAUSES.reduce((a, b) => (Math.abs(b - r) < Math.abs(a - r) ? b : a), 0);
+    scrollToStop(dir > 0 ? ahead : dir < 0 ? behind : near);
   };
   const scheduleSettle = () => {
     clearTimeout(settleTimer);

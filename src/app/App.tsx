@@ -1,8 +1,7 @@
 import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
-import { LAST_STOP, SOURCES_PAGE, STOPS, STOP_INDEX, type StopId } from '../content/story';
+import { LAST_STOP, nextPause, prevPause, SOURCES_PAGE, STOPS, STOP_INDEX, type StopId } from '../content/story';
 import { ORGANS } from '../three/anatomy/organs';
 import { Caption } from '../ui/Caption';
-import { QUESTIONS } from '../content/quiz';
 import { Fallback, StageLoading } from '../ui/Fallback';
 import { Backdrops, HistoryLayer } from '../ui/History';
 import { EndSources } from '../ui/EndSources';
@@ -78,10 +77,10 @@ function useKeyboard() {
         return;
       }
       if (forward) {
-        scrollToStop(currentTargetStop() + 1);
+        scrollToStop(nextPause(currentTargetStop()));
         e.preventDefault();
       } else if (backward) {
-        scrollToStop(currentTargetStop() - 1);
+        scrollToStop(prevPause(currentTargetStop()));
         e.preventDefault();
       } else if (e.key === 'Home') {
         scrollToStop(0);
@@ -137,11 +136,7 @@ function useJourneyDriver() {
 function HoverTip() {
   const hovered = useStory((s) => s.hoveredOrgan);
   const stop = useStory((s) => s.stop);
-  // in the quick check, only while the "tap the organ" question is open
-  const organQuestion = useStory((s) => {
-    const q = QUESTIONS[s.quizIndex];
-    return q?.kind === 'organ' && !s.quizAnswers[q.id]?.solved;
-  });
+
   const [pt, setPt] = useState<{ x: number; y: number } | null>(null);
   useEffect(() => {
     const onMove = (e: PointerEvent) => setPt({ x: e.clientX, y: e.clientY });
@@ -149,10 +144,10 @@ function HoverTip() {
     return () => window.removeEventListener('pointermove', onMove);
   }, []);
   const id = STOPS[stop].id;
-  if (!hovered || !pt || !['body', 'end', 'quiz'].includes(id) || (id === 'quiz' && !organQuestion)) return null;
+  if (!hovered || !pt || !['body', 'end'].includes(id)) return null;
   return (
     <div className="hover-tip" style={{ left: pt.x, top: pt.y }} aria-hidden="true">
-      {id === 'quiz' ? 'Select this organ' : ORGANS[hovered].name}
+      {ORGANS[hovered].name}
     </div>
   );
 }

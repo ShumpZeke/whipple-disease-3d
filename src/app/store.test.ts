@@ -22,7 +22,7 @@ describe('stops', () => {
 
   it('restart scrolls back to the start and clears the quiz', () => {
     st().setStop(STOP_INDEX.quiz);
-    st().answerOrgan('Bladder', 'bladder');
+    st().answerChoice(0);
     st().restart();
     expect(st().quizAnswers).toEqual({});
     expect(st().quizIndex).toBe(0);
@@ -43,36 +43,35 @@ describe('overlays', () => {
 });
 
 describe('quiz', () => {
-  it('scores first tries separately from solved questions', () => {
+  it('scores one try per question and adds up the results', () => {
     st().setStop(STOP_INDEX.quiz);
-    // Q1 (organ): wrong first, then right
-    st().answerOrgan('Bladder', 'bladder');
+    // the first question wrong, the rest right
+    st().answerChoice(QUESTIONS[0].options.findIndex((o) => !o.correct));
     expect(st().quizFeedback?.correct).toBe(false);
-    expect(st().quizFeedback?.text).toMatch(/bladder/);
-    st().answerOrgan('RightKidney', 'right kidney');
-    expect(st().quizFeedback?.correct).toBe(true);
     st().nextQuestion();
-    // remaining choice questions: pick the correct option directly
     for (let i = 1; i < QUESTIONS.length; i++) {
-      const q = QUESTIONS[i];
-      if (q.kind !== 'choice') continue;
-      st().answerChoice(q.options.findIndex((o) => o.correct));
+      st().answerChoice(QUESTIONS[i].options.findIndex((o) => o.correct));
       expect(st().quizFeedback?.correct).toBe(true);
       st().nextQuestion();
     }
     const score = quizScore(st().quizAnswers);
-    expect(score.solved).toBe(QUESTIONS.length);
-    expect(score.firstTry).toBe(QUESTIONS.length - 1);
+    expect(score).toEqual({ right: QUESTIONS.length - 1, total: QUESTIONS.length, percent: Math.round(((QUESTIONS.length - 1) / QUESTIONS.length) * 100) });
     expect(st().quizIndex).toBe(QUESTIONS.length);
   });
 
-  it('explains a wrong choice and lets the student try again', () => {
-    useStory.setState({ quizIndex: QUESTIONS.findIndex((q) => q.kind === 'choice') });
-    const q = QUESTIONS[st().quizIndex];
-    if (q.kind !== 'choice') throw new Error('expected a choice question');
-    st().answerChoice(q.options.findIndex((o) => !o.correct));
-    expect(st().quizFeedback?.correct).toBe(false);
+  it('keeps the first answer: a second click does not change it', () => {
+    const q = QUESTIONS[0];
+    const wrong = q.options.findIndex((o) => !o.correct);
+    st().answerChoice(wrong);
     st().answerChoice(q.options.findIndex((o) => o.correct));
-    expect(st().quizAnswers[q.id]).toEqual({ firstTry: false, solved: true });
+    expect(st().quizAnswers[q.id]).toEqual({ picked: wrong, correct: false });
+  });
+
+  it('can be taken again', () => {
+    st().answerChoice(0);
+    st().nextQuestion();
+    st().retryQuiz();
+    expect(st().quizIndex).toBe(0);
+    expect(st().quizAnswers).toEqual({});
   });
 });

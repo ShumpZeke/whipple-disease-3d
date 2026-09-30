@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { QUESTIONS } from '../src/content/quiz';
-import { LAST_STOP, SECTIONS, SOURCES_PAGE, STOPS } from '../src/content/story';
+import { answerOf, QUESTIONS } from '../src/content/quiz';
+import { LAST_STOP, PAUSES, SECTIONS, SOURCES_PAGE, STOPS } from '../src/content/story';
 import { SOURCES } from '../src/content/citations';
 
 // Known noise from three.js / the GPU driver, not from the exhibit.
@@ -39,7 +39,7 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   await expect(menu.getByRole('button')).toHaveCount(SECTIONS.length);
   await waitForStage(page);
   await menu.getByRole('button', { name: /The cause/ }).click();
-  await expect.poll(async () => (await state(page))?.id).toBe('cause');
+  await expect.poll(async () => (await state(page))?.id).toBe('genes');
   expect(errors).toEqual([]);
 });
 
@@ -55,8 +55,8 @@ test('the history begins with a profile of Max Wilms at his desk, then his 1899 
 
   // scrolling on zooms over his shoulder to the book on his desk; the profile goes with the room
   await page.keyboard.press('PageDown');
-  await expect.poll(async () => (await state(page))?.id).toBe('book');
-  await expect(page.locator('section.caption[data-step="book"] .caption__body')).toContainText('The Mixed Tumors of the Kidney');
+  await expect.poll(async () => (await state(page))?.id).toBe('name');
+  await expect(page.locator('section.caption[data-step="name"] .caption__body')).toContainText('nephroblastoma');
   await expect(card).toBeHidden();
   expect(errors).toEqual([]);
 });
@@ -70,11 +70,12 @@ test('the name stop splits nephroblastoma into its word parts', async ({ page })
   await expect(page.locator('section.caption[data-step="name"] .caption__note')).toContainText('Nephr means kidney');
 });
 
-test('one continuous page: a presenter clicker walks every stop in order', async ({ page }) => {
+test('one continuous page: a presenter clicker walks the talk, flying through the rest', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?e2e');
   await waitForStage(page);
-  for (let i = 1; i <= LAST_STOP; i++) {
+  expect(PAUSES.length).toBe(10);
+  for (const i of PAUSES.slice(1)) {
     await page.keyboard.press('PageDown');
     await expect.poll(async () => (await state(page))?.id, { message: `stop ${i}` }).toBe(STOPS[i].id);
     await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - i)).toBeLessThan(0.01);
@@ -83,7 +84,7 @@ test('one continuous page: a presenter clicker walks every stop in order', async
   // it is one long scrolling page, not a slide deck
   expect(Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(LAST_STOP);
   await page.keyboard.press('PageUp');
-  await expect.poll(async () => (await state(page))?.id).toBe(STOPS[LAST_STOP - 1].id);
+  await expect.poll(async () => (await state(page))?.id).toBe(STOPS[PAUSES.at(-2)!].id);
   await page.keyboard.press('Home');
   await expect.poll(async () => (await state(page))?.id).toBe('title');
   expect(errors).toEqual([]);
@@ -111,32 +112,34 @@ test('the kidney marker zooms in on the kidneys', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('self-check: pick the organ on the 3D model, then answer the questions', async ({ page }) => {
+test('the quiz: five big multiple-choice questions, one try each, then the results', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?stop=quiz&e2e');
   await waitForStage(page);
-  await expect(page.locator('.quiz__prompt')).toContainText('Tap the organ');
-  await page.waitForTimeout(800);
-  // a wrong organ first, then a kidney
-  const bladder = await page.evaluate(() => window.__exhibit!.organPoint('Bladder'));
-  expect(bladder).not.toBeNull();
-  await page.mouse.click(bladder!.x, bladder!.y);
+  // question 1 wrong: the pick turns red, the right answer green, and a second click changes nothing
+  await expect(page.locator('.quiz__prompt')).toHaveText(QUESTIONS[0].prompt);
+  expect(parseFloat(await page.locator('.quiz__prompt').evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(40);
+  const wrong = QUESTIONS[0].options.find((o) => !o.correct)!.text;
+  await page.getByRole('button', { name: wrong }).click();
+  await expect(page.locator('.quiz__opt.is-wrong')).toContainText(wrong);
+  await expect(page.locator('.quiz__opt.is-right')).toContainText(answerOf(QUESTIONS[0]));
   await expect(page.locator('.quiz__feedback')).toHaveClass(/is-wrong/);
-  const pt = await page.evaluate(() => window.__exhibit!.organPoint('LeftKidney'));
-  expect(pt).not.toBeNull();
-  await page.mouse.click(pt!.x, pt!.y);
-  await expect(page.locator('.quiz__feedback')).toHaveClass(/is-right/);
   await page.getByRole('button', { name: 'Next question' }).click();
+  // the other four right
   for (const q of QUESTIONS.slice(1)) {
-    if (q.kind !== 'choice') continue;
-    const wrong = q.options.find((o) => !o.correct)!;
-    await page.getByRole('button', { name: wrong.text, exact: true }).click();
-    await expect(page.locator('.quiz__feedback')).toHaveClass(/is-wrong/);
-    await page.getByRole('button', { name: q.options.find((o) => o.correct)!.text, exact: true }).click();
+    await expect(page.locator('.quiz__prompt')).toHaveText(q.prompt);
+    await page.getByRole('button', { name: answerOf(q) }).click();
     await expect(page.locator('.quiz__feedback')).toHaveClass(/is-right/);
-    await page.getByRole('button', { name: /Next question|See how you did/ }).click();
+    await page.getByRole('button', { name: /Next question|See my results/ }).click();
   }
-  await expect(page.locator('[data-quiz="done"]')).toContainText('Nicely done');
+  const done = page.locator('[data-quiz="done"]');
+  await expect(done.locator('.quiz__score')).toContainText('4');
+  await expect(done).toContainText('80% correct');
+  await expect(done.locator('.quiz__review li.is-wrong')).toHaveCount(1);
+  await expect(done.locator('.quiz__review li.is-right')).toHaveCount(4);
+  // and it can be taken again
+  await done.getByRole('button', { name: 'Try again' }).click();
+  await expect(page.locator('.quiz__prompt')).toHaveText(QUESTIONS[0].prompt);
   expect(errors).toEqual([]);
 });
 
@@ -169,23 +172,23 @@ test('sources, medical terms and inline definitions', async ({ page }) => {
 
 test('reduced motion jumps between stops without the zoom animation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/?stop=inside&e2e');
+  await page.goto('/?stop=body&e2e');
   await waitForStage(page);
   await page.keyboard.press('PageDown');
   await page.waitForTimeout(150);
-  expect((await state(page))?.id).toBe('nephron');
-  expect(Math.abs(((await state(page))?.t ?? 0) - STOPS.findIndex((s) => s.id === 'nephron'))).toBeLessThan(0.001);
+  expect((await state(page))?.id).toBe('genes');
+  expect(Math.abs(((await state(page))?.t ?? 0) - STOPS.findIndex((s) => s.id === 'genes'))).toBeLessThan(0.001);
 });
 
 test('lite mode (?lite) runs the same exhibit', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.goto('/?e2e&lite&stop=nephron');
+  await page.goto('/?e2e&lite&stop=genes');
   await waitForStage(page);
   expect((await state(page))?.quality).toBe('lite');
   await expect(page.locator('html')).toHaveClass(/lite/);
-  await expect(page.locator('section.caption[data-step="nephron"]')).toBeVisible();
+  await expect(page.locator('section.caption[data-step="genes"]')).toBeVisible();
   await page.keyboard.press('PageDown');
-  await expect.poll(async () => (await state(page))?.id).toBe('cause');
+  await expect.poll(async () => (await state(page))?.id).toBe('lump');
   expect(errors).toEqual([]);
 });
 
@@ -198,10 +201,10 @@ test('falls back to still images when WebGL is unavailable', async ({ page }) =>
       return orig.call(this, type, ...rest);
     };
   });
-  await page.goto('/?stop=nephron');
+  await page.goto('/?stop=genes');
   await expect(page.locator('.fallback-img img')).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Interactive 3D isn’t available' })).toBeVisible();
-  await expect(page.locator('section.caption[data-step="nephron"]')).toBeVisible();
+  await expect(page.locator('section.caption[data-step="genes"]')).toBeVisible();
   // the cards that hang in the 3D study are still there
   await page.goto('/?stop=doctor');
   await expect(page.getByRole('article', { name: 'Profile of Max Wilms' })).toBeVisible();
@@ -214,9 +217,9 @@ for (const vp of [
 ]) {
   test(`fits the screen on a ${vp.name}`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto('/?stop=signs&e2e');
+    await page.goto('/?stop=lump&e2e');
     await waitForStage(page);
-    const caption = page.locator('section.caption[data-step="signs"]');
+    const caption = page.locator('section.caption[data-step="lump"]');
     await expect(caption).toBeVisible();
     const box = (await caption.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
@@ -231,18 +234,18 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
 
   test('readable text, and swiping moves through the scene', async ({ page }) => {
     const errors = collectErrors(page);
-    await page.goto('/?e2e&stop=book');
+    await page.goto('/?e2e&stop=doctor');
     await waitForStage(page);
     // text sized for the back of a classroom
-    const title = page.locator('section.caption[data-step="book"] .caption__title');
+    const title = page.locator('section.caption[data-step="doctor"] .caption__title');
     await expect(title).toBeVisible();
     expect(parseFloat(await title.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(40);
-    const body = page.locator('section.caption[data-step="book"] .caption__body');
+    const body = page.locator('section.caption[data-step="doctor"] .caption__body');
     expect(parseFloat(await body.evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(24);
     // no slide furniture on screen
     await expect(page.getByRole('button', { name: /^(Next|Back)$/ })).toHaveCount(0);
     // a finger swipe up zooms on to the next stop and comes to rest there; a tiny swipe falls back
-    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 2)).toBeLessThan(0.01);
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 1)).toBeLessThan(0.01);
     const cdp = await page.context().newCDPSession(page);
     const swipe = async (x: number, y: number, dy: number) => {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
@@ -258,9 +261,9 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await swipe(1300, 500, 60);
     await page.waitForTimeout(1500);
     await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 3)).toBeLessThan(0.01);
-    // swiping down goes back
+    // swiping down goes back (past the over-the-shoulder shot, which the camera only flies through)
     await swipe(1300, 400, 420);
-    await expect.poll(async () => (await state(page))?.id).toBe('book');
+    await expect.poll(async () => (await state(page))?.id).toBe('doctor');
     await expect(page.getByRole('button', { name: /Full screen/ })).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -289,8 +292,8 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
 test('the printable presenter guide has a script for every stop and the quiz answers', async ({ page }) => {
   await page.goto('/?guide');
   await expect(page.getByRole('heading', { name: 'Wilms Tumor', level: 1 })).toBeVisible();
-  await expect(page.locator('.guide__stop')).toHaveCount(STOPS.length);
-  await expect(page.locator('.guide__say')).toHaveCount(STOPS.length);
+  await expect(page.locator('.guide__stop')).toHaveCount(PAUSES.length);
+  await expect(page.locator('.guide__say')).toHaveCount(PAUSES.length);
   await expect(page.locator('.guide__answers li')).toHaveCount(QUESTIONS.length);
-  await expect(page.locator('.guide__answers')).toContainText('a kidney');
+  await expect(page.locator('.guide__answers')).toContainText('In a kidney');
 });

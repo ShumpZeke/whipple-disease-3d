@@ -55,7 +55,7 @@ describe('the one-page journey (storyboard order)', () => {
   it('writes plain sentences on screen: no em dashes, dots between words or fact numbers', () => {
     const onScreen = [
       ...STOPS.flatMap((s) => [s.title, s.text, s.note ?? '']),
-      ...QUESTIONS.flatMap((q) => [q.prompt, q.correct, ...(q.kind === 'choice' ? q.options.flatMap((o) => [o.text, o.why ?? '']) : [q.retry])]),
+      ...QUESTIONS.flatMap((q) => [q.prompt, q.topic, ...q.options.map((o) => o.text)]),
       ...GLOSSARY.flatMap((t) => [t.short, t.definition]),
     ];
     for (const line of onScreen) {
@@ -167,10 +167,8 @@ describe('infographic figures', () => {
     }
   });
 
-  it('names the body system and the specialty', () => {
-    const meta = all.flatMap((f) => (f.kind === 'meta' ? f.rows : []));
-    expect(meta.find((r) => r.label === 'Body system')?.value).toMatch(/urinary/i);
-    expect(meta.find((r) => r.label === 'Specialty')?.value).toMatch(/oncology/i);
+  it('names the body system', () => {
+    expect(STOPS[STOP_INDEX.body].text).toMatch(/urinary system/);
   });
 });
 
@@ -211,19 +209,17 @@ describe('history accuracy', () => {
 });
 
 describe('quiz', () => {
-  it('has 2–4 questions, one answered on the 3D model', () => {
-    expect(QUESTIONS.length).toBeGreaterThanOrEqual(2);
-    expect(QUESTIONS.length).toBeLessThanOrEqual(4);
-    expect(QUESTIONS.some((q) => q.kind === 'organ')).toBe(true);
+  it('has five multiple-choice questions with four answers each, exactly one right', () => {
+    expect(QUESTIONS).toHaveLength(5);
+    for (const q of QUESTIONS) {
+      expect(q.options, q.id).toHaveLength(4);
+      expect(q.options.filter((o) => o.correct), q.id).toHaveLength(1);
+    }
   });
 
-  it('has exactly one correct option per multiple-choice question', () => {
-    for (const q of QUESTIONS) if (q.kind === 'choice') expect(q.options.filter((o) => o.correct)).toHaveLength(1);
-  });
-
-  it('accepts either kidney for the organ question', () => {
-    const q = QUESTIONS.find((x) => x.kind === 'organ');
-    expect(q?.kind === 'organ' && q.answer).toEqual(['LeftKidney', 'RightKidney']);
+  it('does not always put the right answer in the same place', () => {
+    const places = new Set(QUESTIONS.map((q) => q.options.findIndex((o) => o.correct)));
+    expect(places.size).toBeGreaterThanOrEqual(3);
   });
 });
 

@@ -1,70 +1,53 @@
-import type { OrganId } from '../three/anatomy/organs';
+/*
+ * The quick check at the end: five multiple-choice questions, one try each, then the results.
+ * Every answer comes from what the exhibit showed (and the sources it cites).
+ */
 
-export type Question =
-  | {
-      id: string;
-      kind: 'organ';
-      prompt: string;
-      /** Any of these organs counts as right. */
-      answer: OrganId[];
-      correct: string;
-      /** Feedback when another organ is picked. {organ} is replaced with its name. */
-      retry: string;
-      cites: number[];
-    }
-  | {
-      id: string;
-      kind: 'choice';
-      prompt: string;
-      options: { text: string; correct?: boolean; why?: string }[];
-      correct: string;
-      cites: number[];
-    };
+export interface Question {
+  id: string;
+  /** A short name for the results screen. */
+  topic: string;
+  prompt: string;
+  options: { text: string; correct?: boolean }[];
+  cites: number[];
+}
 
 export const QUESTIONS: Question[] = [
   {
-    id: 'organ',
-    kind: 'organ',
-    prompt: 'Tap the organ where Wilms tumor grows.',
-    answer: ['LeftKidney', 'RightKidney'],
-    correct: 'Yes, the kidney.',
-    retry: 'That’s the {organ}. Try the two bean-shaped organs.',
+    id: 'where',
+    topic: 'Where it starts',
+    prompt: 'Where does Wilms tumor start?',
+    options: [{ text: 'In a kidney', correct: true }, { text: 'In the bladder' }, { text: 'In the liver' }, { text: 'In the lungs' }],
     cites: [1, 3],
   },
   {
     id: 'who',
-    kind: 'choice',
+    topic: 'Who gets it',
     prompt: 'Who usually gets Wilms tumor?',
-    options: [
-      { text: 'Kids aged 2 to 5', correct: true },
-      { text: 'Teenagers', why: 'It is much more common in younger kids.' },
-      { text: 'Older adults', why: 'Adults very rarely get it.' },
-    ],
-    correct: 'Right, young kids.',
+    options: [{ text: 'Older adults' }, { text: 'Teenagers' }, { text: 'Kids aged 2 to 5', correct: true }, { text: 'Only newborns' }],
     cites: [1, 4],
   },
   {
     id: 'name',
-    kind: 'choice',
+    topic: 'The medical name',
     prompt: 'What does nephroblastoma mean?',
-    options: [
-      { text: 'A tumor of young kidney cells', correct: true },
-      { text: 'A kidney stone', why: 'A kidney stone is not a tumor.' },
-      { text: 'A bladder infection', why: 'Nephr means kidney, and oma means tumor.' },
-    ],
-    correct: 'Right. Nephr means kidney, blast means bud, oma means tumor.',
+    options: [{ text: 'A kidney stone' }, { text: 'A tumor of young kidney cells', correct: true }, { text: 'A bladder infection' }, { text: 'A broken rib' }],
     cites: [15, 1],
   },
   {
-    id: 'outlook',
-    kind: 'choice',
-    prompt: 'How many kids with Wilms tumor are cured today?',
-    options: [
-      { text: 'About 1 in 10', why: 'That was long ago, before modern treatment.' },
-      { text: 'About half', why: 'It is much higher now.' },
-      { text: 'About 9 in 10', correct: true },
-    ],
-    correct: 'Right, about 9 in 10.',
+    id: 'test',
+    topic: 'The first test',
+    prompt: 'Which test usually comes first?',
+    options: [{ text: 'An eye exam' }, { text: 'A hearing test' }, { text: 'An ultrasound', correct: true }, { text: 'A knee X-ray' }],
+    cites: [6],
+  },
+  {
+    id: 'cured',
+    topic: 'The outlook',
+    prompt: 'How many kids with Wilms tumor are cured?',
+    options: [{ text: 'About 1 in 10' }, { text: 'About 3 in 10' }, { text: 'About half' }, { text: 'About 9 in 10', correct: true }],
     cites: [2, 9],
   },
 ];
+
+export const answerOf = (q: Question) => q.options.find((o) => o.correct)!.text;

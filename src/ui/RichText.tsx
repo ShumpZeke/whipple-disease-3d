@@ -9,10 +9,9 @@ export function Cites({ ids }: { ids: number[] }) {
   const openSources = useStory((s) => s.openSources);
   return (
     <span className="cites">
-      [
       {ids.map((id, i) => (
         <Fragment key={id}>
-          {i > 0 && ', '}
+          {i > 0 && ','}
           <button
             type="button"
             className="cite"
@@ -26,7 +25,6 @@ export function Cites({ ids }: { ids: number[] }) {
           </button>
         </Fragment>
       ))}
-      ]
     </span>
   );
 }

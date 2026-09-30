@@ -54,6 +54,11 @@ export interface Stop {
   demo?: string;
   /** What to say out loud at this stop. */
   say: string;
+  /**
+   * The camera flies through this stop without stopping: no words on screen, and the clicker,
+   * keyboard and swipes skip it (the talk pauses only at the other stops).
+   */
+  pass?: true;
 }
 
 export const STOPS: Stop[] = [
@@ -65,7 +70,7 @@ export const STOPS: Stop[] = [
     title: 'Wilms Tumor',
     text: 'A kidney cancer in young children. Its medical name is nephroblastoma. {c:1,3}',
     demo: 'Point to the three numbers, then the list of parts along the bottom, then scroll down',
-    say: 'My eponym is Wilms tumor. An eponym is a medical term named after a person. As I scroll, we go from the doctor it is named after all the way into the kidney where it grows.',
+    say: 'Our eponym is Wilms tumor, a kidney cancer in young children. It is also called nephroblastoma.',
   },
   {
     id: 'doctor',
@@ -75,10 +80,11 @@ export const STOPS: Stop[] = [
     title: 'Dr. Max Wilms',
     text: 'A German surgeon who lived from 1867 to 1918. The tumor is named after him. {c:9,10}',
     demo: 'Tap a small source number to show where a fact comes from',
-    say: 'Wilms tumor is named after Max Wilms, a German surgeon. He was born in 1867, became a professor in 1904, and died in 1918, during World War I, after catching an infection while operating on a prisoner of war.',
+    say: 'It is named after Max Wilms, a German surgeon who lived from 1867 to 1918.',
   },
   {
     id: 'book',
+    pass: true,
     scene: 'history',
     world: 'none',
     eyebrow: 'History',
@@ -97,7 +103,7 @@ export const STOPS: Stop[] = [
     termLabel: 'Its medical name',
     note: 'Nephr means kidney, blast means bud, oma means tumor. {c:15}',
     demo: 'Scroll slowly from here: the drawing in his book turns into the 3D model',
-    say: 'He was not the first to describe it, but after his book the tumor became known by his name. That is what makes it an eponym. Doctors also call it nephroblastoma, which breaks down into kidney, bud and tumor.',
+    say: 'In 1899 he wrote a book about this tumor, so it carries his name. Nephroblastoma means a tumor of young kidney cells.',
   },
   {
     id: 'body',
@@ -107,10 +113,11 @@ export const STOPS: Stop[] = [
     title: 'What is Wilms tumor?',
     text: 'A cancer that starts in a kidney, part of the urinary system. It is the most common kidney cancer in kids. {c:1,3}',
     demo: 'Drag the model to turn it, then tap the + on the kidney',
-    say: 'Here is my definition. Wilms tumor is a cancer that starts in a kidney, which is part of the urinary system, and it is treated by pediatric oncologists, doctors for children with cancer. The chart shows that 2 out of 3 cases are found before age 5, and the average age is 3 to 4.',
+    say: 'It starts in a kidney, part of the urinary system. It is the most common kidney cancer in kids.',
   },
   {
     id: 'kidneys',
+    pass: true,
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'The disease',
@@ -121,6 +128,7 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'inside',
+    pass: true,
     scene: 'kidney',
     world: 'kidney',
     eyebrow: 'The disease',
@@ -131,6 +139,7 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'nephron',
+    pass: true,
     scene: 'nephron',
     world: 'nephron',
     eyebrow: 'The disease',
@@ -142,6 +151,7 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'cause',
+    pass: true,
     scene: 'cells',
     world: 'cells',
     eyebrow: 'The cause',
@@ -154,10 +164,10 @@ export const STOPS: Stop[] = [
     scene: 'dna',
     world: 'cells',
     eyebrow: 'The cause',
-    title: 'Changes in genes',
-    text: 'A change in a {t:gene} like WT1 keeps them growing. Most of the time it is not inherited. {c:8}',
+    title: 'How it starts',
+    text: 'Before birth, some young kidney cells never grow up. A change in a {t:gene} like WT1 keeps them dividing. {c:3,8}',
     term: 'gene',
-    say: 'What makes them keep growing is a change in their genes, like a gene called WT1. The bar shows that about 90 percent of the time the change just happens by chance. Only about 10 percent are inherited.',
+    say: 'It starts before birth. Some young kidney cells never grow up, and a gene change like WT1 keeps them dividing.',
   },
   {
     id: 'lump',
@@ -165,11 +175,14 @@ export const STOPS: Stop[] = [
     world: 'anatomy',
     eyebrow: 'Signs',
     title: 'A lump in the belly',
-    text: 'The first sign is often a lump in the belly that does not hurt. {c:5,2}',
-    say: 'The tumor can get pretty big before anyone notices. A lot of the time a parent feels a lump or swelling in the belly while giving the child a bath. It usually does not hurt, which is why it can hide.',
+    text: 'The first sign is often a lump in the belly that does not hurt. Some kids have blood in the urine, called {t:hematuria}. {c:5,2,1}',
+    term: 'hematuria',
+    note: 'Hemat means blood, uria means urine. {c:15}',
+    say: 'The first sign is often a painless lump in the belly. Some kids have blood in the urine, called hematuria.',
   },
   {
     id: 'signs',
+    pass: true,
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'Signs',
@@ -186,12 +199,13 @@ export const STOPS: Stop[] = [
     world: 'diagnosis',
     eyebrow: 'Diagnosis',
     title: 'Finding it',
-    text: 'An {t:ultrasound} uses sound waves to show the lump. {c:6,16}',
+    text: 'An {t:ultrasound} uses sound waves to show the lump. A CT scan or MRI shows more detail. {c:6,16}',
     term: 'ultrasound',
-    say: 'To find it, doctors usually start with an ultrasound. It sends sound waves into the belly, and the echoes make a picture that can show a lump in the kidney.',
+    say: 'Doctors find it with an ultrasound first, then a CT scan or MRI for more detail.',
   },
   {
     id: 'scans',
+    pass: true,
     scene: 'ct',
     world: 'diagnosis',
     eyebrow: 'Diagnosis',
@@ -209,10 +223,11 @@ export const STOPS: Stop[] = [
     text: 'Surgery takes out the kidney with the tumor. This is a {t:nephrectomy}. Most kids then get {t:chemotherapy}. {c:1,7}',
     term: 'nephrectomy',
     note: 'Nephr means kidney, ectomy means removal. {c:15}',
-    say: 'The main treatment is surgery to take out the kidney with the tumor. That is a nephrectomy. After that, most kids get chemotherapy, which is medicine that stops cancer cells, and some also get radiation.',
+    say: 'Surgery takes out the kidney with the tumor, a nephrectomy, and most kids then get chemotherapy.',
   },
   {
     id: 'outlook',
+    pass: true,
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'Treatment',
@@ -227,7 +242,7 @@ export const STOPS: Stop[] = [
     eyebrow: 'Summary',
     title: 'In short',
     text: 'A kidney cancer in young kids, named after Max Wilms. Scans find it, surgery and chemotherapy treat it, and most kids are cured. {c:1,2,9}',
-    say: 'So, Wilms tumor is a kidney cancer in young kids, named after Max Wilms. It starts from young kidney cells, doctors find it with scans, and surgery and chemotherapy cure about 9 in 10 children. Now a quick check to see what you remember.',
+    say: 'So: a kidney cancer in young kids, named after Max Wilms, and most kids are cured. Now a quick quiz.',
   },
   {
     id: 'quiz',
@@ -237,7 +252,7 @@ export const STOPS: Stop[] = [
     title: 'Quick check',
     text: '',
     demo: 'Read each question and let a classmate tap the answer',
-    say: 'Let’s see what you remember. I’ll read each question, and someone can come up and tap the answer. After that, my sources are listed at the end.',
+    say: 'Five quick questions to finish. Call out the answer, then we tap it.',
   },
 ];
 
@@ -246,12 +261,18 @@ export const LAST_STOP = STOPS.length - 1;
 /** Scrolling one screen past the last stop reaches the list of sources. */
 export const SOURCES_PAGE = LAST_STOP + 1;
 
+/** The stops the talk pauses at (the others are flown through). */
+export const PAUSES = STOPS.flatMap((s, i) => (s.pass ? [] : [i]));
+/** The next stop to pause at after stop `i` (the list of sources after the last). */
+export const nextPause = (i: number) => PAUSES.find((p) => p > i) ?? SOURCES_PAGE;
+/** The stop to pause at before stop `i`. */
+export const prevPause = (i: number) => [...PAUSES].reverse().find((p) => p < i) ?? 0;
+
 /** The home screen's list of parts (each one jumps there). */
 export const SECTIONS: { title: string; stop: number }[] = [
   { title: 'History', stop: STOP_INDEX.doctor },
   { title: 'The disease', stop: STOP_INDEX.body },
-  { title: 'Inside the kidney', stop: STOP_INDEX.inside },
-  { title: 'The cause', stop: STOP_INDEX.cause },
+  { title: 'The cause', stop: STOP_INDEX.genes },
   { title: 'Signs', stop: STOP_INDEX.lump },
   { title: 'Diagnosis', stop: STOP_INDEX.ultrasound },
   { title: 'Treatment', stop: STOP_INDEX.treatment },

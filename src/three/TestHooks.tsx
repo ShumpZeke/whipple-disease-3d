@@ -55,7 +55,7 @@ export function TestHooks() {
       quizAnswer: () => {
         const q = QUESTIONS[useStory.getState().quizIndex];
         if (!q) return null;
-        return q.kind === 'organ' ? { kind: 'organ' } : { kind: 'choice', text: q.options.find((o) => o.correct)!.text };
+        return { kind: 'choice', text: q.options.find((o) => o.correct)!.text };
       },
       programs: () => (gl.info.programs ?? []).map((p) => `${p.name} ${(p as unknown as { cacheKey: string }).cacheKey}`),
       renderInfo: () => ({
