@@ -280,8 +280,10 @@ html::-webkit-scrollbar {
   width: min(460px, calc(100vw - 2 * var(--gutter)));
   pointer-events: auto;
 }
-/* a soft shade in the bottom-left corner of the screen keeps the text readable on any scene */
-.caption::before {
+/* a soft shade in the bottom-left corner of the screen keeps the text readable on any scene (it
+   stays in the corner while the words, pinned in the scene, travel) */
+.caption-shade,
+.caption--quiz::before {
   content: '';
   position: absolute;
   z-index: -1;
@@ -1097,7 +1099,8 @@ html::-webkit-scrollbar {
   text-shadow: 0 1px 14px rgba(10, 9, 10, 0.55);
 }
 /* a deeper corner shade: the bigger captions stay readable over bright pink tissue */
-.caption::before {
+.caption-shade,
+.caption--quiz::before {
   width: max(780px, 72vw);
   height: max(620px, 100vh);
   background: radial-gradient(
@@ -1107,6 +1110,13 @@ html::-webkit-scrollbar {
     rgba(10, 9, 10, 0.34) 60%,
     rgba(10, 9, 10, 0) 84%
   );
+}
+.caption-shade {
+  z-index: 11;
+  left: 0;
+  bottom: 0;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .caption .quiz__opt {
@@ -1787,7 +1797,8 @@ html.guide-mode {
     padding-left: var(--gutter);
     padding-right: var(--gutter);
   }
-  .caption::before {
+  .caption::before,
+  .caption-shade {
     display: none;
   }
   /* 3D labels: just the name on a phone (the caption carries the explanation), wrapping if long */

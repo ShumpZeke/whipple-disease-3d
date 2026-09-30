@@ -2,6 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { journey, nearestStop } from '../app/journey';
+import { emitCameraPath, restPoses } from '../app/pinned';
 import { useStory } from '../app/store';
 import { LAST_STOP, STOPS } from '../content/story';
 import { MODEL_SCALE, useAnatomy } from './anatomy/useAnatomy';
@@ -54,6 +55,7 @@ export function Director() {
   const poses = (aspect: number) => {
     if (!cache.current || Math.abs(cache.current.aspect - aspect) > 1e-3) {
       cache.current = { aspect, list: STOPS.map((s) => worldPose(s.id, refs, levels, aspect)) };
+      restPoses.list = cache.current.list;
     }
     return cache.current.list;
   };
@@ -122,6 +124,8 @@ export function Director() {
     const list = poses(camera.aspect);
     const i = Math.min(LAST_STOP - 1, Math.floor(t));
     zoomLerp(list[i], list[i + 1], t - i, cur);
+    // the words pinned in the scene follow the path (not the visitor's drag)
+    emitCameraPath(cur);
 
     // orbit offset: free at a stop, eases away while travelling between stops
     const o = orbit.current;

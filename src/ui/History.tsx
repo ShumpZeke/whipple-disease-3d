@@ -1,6 +1,8 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { names, periodLabel } from '../app/config';
 import { scrollToStop, smoothstep } from '../app/journey';
+import { pinToScene } from '../app/pinned';
+import { useStory } from '../app/store';
 import { SECTIONS, STOPS } from '../content/story';
 import { RichText } from './RichText';
 import { Scramble } from './Scramble';
@@ -20,11 +22,13 @@ export function Backdrops() {
 
 /**
  * The home screen: the eponym's name, a one-line definition, who made the project, and a menu of
- * the parts (each one jumps there), over the 3D study where Max Wilms is at work. It fades as the
- * camera moves in towards him.
+ * the parts (each one jumps there), over the 3D study where Max Wilms is at work. The name hangs in
+ * the room (see app/pinned.ts), so it slides away with the room as the camera moves in towards him.
  */
 function Cover() {
   const ref = useRef<HTMLElement>(null);
+  const brand = useRef<HTMLDivElement>(null);
+  const reduced = useStory((s) => s.reducedMotion);
   useJourney((t) => {
     const el = ref.current;
     if (!el) return;
@@ -32,11 +36,19 @@ function Cover() {
     el.style.opacity = String(o);
     el.style.visibility = o < 0.01 ? 'hidden' : 'visible';
     el.style.pointerEvents = o > 0.6 ? 'auto' : 'none';
-    el.style.transform = `scale(${(1 + t * 0.12).toFixed(4)})`;
   });
+  useEffect(() => {
+    const el = brand.current;
+    if (!el || reduced) return;
+    const off = pinToScene(el, 0);
+    return () => {
+      off();
+      el.style.transform = '';
+    };
+  }, [reduced]);
   return (
     <section ref={ref} className="cover cover--min fly" aria-labelledby="cover-title">
-      <div className="cover__brand">
+      <div ref={brand} className="cover__brand">
         <h1 id="cover-title" className="cover__title">
           <Scramble text="Wilms Tumor" duration={1100} />
         </h1>
