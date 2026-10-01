@@ -7,18 +7,14 @@ import { view } from './Director';
 import { mulberry32 } from './random';
 
 /*
- * Dust in the air, at every scale. The camera flies through it, so every move between two stops
- * feels like travelling through one space (things pass by, near ones faster than far ones), from
- * the lamp-lit study all the way down to the DNA. The dust fills a box a few times the viewing
- * distance around the camera; as the zoom goes down (or up) by ten, a finer (or coarser) box of
- * dust fades in and the other fades out, so it looks the same at every scale. It only shows while
- * the camera is moving: every stop is left clean.
+ * A very light field of dust gives camera motion parallax across the huge scale changes. It only
+ * appears while moving and disappears at each stop, so it reads as depth rather than decoration.
  */
 
-const COUNT = LITE ? 3000 : 6000;
+const COUNT = LITE ? 900 : 1800;
 /** Each box of dust is about this many times the viewing distance across. */
 const BOX = 3;
-/** How big a speck is, as a part of its box (about 5 pixels across at the viewing distance). */
+/** How big a speck is, as a part of its box. */
 const SPECK = 8e-4;
 
 const vertexShader = /* glsl */ `
@@ -29,11 +25,8 @@ const vertexShader = /* glsl */ `
   attribute float aAlpha;
   varying float vAlpha;
   void main() {
-    // the copy of this speck nearest the camera (the box repeats forever), relative to the camera;
-    // the camera's place in its box is worked out on the CPU, so this stays precise at any scale
     vec3 rel = -uL * (fract(uCamFrac - position + 0.5) - 0.5);
     float r = length(rel);
-    // none right at the lens, and none near the edge of the box (where a speck jumps to the far side)
     vAlpha = aAlpha * smoothstep(0.1 * uL, 0.2 * uL, r) * (1.0 - smoothstep(0.34 * uL, 0.47 * uL, r));
     vec4 mv = vec4(mat3(viewMatrix) * rel, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -95,7 +88,6 @@ export function Motes() {
   }, []);
 
   useFrame((_, dt) => {
-    // how fast the journey is moving (stops per second), smoothed
     const s = speed.current;
     const v = dt > 0 ? Math.abs(journey.t - s.last) / dt : 0;
     s.last = journey.t;
@@ -113,7 +105,7 @@ export function Motes() {
       u.uL.value = L;
       u.uScale.value = scale;
       u.uCamFrac.value.set(frac(c.x / L), frac(c.y / L), frac(c.z / L));
-      u.uOpacity.value = 0.5 * moving * (j === 0 ? 1 - f : f);
+      u.uOpacity.value = 0.18 * moving * (j === 0 ? 1 - f : f);
     });
   });
 
