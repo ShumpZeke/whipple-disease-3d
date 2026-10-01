@@ -3,11 +3,8 @@ import { names, periodLabel } from '../app/config';
 import { scrollToStop, smoothstep } from '../app/journey';
 import { pinToScene } from '../app/pinned';
 import { useStory } from '../app/store';
-import { HEADLINE } from '../content/figures';
 import { SECTIONS, STOPS } from '../content/story';
-import { StatRow } from './Charts';
 import { RichText } from './RichText';
-import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
 
 /* ------------------------------------------------------------------ backdrop */
@@ -23,9 +20,9 @@ export function Backdrops() {
 /* ------------------------------------------------------------------ home screen */
 
 /**
- * The home screen: the eponym's name, a one-line definition, who made the project, and a menu of
- * the parts (each one jumps there), over the 3D study where Max Wilms is at work. The name hangs in
- * the room (see app/pinned.ts), so it slides away with the room as the camera moves in towards him.
+ * The home screen stays deliberately spare: title, one-line definition, the group, and a quiet
+ * index into the same continuous 3D journey. The title is pinned into the opening room so it moves
+ * with the world instead of behaving like a slide header.
  */
 function Cover() {
   const ref = useRef<HTMLElement>(null);
@@ -52,7 +49,7 @@ function Cover() {
     <section ref={ref} className="cover cover--min fly" aria-labelledby="cover-title">
       <div ref={brand} className="cover__brand">
         <h1 id="cover-title" className="cover__title">
-          <Scramble text="Wilms Tumor" duration={1100} />
+          Wilms Tumor
         </h1>
         <p className="cover__def">
           <RichText text={STOPS[0].text} />
@@ -60,14 +57,12 @@ function Cover() {
         <p className="cover__meta">
           {names()}, {periodLabel()}
         </p>
-        <StatRow items={HEADLINE} className="cover__stats" />
       </div>
       <nav className="cover__toc" aria-label="What’s inside">
         <ol>
-          {SECTIONS.map((sec, i) => (
+          {SECTIONS.map((sec) => (
             <li key={sec.title}>
               <button type="button" onClick={() => scrollToStop(sec.stop)}>
-                <span className="cover__n">{String(i + 1).padStart(2, '0')}</span>
                 {sec.title}
               </button>
             </li>
