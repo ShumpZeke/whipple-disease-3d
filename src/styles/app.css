@@ -2939,6 +2939,18 @@ body,
 .cover--min .cover__meta:last-child {
   margin-top: calc(var(--u) * 0.8);
 }
+.cover--min .cover__stats {
+  margin-top: calc(var(--u) * 1.1);
+  gap: calc(var(--u) * 1.6);
+}
+.cover--min .cover__stats .fig__num {
+  font-size: max(23px, calc(var(--u) * 2.15));
+}
+.cover--min .cover__stats .fig__label {
+  max-width: 12em;
+  font-size: max(10px, calc(var(--u) * 0.7));
+  color: var(--muted);
+}
 .cover--min .cover__toc {
   position: absolute;
   left: var(--gutter);
