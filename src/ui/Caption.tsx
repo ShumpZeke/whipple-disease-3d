@@ -3,14 +3,28 @@ import { creditLine } from '../app/config';
 import { scrollToStop, stopPresence } from '../app/journey';
 import { pinToScene } from '../app/pinned';
 import { useStory } from '../app/store';
-import { SOURCES_PAGE, STOPS } from '../content/story';
+import { SOURCES_PAGE, STOPS, type StopId } from '../content/story';
 import { StopFigures } from './Charts';
 import { Quiz } from './Quiz';
 import { RichText } from './RichText';
-import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
 
-/** The last stop: links to the sources and back to the start, and who made the exhibit. */
+/**
+ * The full research copy stays in story.ts for the guide and sources. On the main journey we show
+ * only the sentence needed at that moment. The 3D scene carries the rest of the explanation.
+ */
+const DISPLAY_TEXT: Partial<Record<StopId, string>> = {
+  doctor: 'Max Wilms was a German surgeon; the tumor is named after him. {c:9,10}',
+  name: 'His 1899 work gave the tumor its name. The medical term is {t:nephroblastoma}. {c:9,1}',
+  body: 'Wilms tumor is the most common kidney cancer in children. {c:1,3}',
+  genes: 'It begins when young kidney cells keep dividing, often after a {t:gene} change such as WT1. {c:3,8}',
+  lump: 'The first sign is often a painless belly lump; blood in urine is {t:hematuria}. {c:5,2}',
+  ultrasound: '{t:ultrasound|Ultrasound} usually comes first; CT or MRI shows more detail. {c:6}',
+  treatment: 'Removing the affected kidney is a {t:nephrectomy}; chemotherapy usually follows. {c:1,7}',
+  end: 'Wilms tumor is usually treatable, and most children survive. {c:1,2}',
+};
+
+/** The last stop: two quiet utility links and the project credit. */
 function Extras({ id }: { id: string }) {
   const restart = useStory((s) => s.restart);
 
@@ -35,10 +49,8 @@ function Extras({ id }: { id: string }) {
 }
 
 /**
- * The words for the nearest stop: a heading and a few plain sentences in the corner of the scene.
- * They are pinned in the 3D world beside what they describe (see app/pinned.ts), so they arrive
- * with the scene and move away with it, instead of changing like slides. The soft shade that keeps
- * them readable stays in the corner of the screen.
+ * The active fact is pinned beside the thing it describes. It moves with the 3D scene rather than
+ * behaving like a new slide. Extra definitions stay behind tappable medical terms.
  */
 export function Caption() {
   const stop = useStory((s) => s.stop);
@@ -57,7 +69,7 @@ export function Caption() {
     },
     [stop],
   );
-  // (the quiz stays put: it is something to tap, not part of the scene)
+
   const pinned = s.id !== 'quiz' && !reduced;
   useEffect(() => {
     const el = ref.current;
@@ -68,7 +80,7 @@ export function Caption() {
       el.style.transform = '';
     };
   }, [stop, pinned]);
-  // no words on the home screen (it has its own) or on stops the camera only flies through
+
   if (s.id === 'title' || s.pass) return null;
   if (s.id === 'quiz')
     return (
@@ -76,21 +88,23 @@ export function Caption() {
         <Quiz />
       </section>
     );
+
+  const text = DISPLAY_TEXT[s.id] ?? s.text;
+  const showNote = s.id === 'name' && s.note;
+
   return (
     <>
       <div ref={shade} className="caption-shade" aria-hidden="true" />
       <section ref={ref} key={s.id} className="caption" aria-live="polite" aria-label={s.title.replace(/\*/g, '')} data-step={s.id}>
-        <h1 className="caption__title">
-          <Scramble text={s.title} />
-        </h1>
-        {s.text && (
+        <h1 className="caption__title">{s.title}</h1>
+        {text && (
           <p className="caption__body">
-            <RichText text={s.text} />
+            <RichText text={text} />
           </p>
         )}
-        {s.note && (
+        {showNote && (
           <p className="caption__note">
-            <RichText text={s.note} />
+            <RichText text={s.note!} />
           </p>
         )}
         <StopFigures id={s.id} />
