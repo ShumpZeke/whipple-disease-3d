@@ -54,8 +54,7 @@ export function SourcesOverlay() {
         <CloseButton onClick={close} label="Close sources" />
         <h2 id="sources-title">Sources</h2>
         <p className="lede">
-          References in APA style. Numbers match the small markers beside each fact. All information was put in my own
-          words.
+          APA references for the facts used throughout the infographic. Numbered citations match the markers beside each fact.
         </p>
 
         <h3>References</h3>
@@ -66,12 +65,11 @@ export function SourcesOverlay() {
               <span className="ref__text">
                 <Reference s={s} />
               </span>
-              <span className="ref__use">Used for: {s.usedFor}</span>
             </li>
           ))}
         </ol>
 
-        <h3>Images, 3D models and media</h3>
+        <h3>Visual credits</h3>
         <ul className="credit-list">
           {MEDIA_CREDITS.map((c) => (
             <li key={c.what}>
