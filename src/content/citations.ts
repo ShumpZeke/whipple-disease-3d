@@ -250,10 +250,10 @@ export const MEDIA_CREDITS: MediaCredit[] = [
     note: 'Illustrations, not to scale, with colors chosen for clarity. The figure at the desk is a simple likeness based on his portrait. The scans are drawings, not patient images.',
   },
   {
-    what: 'Exhibit text, code and 3D scenes',
-    creator: 'Made with the help of Claude (Anthropic), an AI assistant',
-    license: 'Original work',
-    note: 'Every fact is paraphrased from the references above.',
+    what: 'Development assistance',
+    creator: 'Claude (Anthropic)',
+    license: 'Project assistance',
+    note: 'Medical facts are supported by the references above.',
   },
   {
     what: 'Typefaces: IBM Plex Sans, IBM Plex Mono and Unbounded',
