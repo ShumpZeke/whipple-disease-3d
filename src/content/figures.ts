@@ -30,18 +30,6 @@ export type Figure =
 
 export const FIGURES: Partial<Record<StopId, Figure[]>> = {
   body: [{ kind: 'ages', title: 'Age at diagnosis', cites: [4, 8] }],
-  kidneys: [
-    {
-      kind: 'compare',
-      title: 'What the kidneys do each day',
-      rows: [
-        { label: 'Blood filtered', value: 150, shown: 'about 150 quarts' },
-        { label: 'Urine made', value: 1.5, shown: 'about 1 to 2 quarts' },
-      ],
-      cites: [12],
-    },
-  ],
-  nephron: [{ kind: 'big', value: '≈1,000,000', label: 'nephrons in each kidney', cites: [12] }],
   genes: [
     {
       kind: 'donut',
@@ -53,16 +41,6 @@ export const FIGURES: Partial<Record<StopId, Figure[]>> = {
     },
   ],
   lump: [
-    {
-      kind: 'people',
-      title: 'Both kidneys',
-      active: 1,
-      total: 10,
-      label: 'up to about 1 in 10 children have tumors in both kidneys',
-      cites: [3],
-    },
-  ],
-  signs: [
     {
       kind: 'bars',
       title: 'Signs at diagnosis',
@@ -83,7 +61,7 @@ export const FIGURES: Partial<Record<StopId, Figure[]>> = {
       cites: [1, 7],
     },
   ],
-  outlook: [
+  end: [
     {
       kind: 'people',
       title: 'Outlook',
@@ -93,5 +71,4 @@ export const FIGURES: Partial<Record<StopId, Figure[]>> = {
       cites: [2, 9],
     },
   ],
-  end: [{ kind: 'stats', title: 'Wilms tumor in numbers', items: HEADLINE }],
 };
