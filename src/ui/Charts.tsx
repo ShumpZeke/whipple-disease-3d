@@ -1,11 +1,10 @@
-import type { CSSProperties } from 'react';
 import { FIGURES, type Figure, type Stat } from '../content/figures';
 import type { StopId } from '../content/story';
 import { Cites } from './RichText';
 
 /*
- * Compact infographic visuals. They only appear when a number or sequence is easier to understand
- * visually than as another sentence.
+ * The infographic's charts: small, flat and quiet, in the exhibit's own type (a mono label, a big
+ * number, thin lines and one accent colour). Each draws exactly the numbers in figures.ts.
  */
 
 function Head({ title, cites }: { title: string; cites?: number[] }) {
@@ -32,13 +31,14 @@ export function StatRow({ items, className = '' }: { items: Stat[]; className?: 
   );
 }
 
-/** Ages 0 to 12: most cases are found in early childhood, with the average around 3 to 4. */
+/** Ages 0 to 12: two in three are found before age 5, nearly all before 10; the average is 3 to 4. */
 function Ages() {
   const x = (age: number) => `${(age / 12) * 100}%`;
   return (
-    <div className="fig-ages" role="img" aria-label="Wilms tumor is usually found in young children. The average age is about 3 to 4.">
+    <div className="fig-ages" role="img" aria-label="Two in three children are diagnosed before age 5 and nearly all before age 10. The average age is 3 to 4.">
       <div className="fig-ages__track">
-        <span className="fig-ages__band is-strong" style={{ left: x(2), width: x(3) }} />
+        <span className="fig-ages__band is-strong" style={{ left: 0, width: x(5) }} />
+        <span className="fig-ages__band" style={{ left: x(5), width: x(5) }} />
         <span className="fig-ages__avg" style={{ left: x(3.5) }} />
       </div>
       <div className="fig-ages__ticks" aria-hidden="true">
@@ -50,92 +50,44 @@ function Ages() {
       </div>
       <p className="fig-ages__key">
         <span>
-          <i className="is-strong" />
-          common ages: 2 to 5
+          <i className="is-strong" />2 in 3 before age 5
+        </span>
+        <span>
+          <i />
+          nearly all before 10
         </span>
         <span>
           <i className="is-avg" />
-          average: 3 to 4
+          average 3 to 4
         </span>
       </p>
     </div>
   );
 }
 
-function Bars({ rows, max }: { rows: { label: string; value: number; shown: string }[]; max: number }) {
+function Bars({ rows, max = 100, unit = '%' }: { rows: { label: string; value: number; shown?: string }[]; max?: number; unit?: string }) {
   return (
     <ul className="fig-bars">
       {rows.map((r) => (
         <li key={r.label}>
           <span className="fig-bars__label">{r.label}</span>
           <span className="fig-bars__track" aria-hidden="true">
-            <span className="fig-bars__fill" style={{ width: `${Math.max(1, (r.value / max) * 100)}%` }} />
+            <span className="fig-bars__fill" style={{ width: `${Math.max(0.8, (r.value / max) * 100)}%` }} />
           </span>
-          <span className="fig-bars__value">{r.shown}</span>
+          <span className="fig-bars__value">{r.shown ?? `${r.value}${unit}`}</span>
         </li>
       ))}
     </ul>
   );
 }
 
-function PersonIcon() {
+function Dots({ value }: { value: number }) {
   return (
-    <svg viewBox="0 0 24 36" aria-hidden="true">
-      <circle cx="12" cy="6" r="4" />
-      <path d="M7.2 13.2c0-2 1.7-3.7 3.7-3.7h2.2c2 0 3.7 1.7 3.7 3.7v8.2h-2.7V34h-4.2V21.4H7.2z" />
-    </svg>
-  );
-}
-
-function People({ active, total, label }: { active: number; total: number; label: string }) {
-  return (
-    <div className="fig-people" role="img" aria-label={label}>
-      <span className="fig-people__icons" aria-hidden="true">
-        {Array.from({ length: total }, (_, i) => (
-          <i key={i} className={i < active ? 'is-on' : ''}>
-            <PersonIcon />
-          </i>
-        ))}
-      </span>
-      <span className="fig-people__label">{label}</span>
-    </div>
-  );
-}
-
-function Donut({ value, label, remainder }: { value: number; label: string; remainder: string }) {
-  const style = { '--p': `${value}%` } as CSSProperties;
-  return (
-    <div className="fig-donut-wrap" role="img" aria-label={`${value}% ${label}; ${100 - value}% ${remainder}`}>
-      <span className="fig-donut" style={style}>
-        <span>
-          <b>{value}%</b>
-          <small>not inherited</small>
-        </span>
-      </span>
-      <p className="fig-donut__key">
-        <span>
-          <i className="is-main" />
-          {label}
-        </span>
-        <span>
-          <i />
-          {100 - value}% {remainder}
-        </span>
-      </p>
-    </div>
-  );
-}
-
-function Steps({ items }: { items: string[] }) {
-  return (
-    <ol className="fig-steps">
-      {items.map((item, i) => (
-        <li key={item}>
-          <span>{String(i + 1).padStart(2, '0')}</span>
-          <b>{item}</b>
-        </li>
+    <span className="fig-dots" aria-hidden="true">
+      {Array.from({ length: 100 }, (_, i) => (
+        <i key={i} className={i < value ? 'is-on' : ''} />
       ))}
-    </ol>
+    </span>
   );
 }
 
@@ -162,13 +114,6 @@ function One({ f }: { f: Figure }) {
           <Bars rows={f.rows} max={Math.max(...f.rows.map((r) => r.value))} />
         </div>
       );
-    case 'bars':
-      return (
-        <div className="fig">
-          <Head title={f.title} cites={f.cites} />
-          <Bars rows={f.rows.map((r) => ({ ...r, shown: `${r.value}%` }))} max={100} />
-        </div>
-      );
     case 'big':
       return (
         <div className="fig fig--big">
@@ -178,25 +123,44 @@ function One({ f }: { f: Figure }) {
           </span>
         </div>
       );
-    case 'donut':
+    case 'split':
       return (
         <div className="fig">
           <Head title={f.title} cites={f.cites} />
-          <Donut value={f.value} label={f.label} remainder={f.remainder} />
+          <div className="fig-split" role="img" aria-label={`${f.value}% ${f.a.toLowerCase()}, ${100 - f.value}% ${f.b.toLowerCase()}`}>
+            <span className="fig-split__a" style={{ width: `${f.value}%` }} />
+            <span className="fig-split__b" style={{ width: `${100 - f.value}%` }} />
+          </div>
+          <p className="fig-ages__key">
+            <span>
+              <i className="is-strong" />
+              {f.value}% {f.a.toLowerCase()}
+            </span>
+            <span>
+              <i />
+              {100 - f.value}% {f.b.toLowerCase()}
+            </span>
+          </p>
         </div>
       );
-    case 'people':
+    case 'bars':
       return (
         <div className="fig">
           <Head title={f.title} cites={f.cites} />
-          <People active={f.active} total={f.total} label={f.label} />
+          <Bars rows={f.rows} />
         </div>
       );
-    case 'steps':
+    case 'dots':
       return (
-        <div className="fig">
-          <Head title={f.title} cites={f.cites} />
-          <Steps items={f.items} />
+        <div className="fig fig--dots" role="img" aria-label={`${f.value} out of 100 ${f.label}`}>
+          <Dots value={f.value} />
+          <span>
+            <Head title={f.title} />
+            <b className="fig__num">{f.value}</b>
+            <span className="fig__label">
+              {f.label} <Cites ids={f.cites} />
+            </span>
+          </span>
         </div>
       );
     case 'meta':
@@ -215,7 +179,7 @@ function One({ f }: { f: Figure }) {
   }
 }
 
-/** The one relevant figure for a stop, if that stop benefits from a visual. */
+/** The figures for a stop, under its words. */
 export function StopFigures({ id }: { id: StopId }) {
   const list = FIGURES[id];
   if (!list) return null;
