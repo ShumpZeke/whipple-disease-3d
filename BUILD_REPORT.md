@@ -18,10 +18,6 @@ signs (hematuria) → ultrasound → CT scan → treatment (nephrectomy: the kid
 outlook (one kidney, about 9 in 10 survive) → summary → quick check → the list of sources, terms and
 credits.
 
-This version replaces an earlier exhibit about Whipple’s disease, which was the wrong eponym for
-this student (the class list gives #27, Wilms tumor, Max Wilms). The Whipple version stays in the
-git history.
-
 ### Design decisions
 
 - **One page, not slides.** The scroll position drives the camera directly, so wheel, trackpad,
