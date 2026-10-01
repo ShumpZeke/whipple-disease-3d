@@ -3,7 +3,9 @@ import { names, periodLabel } from '../app/config';
 import { scrollToStop, smoothstep } from '../app/journey';
 import { pinToScene } from '../app/pinned';
 import { useStory } from '../app/store';
+import { HEADLINE } from '../content/figures';
 import { SECTIONS, STOPS } from '../content/story';
+import { StatRow } from './Charts';
 import { RichText } from './RichText';
 import { Scramble } from './Scramble';
 import { useJourney } from './useJourney';
@@ -58,6 +60,7 @@ function Cover() {
         <p className="cover__meta">
           {names()}, {periodLabel()}
         </p>
+        <StatRow items={HEADLINE} className="cover__stats" />
       </div>
       <nav className="cover__toc" aria-label="What’s inside">
         <ol>
