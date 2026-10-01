@@ -21,6 +21,7 @@ export type Figure =
   | { kind: 'stats'; title: string; items: Stat[] }
   | { kind: 'ages'; title: string; cites: number[] }
   | { kind: 'compare'; title: string; rows: { label: string; value: number; shown: string }[]; cites: number[] }
+  | { kind: 'bars'; title: string; rows: { label: string; value: number }[]; cites: number[] }
   | { kind: 'big'; value: string; label: string; cites: number[] }
   | { kind: 'donut'; title: string; value: number; label: string; remainder: string; cites: number[] }
   | { kind: 'people'; title: string; active: number; total: number; label: string; cites: number[] }
@@ -59,6 +60,19 @@ export const FIGURES: Partial<Record<StopId, Figure[]>> = {
       total: 10,
       label: 'up to about 1 in 10 children have tumors in both kidneys',
       cites: [3],
+    },
+  ],
+  signs: [
+    {
+      kind: 'bars',
+      title: 'Signs at diagnosis',
+      rows: [
+        { label: 'Belly pain', value: 40 },
+        { label: 'High blood pressure', value: 25 },
+        { label: 'Visible blood in urine', value: 18 },
+        { label: 'Fever or weight loss', value: 10 },
+      ],
+      cites: [2],
     },
   ],
   treatment: [
