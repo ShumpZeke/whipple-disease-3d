@@ -1,8 +1,7 @@
 # Sources
 
-References in APA 7 style. The numbers match the `[n]` markers beside each fact in the exhibit
-(also listed in the in-app **Sources** panel and at the end of the page). All information was put
-in my own words.
+APA 7 references for the facts used in the exhibit. The numbers match the `[n]` markers beside each fact
+and the numbered citations in the in-app **Sources** panel.
 
 1. National Cancer Institute. (2025, May 12). *Wilms tumor (PDQ®): Patient version*.
    https://www.cancer.gov/types/kidney/patient/wilms-treatment-pdq
