@@ -148,7 +148,7 @@ describe('citations', () => {
     expect(text).toMatch(/CC BY-SA/);
     expect(text).toMatch(/Wellcome Collection/);
     expect(text).toMatch(/CC BY 4\.0/);
-    expect(text).toMatch(/AI assistant/);
+    expect(text).toMatch(/Claude \(Anthropic\)/);
   });
 });
 
