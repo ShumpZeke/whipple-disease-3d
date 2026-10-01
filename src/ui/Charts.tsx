@@ -162,6 +162,13 @@ function One({ f }: { f: Figure }) {
           <Bars rows={f.rows} max={Math.max(...f.rows.map((r) => r.value))} />
         </div>
       );
+    case 'bars':
+      return (
+        <div className="fig">
+          <Head title={f.title} cites={f.cites} />
+          <Bars rows={f.rows.map((r) => ({ ...r, shown: `${r.value}%` }))} max={100} />
+        </div>
+      );
     case 'big':
       return (
         <div className="fig fig--big">
