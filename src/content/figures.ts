@@ -2,7 +2,7 @@ import type { StopId } from './story';
 
 /*
  * Small infographic figures used throughout the exhibit.
- * Each stop gets at most one visual, and every number is tied to a source in citations.ts.
+ * Every number is tied to a source in citations.ts.
  */
 
 export interface Stat {
@@ -21,54 +21,60 @@ export type Figure =
   | { kind: 'stats'; title: string; items: Stat[] }
   | { kind: 'ages'; title: string; cites: number[] }
   | { kind: 'compare'; title: string; rows: { label: string; value: number; shown: string }[]; cites: number[] }
-  | { kind: 'bars'; title: string; rows: { label: string; value: number }[]; cites: number[] }
   | { kind: 'big'; value: string; label: string; cites: number[] }
-  | { kind: 'donut'; title: string; value: number; label: string; remainder: string; cites: number[] }
-  | { kind: 'people'; title: string; active: number; total: number; label: string; cites: number[] }
-  | { kind: 'steps'; title: string; items: string[]; cites: number[] }
+  | { kind: 'split'; title: string; value: number; a: string; b: string; cites: number[] }
+  | { kind: 'bars'; title: string; rows: { label: string; value: number }[]; cites: number[] }
+  | { kind: 'dots'; title: string; value: number; label: string; cites: number[] }
   | { kind: 'meta'; rows: { label: string; value: string }[]; cites: number[] };
 
 export const FIGURES: Partial<Record<StopId, Figure[]>> = {
-  body: [{ kind: 'ages', title: 'Age at diagnosis', cites: [4, 8] }],
-  genes: [
+  name: [
     {
-      kind: 'donut',
-      title: 'Most cases are not inherited',
-      value: 90,
-      label: 'happen from gene changes that are not inherited',
-      remainder: 'other cases',
-      cites: [8],
+      kind: 'meta',
+      rows: [{ label: 'Name', value: 'Wilms tumor, also called nephroblastoma' }],
+      cites: [1, 9],
     },
   ],
+  body: [
+    { kind: 'ages', title: 'Age at diagnosis', cites: [4, 8] },
+    {
+      kind: 'meta',
+      rows: [
+        { label: 'Body system', value: 'Urinary system' },
+        { label: 'Specialty', value: 'Pediatric oncology' },
+      ],
+      cites: [1],
+    },
+  ],
+  kidneys: [
+    {
+      kind: 'compare',
+      title: 'What the kidneys do each day',
+      rows: [
+        { label: 'Blood filtered', value: 150, shown: 'about 150 quarts' },
+        { label: 'Urine made', value: 1.5, shown: 'about 1 to 2 quarts' },
+      ],
+      cites: [12],
+    },
+  ],
+  nephron: [{ kind: 'big', value: '≈1,000,000', label: 'nephrons in each kidney', cites: [12] }],
   lump: [
     {
-      kind: 'bars',
-      title: 'Signs at diagnosis',
-      rows: [
-        { label: 'Belly pain', value: 40 },
-        { label: 'High blood pressure', value: 25 },
-        { label: 'Visible blood in urine', value: 18 },
-        { label: 'Fever or weight loss', value: 10 },
-      ],
-      cites: [2],
+      kind: 'stats',
+      title: 'Both kidneys',
+      items: [{ value: '5–10%', label: 'of children have tumors in both kidneys', cites: [3] }],
     },
   ],
   treatment: [
     {
-      kind: 'steps',
-      title: 'Treatment path',
-      items: ['Surgery', 'Chemotherapy', 'Sometimes radiation'],
+      kind: 'meta',
+      rows: [
+        { label: 'Main treatment', value: 'Surgery + chemotherapy' },
+        { label: 'Sometimes', value: 'Radiation therapy' },
+      ],
       cites: [1, 7],
     },
   ],
-  end: [
-    {
-      kind: 'people',
-      title: 'Outlook',
-      active: 9,
-      total: 10,
-      label: 'about 9 in 10 children survive',
-      cites: [2, 9],
-    },
-  ],
+  outlook: [{ kind: 'dots', title: 'Five-year survival', value: 93, label: 'out of 100 are alive 5 years later', cites: [2] }],
+  end: [{ kind: 'stats', title: 'Wilms tumor in numbers', items: HEADLINE }],
 };
