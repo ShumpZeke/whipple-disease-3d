@@ -160,21 +160,12 @@ describe('infographic figures', () => {
     for (const id of cites) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
   });
 
-  it('keeps percentage and pictogram values in valid ranges', () => {
-    const percentages = all.flatMap((f) =>
-      f.kind === 'donut' ? [f.value] : f.kind === 'bars' ? f.rows.map((r) => r.value) : [],
-    );
-    expect(percentages.length).toBeGreaterThan(0);
-    for (const v of percentages) {
+  it('draws percentages between 0 and 100', () => {
+    const values = all.flatMap((f) => (f.kind === 'bars' ? f.rows.map((r) => r.value) : f.kind === 'split' || f.kind === 'dots' ? [f.value] : []));
+    expect(values.length).toBeGreaterThan(0);
+    for (const v of values) {
       expect(v).toBeGreaterThan(0);
       expect(v).toBeLessThanOrEqual(100);
-    }
-    const people = all.filter((f) => f.kind === 'people');
-    expect(people.length).toBeGreaterThan(0);
-    for (const f of people) {
-      if (f.kind !== 'people') continue;
-      expect(f.active).toBeGreaterThan(0);
-      expect(f.active).toBeLessThanOrEqual(f.total);
     }
   });
 
