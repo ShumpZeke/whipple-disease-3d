@@ -161,7 +161,9 @@ describe('infographic figures', () => {
   });
 
   it('keeps percentage and pictogram values in valid ranges', () => {
-    const percentages = all.flatMap((f) => (f.kind === 'donut' ? [f.value] : []));
+    const percentages = all.flatMap((f) =>
+      f.kind === 'donut' ? [f.value] : f.kind === 'bars' ? f.rows.map((r) => r.value) : [],
+    );
     expect(percentages.length).toBeGreaterThan(0);
     for (const v of percentages) {
       expect(v).toBeGreaterThan(0);
