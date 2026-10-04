@@ -3513,3 +3513,181 @@ body,
 .caption--quiz .quiz__opt.is-dim:disabled {
   opacity: 0.4;
 }
+
+/* ---------------------------------------------------------------- the summary: one drawing */
+.caption--summary {
+  inset: 0;
+  left: 0;
+  bottom: 0;
+  width: auto;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse 120% 100% at 50% 50%, rgba(13, 12, 13, 0.9), rgba(13, 12, 13, 0.97));
+}
+.sum {
+  width: 100%;
+  height: 100%;
+  font-family: var(--mono);
+  fill: var(--ivory);
+}
+.sum__title {
+  font-size: 62px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.sum__sub {
+  font-size: 22px;
+  fill: var(--ivory-soft);
+}
+.sum__kicker {
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--muted);
+}
+.sum__n {
+  fill: var(--accent);
+}
+.sum__head {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.sum__body {
+  font-size: 22px;
+  fill: var(--ivory-soft);
+}
+.sum__ref {
+  font-size: 14px;
+  fill: rgba(241, 233, 216, 0.45);
+}
+.sum__ref {
+  cursor: pointer;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.sum__ref:hover,
+.sum__ref:focus-visible {
+  fill: var(--accent);
+  outline: none;
+}
+.sum__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.sum__arrowhead {
+  fill: var(--accent);
+}
+.sum__node {
+  fill: #121113;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.sum__axis {
+  stroke: var(--faint);
+  stroke-width: 2;
+}
+.sum__band {
+  stroke: var(--accent);
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+.sum__tick {
+  font-size: 17px;
+  text-anchor: middle;
+  fill: var(--muted);
+}
+.sum__tick--start {
+  text-anchor: start;
+}
+.sum__cells circle {
+  fill: rgba(170, 110, 190, 0.3);
+  stroke: #c79ad6;
+  stroke-width: 2;
+}
+.sum__step {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.sum__bar {
+  fill: var(--accent);
+}
+.sum__bar--rest {
+  fill: var(--faint);
+}
+.sum__kidney,
+.sum__tumor {
+  stroke: rgba(10, 9, 10, 0.5);
+  stroke-width: 2;
+}
+.sum__ureter {
+  fill: none;
+  stroke: #d8b9a0;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+.sum__vessel {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+.sum__vessel--a {
+  stroke: #b8372f;
+}
+.sum__vessel--v {
+  stroke: #33508f;
+}
+.sum__leader {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+.sum__label {
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.sum__label--end {
+  text-anchor: end;
+}
+.sum__label--mid {
+  text-anchor: middle;
+}
+.sum__fan path {
+  fill: rgba(241, 233, 216, 0.06);
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+.sum__fan-lump {
+  fill: none;
+  stroke: var(--ivory);
+  stroke-width: 2.5;
+}
+.sum__dot {
+  fill: var(--accent);
+}
+.sum__dot--off {
+  fill: var(--faint);
+}
+.sum__big {
+  font-size: 92px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.sum__credit {
+  font-size: 15px;
+  text-anchor: middle;
+  fill: var(--muted);
+}
+.sum__links {
+  display: flex;
+  gap: 28px;
+  justify-content: flex-start;
+}
+.sum__links .text-link {
+  font-size: 17px;
+}
