@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { names, periodLabel, SUBMISSION } from '../app/config';
 import { MEDIA_CREDITS, SOURCES, SOURCE_BY_ID } from './citations';
 import { GLOSSARY, TERM_BY_KEY } from './glossary';
-import { FIGURES } from './figures';
+import { figureCites, FIGURES } from './figures';
 import { QUESTIONS } from './quiz';
-import { FACTS, QA, SECTIONS, STOPS, STOP_INDEX } from './story';
+import { FACTS, PAUSES, QA, SECTIONS, STOPS, STOP_INDEX, type StopId } from './story';
 
-const allCaptionText = STOPS.flatMap((s) => [s.title, s.text, s.note ?? '']);
+const allCaptionText = STOPS.flatMap((s) => [s.title, s.text]);
 const citeRefs = (t: string) => [...t.matchAll(/\{c:([\d,\s]+)\}/g)].flatMap((m) => m[1].split(',').map((n) => Number(n.trim())));
 const termRefs = (t: string) => [...t.matchAll(/\{t:([a-z-]+)(?:\|[^}]+)?\}/g)].map((m) => m[1]);
 
@@ -42,19 +42,20 @@ describe('the one-page journey (storyboard order)', () => {
     }
   });
 
-  it('keeps every caption to a couple of short, simple sentences', () => {
+  it('keeps every caption to a few short, simple sentences under a short headline', () => {
     for (const s of STOPS) {
       const words = s.text.replace(/\{c:[^}]+\}/g, '').split(/\s+/).filter(Boolean).length;
-      expect(words, s.id).toBeLessThanOrEqual(24);
+      expect(words, s.id).toBeLessThanOrEqual(42);
       const sentences = s.text.replace(/\{c:[^}]+\}/g, '').split(/[.?!](\s|$)/).filter((x) => x.trim().length > 1);
-      expect(sentences.length, s.id).toBeLessThanOrEqual(3);
+      expect(sentences.length, s.id).toBeLessThanOrEqual(4);
       expect(s.title.split(/\s+/).length, s.id).toBeLessThanOrEqual(6);
     }
   });
 
   it('writes plain sentences on screen: no em dashes, dots between words or fact numbers', () => {
     const onScreen = [
-      ...STOPS.flatMap((s) => [s.title, s.text, s.note ?? '']),
+      ...STOPS.flatMap((s) => [s.title, s.text]),
+      ...Object.values(FIGURES).flatMap((f) => (f.kind === 'facts' ? f.items.flatMap((x) => [x.value, x.label]) : [f.label])),
       ...QUESTIONS.flatMap((q) => [q.prompt, q.topic, ...q.options.map((o) => o.text)]),
       ...GLOSSARY.flatMap((t) => [t.short, t.definition]),
     ];
@@ -153,19 +154,47 @@ describe('citations', () => {
 });
 
 describe('infographic figures', () => {
-  const all = Object.values(FIGURES).flat();
-  it('cites a real source for every number', () => {
-    const cites = all.flatMap((f) => ('cites' in f ? f.cites : f.items.flatMap((s) => s.cites)));
-    expect(cites.length).toBeGreaterThan(0);
-    for (const id of cites) expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
+  // the stops the talk pauses at, between the home screen and the quiz
+  const shown = PAUSES.map((i) => STOPS[i]).filter((s) => s.id !== 'title' && s.id !== 'quiz');
+
+  it('gives every stop of the talk the same thing: three key facts (the summary, one number)', () => {
+    for (const s of shown) {
+      const f = FIGURES[s.id];
+      expect(f, s.id).toBeDefined();
+      if (f!.kind === 'facts') expect(f!.items, s.id).toHaveLength(3);
+      else expect(s.id).toBe('end');
+    }
+    // and no facts on stops the camera only flies through
+    for (const id of Object.keys(FIGURES) as StopId[]) expect(STOPS[STOP_INDEX[id]].pass, id).toBeUndefined();
   });
 
-  it('draws percentages between 0 and 100', () => {
-    const values = all.flatMap((f) => (f.kind === 'bars' ? f.rows.map((r) => r.value) : f.kind === 'split' || f.kind === 'dots' ? [f.value] : []));
-    expect(values.length).toBeGreaterThan(0);
-    for (const v of values) {
-      expect(v).toBeGreaterThan(0);
-      expect(v).toBeLessThanOrEqual(100);
+  it('keeps each fact short enough to read at a glance', () => {
+    for (const f of Object.values(FIGURES)) {
+      if (f.kind !== 'facts') continue;
+      for (const x of f.items) {
+        expect(x.value.length, x.value).toBeLessThanOrEqual(9);
+        expect(x.label.split(/\s+/).length, x.label).toBeLessThanOrEqual(7);
+      }
+    }
+  });
+
+  it('cites a real source for every fact, and shows that number beside the stop’s words', () => {
+    for (const s of shown) {
+      const cites = figureCites(FIGURES[s.id]!);
+      expect(cites.length, s.id).toBeGreaterThan(0);
+      for (const id of cites) {
+        expect(SOURCE_BY_ID.has(id), `source ${id}`).toBe(true);
+        expect(citeRefs(s.text), `${s.id} shows source ${id}`).toContain(id);
+      }
+    }
+  });
+
+  it('draws the survival figure as a share of 100', () => {
+    const f = FIGURES.end!;
+    expect(f.kind).toBe('dots');
+    if (f.kind === 'dots') {
+      expect(f.value).toBeGreaterThan(0);
+      expect(f.value).toBeLessThanOrEqual(100);
     }
   });
 
@@ -203,10 +232,15 @@ describe('history accuracy', () => {
   const text = allCaptionText.join(' ');
   it('names Max Wilms, his dates and his 1899 book', () => {
     expect(text).toMatch(/Max Wilms/);
-    expect(text).toMatch(/1867 to 1918/);
+    // (his dates are the key facts of his stop)
+    expect(FIGURES.doctor!.kind === 'facts' && FIGURES.doctor!.items.map((x) => x.value)).toEqual(['1867', '1899', '1918']);
     expect(text).toMatch(/The Mixed Tumors of the Kidney/);
     expect(STOPS[STOP_INDEX.name].term).toBe('nephroblastoma');
-    expect(citeRefs(STOPS[STOP_INDEX.name].note ?? '').length).toBeGreaterThan(0);
+    // the eponym is not credited with a discovery he did not make
+    expect(STOPS[STOP_INDEX.doctor].text).toMatch(/Other doctors had already reported/);
+    // the medical name is split into its word parts, with a source
+    const parts = FIGURES.name!;
+    expect(parts.kind === 'facts' && parts.items.map((x) => `${x.value} ${x.label}`)).toEqual(['nephro kidney', 'blast young cell', 'oma tumor']);
   });
 });
 

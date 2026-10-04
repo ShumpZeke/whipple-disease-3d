@@ -1,6 +1,6 @@
 import { useStory } from '../app/store';
 import { STOPS } from '../content/story';
-import { ProfileCard, WordPartsCard } from './HistoryCards';
+import { Portrait } from './HistoryCards';
 
 const IMAGES: Record<string, { src: string; alt: string }> = {
   none: {
@@ -29,7 +29,7 @@ const IMAGES: Record<string, { src: string; alt: string }> = {
   },
 };
 
-/** Shown when WebGL is unavailable: all text, cards, quiz and sources still work. */
+/** Shown when WebGL is unavailable: all text, key facts, quiz and references still work. */
 export function Fallback() {
   const stop = useStory((s) => s.stop);
   const { id, world } = STOPS[stop];
@@ -39,15 +39,10 @@ export function Fallback() {
       <div className="fallback-img">
         <img src={img.src} alt={img.alt} onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
       </div>
-      {/* the cards that hang in the 3D study */}
+      {/* the photograph that hangs in the 3D study */}
       {id === 'doctor' && (
         <div className="fallback-card">
-          <ProfileCard className="profile--label" />
-        </div>
-      )}
-      {id === 'name' && (
-        <div className="fallback-card">
-          <WordPartsCard className="wordparts--label" />
+          <Portrait />
         </div>
       )}
       <p className="fallback-note" role="status">

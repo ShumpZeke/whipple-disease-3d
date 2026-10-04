@@ -67,8 +67,9 @@ export function Guide() {
           </li>
           <li>Keep this guide on your phone or printed. Say the lines in your own words. You do not need to read the screen out.</li>
           <li>
-            Speak to the class, not the board. The screen only shows a heading and a few lines, so <b>you</b> are
-            the explanation.
+            Speak to the class, not the board. Every part has the same layout (its section, a headline, three key
+            facts and a short explanation beside the 3D model), so point at the three facts and explain them in your
+            own words.
           </li>
         </ul>
       </section>

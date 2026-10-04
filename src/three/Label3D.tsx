@@ -31,6 +31,8 @@ export function Label3D({
   at?: StopId | StopId[];
 }) {
   const p: [number, number, number] = Array.isArray(position) ? position : [position.x, position.y, position.z];
+  // a label that only belongs to stops the camera flies through is never shown: leave it out
+  const never = !!at && (Array.isArray(at) ? at : [at]).every((id) => STOPS[STOP_INDEX[id]].pass);
   const box = useRef<HTMLDivElement>(null);
   const shift = useRef(0);
   const tick = useRef(0);
@@ -74,6 +76,7 @@ export function Label3D({
     }
   });
 
+  if (never) return null;
   return (
     <Html
       position={p}

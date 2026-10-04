@@ -5,9 +5,10 @@
  * outlook → summary → a quick check (then the list of sources). It starts and ends at Max Wilms's
  * desk: the camera goes into the drawing in his book, and at the end comes back out of it.
  *
- * On screen each stop is just a short heading and a few plain sentences, the way you would explain
- * it to a friend. `say` is the presenter's line for that stop and `demo` what to tap there; both
- * live in the printable presenter guide, not on the big screen.
+ * On screen every stop the talk pauses at has the same four things: its section (`eyebrow`), a
+ * headline that states the takeaway (`title`), three key facts (figures.ts) and a few plain
+ * sentences that explain them (`text`). `say` is the presenter's line for that stop and `demo` what
+ * to tap there; both live in the printable presenter guide, not on the big screen.
  *
  * Caption markup (ui/RichText.tsx): {t:key|label} term, {c:1,2} source numbers, *italics*
  */
@@ -41,7 +42,7 @@ export interface Stop {
   id: StopId;
   scene: Scene;
   world: World;
-  /** The part of the story (presenter guide only). */
+  /** The part of the story it belongs to (shown above the headline, as on the home screen's list). */
   eyebrow: string;
   title: string;
   text: string;
@@ -49,8 +50,6 @@ export interface Stop {
   term?: string;
   /** Heading for that term in the guide when it isn't simply "Key term". */
   termLabel?: string;
-  /** A second, smaller line on screen. */
-  note?: string;
   /** What the presenter taps here to show an interactive feature. */
   demo?: string;
   /** What to say out loud at this stop. */
@@ -72,17 +71,17 @@ export const STOPS: Stop[] = [
     text: 'A kidney cancer in young children. Its medical name is nephroblastoma. {c:1,3}',
     demo: 'Point to the list of parts along the bottom, then tap History to jump there',
     term: 'wilms',
-    say: 'Our eponym is Wilms tumor, said WILMZ TOO-mer. It is a kidney cancer that young children get, and its medical name is nephroblastoma. I organized this into the history, what the disease is, how it starts, the signs, diagnosis, treatment, and a quick check. That list is along the bottom, and each one jumps to its part. Scrolling moves one camera through the whole thing.',
+    say: 'Our eponym is Wilms tumor, said WILMZ TOO-mer. It is a kidney cancer that young children get, and its medical name is nephroblastoma. I organized this into the history, what the disease is, how it starts, the signs, diagnosis, treatment, and a quick check. That list is along the bottom, and each one jumps to its part. Every part has the same layout: a headline, three key facts, and a short explanation next to the 3D model.',
   },
   {
     id: 'doctor',
     scene: 'history',
     world: 'none',
     eyebrow: 'History',
-    title: 'Dr. Max Wilms',
-    text: 'A German surgeon who lived from 1867 to 1918. The tumor is named after him. {c:9,10}',
+    title: 'Named after Max Wilms',
+    text: 'Max Wilms was a German surgeon. Other doctors had already reported this kidney tumor in children. His detailed study brought those reports together and explained it as one disease, so his name stayed with it. {c:9,10}',
     demo: 'Tap a small reference number to show where a fact comes from',
-    say: 'This is Max Wilms, a German surgeon who lived from 1867 to 1918. The card shows his timeline. The small numbers next to the facts are my references. If I tap one, it shows where that fact came from.',
+    say: 'This is Max Wilms, a German surgeon who lived from 1867 to 1918. Here is the part people get wrong: he did not discover this tumor. Other doctors had already reported kidney tumors like it in children. In 1899, when he was 32, he published a detailed study that pulled those reports together and explained it as one disease. That is why his name stuck to it. The small numbers next to the facts are my references. If I tap one, it shows where that fact came from.',
   },
   {
     id: 'book',
@@ -99,22 +98,21 @@ export const STOPS: Stop[] = [
     scene: 'history',
     world: 'none',
     eyebrow: 'History',
-    title: 'Why it has his name',
-    text: 'Other doctors had reported this tumor. His detailed 1899 study brought the findings together, so it took his name. The medical name is {t:nephroblastoma}. {c:9,1}',
+    title: 'Also called nephroblastoma',
+    text: 'Doctors call it {t:nephroblastoma} (NEF-roh-blas-TOH-muh): a tumor of young kidney cells. Wilms tumor is the everyday name, from his 1899 book, The Mixed Tumors of the Kidney. {c:1,9,15}',
     term: 'nephroblastoma',
     termLabel: 'Its medical name',
-    note: 'Nephr means kidney, blast means bud, oma means tumor. {c:15}',
-    demo: 'Tap the underlined word nephroblastoma to show how to say it and its word parts',
-    say: 'Here is the part people get wrong. Max Wilms did not discover this tumor. Other doctors had already reported kidney tumors like it in children. In 1899, when he was 32, he published a detailed study that pulled those reports together and explained it as one disease. That is why his name stuck to it. The medical name is nephroblastoma. If I tap the word, it breaks down: nephr means kidney, blast means a young cell, and oma means tumor.',
+    demo: 'Tap the underlined word nephroblastoma to show its definition and how to say it',
+    say: 'This is his 1899 book, The Mixed Tumors of the Kidney. Wilms tumor is the everyday name. The medical name is nephroblastoma, said NEF-roh-blas-TOH-muh. It breaks into three word parts: nephro means kidney, blast means a young cell, and oma means tumor. So it is a tumor of young kidney cells. If I tap the underlined word, the definition pops up.',
   },
   {
     id: 'body',
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'The disease',
-    title: 'What is Wilms tumor?',
-    text: 'A cancer that starts in a kidney, part of the urinary system. It is the most common kidney cancer in kids. {c:1,3}',
-    demo: 'Drag the model to turn it, then tap the + on the kidney',
+    title: 'A kidney cancer in young children',
+    text: 'Wilms tumor starts in a kidney, part of the urinary system. It is the most common kidney cancer in children and usually affects one kidney. It is treated in {t:oncologist|pediatric oncology}. {c:1,3,4}',
+    demo: 'Drag the model to turn it, then tap the + on the kidney to zoom in',
     say: 'Now we go into the drawing in his book, and it becomes the urinary system. Wilms tumor starts in a kidney. It is the most common kidney cancer in children, mostly ages 2 to 5, about 600 kids a year in the U.S. The doctors who treat it are pediatric oncologists. I can drag the model to turn it.',
   },
   {
@@ -166,8 +164,8 @@ export const STOPS: Stop[] = [
     scene: 'dna',
     world: 'cells',
     eyebrow: 'The cause',
-    title: 'How it starts',
-    text: 'Before birth, some young kidney cells never grow up. A change in a {t:gene} like WT1 keeps them dividing. {c:3,8}',
+    title: 'Young cells that keep dividing',
+    text: 'Before birth, the kidneys grow from young cells that should mature by age 3 or 4. In Wilms tumor some stay young and keep dividing. A {t:gene} change is behind it, and most cases do not run in families. {c:3,8}',
     term: 'gene',
     say: 'We just zoomed from the kidney, into one of its tiny filters, down to the cells and their DNA. Before birth, the kidneys grow from young cells. Sometimes a few never mature and keep dividing, and that becomes the tumor. A gene called WT1 is often involved. In about 9 out of 10 cases the gene change is only in the tumor cells, so it usually does not run in families.',
   },
@@ -176,10 +174,9 @@ export const STOPS: Stop[] = [
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'Signs',
-    title: 'A lump in the belly',
-    text: 'The first sign is often a lump in the belly that does not hurt. Some kids have blood in the urine, called {t:hematuria}. {c:5,2,1}',
+    title: 'First sign: a painless lump',
+    text: 'A parent often notices the swelling while bathing or dressing the child. Blood in the urine is called {t:hematuria}: hemat means blood, uria means urine. {c:1,5,15}',
     term: 'hematuria',
-    note: 'Hemat means blood, uria means urine. {c:15}',
     demo: 'Tap the underlined word hematuria',
     say: 'Back out at the kidney, this is the tumor. The first sign is usually a lump or swelling in the belly that does not hurt. A parent often notices it. Some kids also have blood in the urine. That is called hematuria: hemat means blood and uria means urine. Fever and high blood pressure can happen too.',
   },
@@ -192,7 +189,6 @@ export const STOPS: Stop[] = [
     title: 'Other signs',
     text: 'Some kids have blood in the urine, called {t:hematuria}, or a fever. {c:1,2}',
     term: 'hematuria',
-    note: 'Hemat means blood, uria means urine. {c:15}',
     demo: 'Tap the underlined word hematuria to show how to say it',
     say: 'The chart shows other signs doctors see when it is found: belly pain in about 40 out of 100 kids, high blood pressure in 25, and blood in the urine, called hematuria, in about 1 in 5.',
   },
@@ -201,8 +197,8 @@ export const STOPS: Stop[] = [
     scene: 'ultrasound',
     world: 'diagnosis',
     eyebrow: 'Diagnosis',
-    title: 'Finding it',
-    text: 'An {t:ultrasound} uses sound waves to show the lump. A CT scan or MRI shows more detail. {c:6,16}',
+    title: 'Found with an ultrasound',
+    text: 'An {t:ultrasound} makes a picture of the kidney from sound waves. A {t:ct|CT scan} or MRI then shows how big the tumor is and whether it has spread. {c:6}',
     term: 'ultrasound',
     say: 'To find it, doctors usually start with an ultrasound, which makes a picture from sound waves. Then a CT scan or MRI shows how big it is and whether it has spread. The final answer comes from looking at the tumor under a microscope.',
   },
@@ -222,11 +218,10 @@ export const STOPS: Stop[] = [
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'Treatment',
-    title: 'Treatment',
-    text: 'Treatment usually combines surgery and {t:chemotherapy}. Removing the kidney is a {t:nephrectomy}. Some children also get radiation. {c:1,2}',
+    title: 'Surgery plus chemotherapy',
+    text: 'Removing the kidney is a {t:nephrectomy}: nephr means kidney, ectomy means removal. {t:chemotherapy|Chemotherapy} is medicine that stops cancer cells from growing. The exact plan depends on the stage. {c:1,2,15}',
     term: 'nephrectomy',
-    note: 'Nephr means kidney, ectomy means removal. {c:15}',
-    demo: 'Tap the word chemotherapy, then scroll on to watch the kidney come out',
+    demo: 'Tap the word nephrectomy, then move on to watch the kidney come out',
     say: 'Treatment usually combines surgery and chemotherapy, said KEE-moh-THAYR-uh-pee. The surgery is a nephrectomy: nephr means kidney and ectomy means removal. Watch the kidney with the tumor come out. Chemotherapy can come before or after surgery, and some children also need radiation. The exact plan depends on the stage and on whether one or both kidneys are affected. A person can live a healthy life with one kidney.',
   },
   {
@@ -244,8 +239,8 @@ export const STOPS: Stop[] = [
     scene: 'history',
     world: 'none',
     eyebrow: 'Summary',
-    title: 'In short',
-    text: 'A kidney cancer in young children, named after Max Wilms. About 93 in 100 children are alive five years later. {c:1,2,9}',
+    title: 'Most children survive',
+    text: 'Wilms tumor is a kidney cancer of young children, named after Max Wilms. Scans find it. Surgery and chemotherapy treat it. {c:1,2,9}',
     demo: 'Point to the 93 dots, then to the References link',
     say: 'The camera comes back out of the book to Max Wilms, where we started. So, in short: a kidney cancer in young children, named after Max Wilms. And the outlook is good. Each dot is a child: about 93 out of 100 are alive five years later.',
   },

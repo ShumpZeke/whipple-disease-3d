@@ -5,7 +5,9 @@
 One continuous page. Scrolling is a camera zoom: from Max Wilms and his 1899 book, into the
 urinary system, inside a kidney, down to its tiny filters and the young cells where the tumor
 starts, then back out to the lump, the other signs, the scans, the operation and the outlook,
-ending with a short summary, a quick quiz and the sources. The talk pauses at ten stops (about a minute); the camera flies through the rest on its own.
+then back out of the book to Max Wilms for a short summary, a quick quiz and the references. The talk pauses at ten stops (about four minutes); the camera flies through the rest on its own.
+
+It is built as one infographic: every stop has the same four parts (its section, a headline that states the takeaway, three key facts as big figures, and a short explanation) beside a labeled 3D model.
 
 ![The home screen](docs/preview.jpg)
 
@@ -29,15 +31,15 @@ Nothing else needs editing.
 
 ## Presenting it (smart board, projector or laptop)
 
-The exhibit is one scene, not slides. There are no arrows, Next buttons or page numbers: you move by
-zooming, and the words for each part appear quietly in the corner.
+The exhibit is one scene, not slides. There are no arrows, Next buttons or page numbers on screen:
+you move by zooming, and the words for each part arrive with the scene.
 
 1. Open the link on the board in Chrome or Edge and tap **Full screen** in the top-right corner (or
    press **F**). Text grows with the screen, so it stays readable from the back of the room.
 2. **Swipe up** on the board to zoom on to the next part, **swipe down** to go back. A clicker, the
    arrow keys, Page Down or a mouse wheel do the same. It always comes to rest on the next part.
-3. At each part, read the heading and explain it in your own words. The presenter guide has a line
-   to say for every part.
+3. At each part, point at the three key facts and explain them in your own words. The presenter
+   guide has a line to say for every part.
 
 | Do this | To |
 | --- | --- |
@@ -48,15 +50,15 @@ zooming, and the words for each part appear quietly in the corner.
 | **Home / End** | back to the start, or the summary |
 | Drag the 3D picture | turn it (double-tap or **R** resets it) |
 | Tap an underlined word | its meaning, pronunciation and word parts |
-| Tap a small source number | the source behind that fact |
+| Tap a small reference number | the reference behind that fact |
 
-After the summary, one more swipe scrolls into the full list of sources, the medical terms and the
+After the quiz, one more step scrolls into the full list of references, the medical terms and the
 image credits.
 
 ### Presenter guide (printable)
 
 Open the exhibit’s address with **`?guide`** on the end (e.g. `…vercel.app/?guide`) for a printable
-five-minute plan: what to say and what to tap at each part, the medical terms with pronunciation,
+four-minute plan: what to say and what to tap at each part, the medical terms with pronunciation,
 likely questions with answers from the sources, and the quiz answers. There is also a link at the
 very end of the exhibit.
 
@@ -78,30 +80,30 @@ still pictures instead of 3D.
 
 | The handout asks for | Where it is in the exhibit |
 | --- | --- |
-| Correct name and spelling, and the modern term | Home screen: **Wilms Tumor**, “Also called nephroblastoma”, and how to say it |
-| Origin: the person it is named for | Part 2: profile card of **Max Wilms** (1867 to 1918), a German surgeon |
-| Brief historical profile and why the name stuck | Parts 2 to 4: his life in four dates, his 1899 book *The Mixed Tumors of the Kidney*, and why the tumor carries his name |
-| A clear definition in your own words | Home screen and part 5, “What is Wilms tumor?” |
-| Body system or medical specialty | Part 5: “Body system: urinary” and “Specialty: pediatric oncology”; the care team at Treatment |
-| At least four clinical facts | The cause (young cells, gene changes), the signs (a lump, blood in the urine), how doctors find it (ultrasound, CT or MRI) and the treatment (nephrectomy, chemotherapy, radiation), plus the outlook |
-| At least three terms, word parts, abbreviations or pronunciation tips | Explained in plain words on screen (“Nephr means kidney, blast means bud and oma means tumor”), 14 terms with pronunciation in the **Terms** panel and at the end, the abbreviation CT |
-| At least two visuals with captions or labels | Labeled 3D scenes (the urinary system, the tumor, a kidney cut in half, a nephron, young cells, DNA, an ultrasound and a CT scanner), the captioned portrait, and titled charts: age at diagnosis, blood filtered vs urine made, inherited or not, signs at diagnosis, 93 in 100 survive |
-| Purposeful interactive elements | The list of parts, the + marker, organs you can tap, term pop-ups, source numbers, the 3D model you can turn, the five-question quiz with a results screen |
-| Accuracy check (spelling, attribution) | Part 4: “Spelled Wilms tumor, no apostrophe. Others described it first; his book made his name stick.” with sources |
-| Source numbers that connect to the reference list | Every fact has a small source number; the full list is at the end |
+| Correct name and spelling, and the modern term | Home screen: **Wilms Tumor**, “Its medical name is nephroblastoma”; the stop “Also called nephroblastoma” gives how to say it |
+| Origin: the person it is named for | “Named after Max Wilms”: his photograph, the 3D likeness of him at his desk, and three dates (1867, 1899, 1918) |
+| Brief historical profile and why the name stuck | The two History stops: a German surgeon; other doctors had already reported the tumor, and his detailed 1899 study, *The Mixed Tumors of the Kidney*, brought the reports together, so his name stayed with it |
+| A clear definition in your own words | Home screen, and the stop “A kidney cancer in young children” |
+| Body system or medical specialty | The same stop: “part of the urinary system” and “treated in pediatric oncology”, on a 3D model labeled Kidneys, Ureter and Bladder |
+| At least four clinical facts | Three key facts each for who gets it, the cause, the signs, the diagnosis and the treatment, plus the outlook (93 of 100 alive five years later) |
+| At least three terms, word parts, abbreviations or pronunciation tips | Word parts on screen (nephro, blast, oma; hemat, uria; nephr, ectomy), the pronunciation NEF-roh-blas-TOH-muh, 14 terms with pronunciation in the **Terms** panel and at the end, the abbreviation CT |
+| At least two visuals with captions or labels | Labeled 3D scenes (the urinary system, the tumor, the DNA and its gene, the ultrasound), the captioned and credited portrait, and the chart of 93 in 100 dots |
+| Purposeful interactive elements | The list of parts, the + marker on the kidney, term pop-ups, reference numbers, the 3D model you can turn, the five-question quiz with a results screen |
+| Accuracy check (spelling, attribution) | “Named after Max Wilms”: he did not discover it. “Other doctors had already reported this kidney tumor in children. His detailed study brought those reports together”, with sources |
+| Reference numbers that connect to the reference list | Every stop carries small reference numbers that open that reference; the full list is at the end |
 
 **Design, research and presenting**
 
 | The handout asks for | Where it is |
 | --- | --- |
-| Clear title, consistent colors and fonts, readable text, logical sections | Parts: History, The disease, Inside the kidney, The cause, Signs, Diagnosis, Treatment, Quick check, Sources; one warm palette; IBM Plex Sans for reading |
+| Clear title, consistent colors and fonts, readable text, logical sections | Parts: History, The disease, The cause, Signs, Diagnosis, Treatment, Quick check, References, named above every headline; one warm palette; every stop laid out the same way |
 | A home screen that introduces the eponym and guides the viewer | Home screen with the definition and a list of the parts that jumps to each one |
-| At least three interaction types | Navigation (the list of parts, swiping and scrolling), hotspots (+ marker, tappable organs, labels, term pop-ups), and the self-check quiz, plus the 3D model you can turn |
+| At least three interaction types | Navigation (the list of parts, swiping and scrolling), hotspots and pop-ups (+ marker, medical terms, reference numbers), and the self-check quiz, plus the 3D model you can turn |
 | School-appropriate visuals, patient privacy | No patient photos; the scans are drawings; the portrait is openly licensed (CC BY 4.0) |
 | At least three credible sources (not Wikipedia or AI) | 17: National Cancer Institute, American Cancer Society, MedlinePlus (NIH), NIDDK (NIH), OpenStax, and three peer-reviewed history articles |
 | Paraphrased, numbered citations and a full APA reference page | Yes, the reference page is the end of the exhibit (and [SOURCES.md](SOURCES.md)) |
 | Cite all media you did not create | “Images, 3D models and media” at the end, and [CREDITS.md](CREDITS.md) |
-| 3 to 5 minute presentation that explains the organization and features | The presenter guide (`?guide`) is paced for about 5 minutes and starts with the list of parts |
+| 3 to 5 minute presentation that explains the organization and features | The presenter guide (`?guide`) is paced for about 4 minutes and starts with how the exhibit is organized |
 
 **Submission checklist**
 
@@ -109,7 +111,7 @@ still pictures instead of 3D.
 - [x] Only the assigned eponym, with all required content
 - [x] All interactive features work (checked by the browser tests)
 - [x] Reference page included (end of the exhibit)
-- [x] Student name and class period: “Vardhmansinh Rathod, Eren Robinson and Shanya Prezy, 3rd Block” on the home screen, in the corner of every part, and at the end
+- [x] Student name and class period: “Vardhmansinh Rathod, Eren Robinson and Shanya Prezy, 3rd Block” on the home screen, on the summary and at the end
 - [ ] Proofread and practiced: use the presenter guide
 
 ## Running it

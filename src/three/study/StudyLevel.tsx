@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { journey, onJourneyFrame, smoothstep } from '../../app/journey';
 import { STOP_INDEX } from '../../content/story';
-import { ProfileCard, WordPartsCard } from '../../ui/HistoryCards';
+import { Portrait } from '../../ui/HistoryCards';
 import { sharedOrganUniforms } from '../anatomy/organMaterial';
 import { useAnatomyRefs } from '../Director';
 import { hingeState, manLine } from '../hinge';
@@ -189,10 +189,10 @@ export function StudyLevel({ visible }: { visible: boolean }) {
     camera.layers.enable(STUDY_LAYER);
   }, [camera]);
 
-  // the two cards sit at fixed places on screen at their stops (on a 16:9 screen), but they are
-  // pinned in the room, so they move with it while the camera travels
-  const cards = useMemo(() => {
-    const at = (id: 'doctor' | 'name', fx: number, fy: number) => {
+  // his photograph sits at a fixed place on screen at his stop (on a 16:9 screen), but it is pinned
+  // in the room, so it moves with the room while the camera travels
+  const photo = useMemo(() => {
+    const at = (id: 'doctor', fx: number, fy: number) => {
       const p = worldPose(id, refs, levels, 16 / 9);
       const fwd = p.target.clone().sub(p.pos);
       const d = fwd.length();
@@ -202,7 +202,7 @@ export function StudyLevel({ visible }: { visible: boolean }) {
       const halfH = Math.tan(THREE.MathUtils.degToRad(p.fov / 2)) * d;
       return p.target.clone().addScaledVector(right, fx * halfH * (16 / 9)).addScaledVector(up, fy * halfH);
     };
-    return { doctor: at('doctor', -0.92, 0.74), name: at('name', -0.92, 0.74) };
+    return at('doctor', -0.92, 0.74);
   }, [refs, levels]);
 
   useEffect(() => {
@@ -241,16 +241,13 @@ export function StudyLevel({ visible }: { visible: boolean }) {
       <group ref={setMatrix}>
         <primitive object={built.root} />
       </group>
-      <Label3D visible={visible} at="doctor" position={cards.doctor} interactive>
-        <ProfileCard className="profile--label" />
+      <Label3D visible={visible} at="doctor" position={photo}>
+        <Portrait />
       </Label3D>
       <group ref={pages}>
         <primitive object={built.left} />
         <primitive object={built.right} />
       </group>
-      <Label3D visible={visible} at="name" position={cards.name} interactive>
-        <WordPartsCard className="wordparts--label" />
-      </Label3D>
     </>
   );
 }

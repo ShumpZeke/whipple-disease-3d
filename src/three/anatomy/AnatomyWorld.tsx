@@ -1,12 +1,11 @@
 import { ContactShadows } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX, type StopId } from '../../content/story';
-import { Cites, TermButton } from '../../ui/RichText';
 import { useJourney } from '../../ui/useJourney';
 import { hingeState, kidneyBack, RETURN } from '../hinge';
 import { Label3D } from '../Label3D';
@@ -185,12 +184,10 @@ function Tumor() {
     <group ref={group} position={pivot}>
       <group position={pivot.clone().negate()}>
         <mesh ref={mass} geometry={built.geo} material={built.mat} position={built.center} quaternion={built.q} visible={false} />
-        <Label3D visible at={['lump', 'signs']} position={built.labelAt} interactive>
+        <Label3D visible at="lump" position={built.labelAt}>
           <div ref={tag} className="leader" style={{ opacity: 0 }}>
-            <span className="leader__line" style={{ width: 36 }} />
-            <span className="tag">
-              Wilms tumor <Cites ids={[1]} />
-            </span>
+            <span className="leader__line" />
+            <span className="tag">Wilms tumor</span>
           </div>
         </Label3D>
       </group>
@@ -239,58 +236,11 @@ function KidneyMarker({ visible }: { visible: boolean }) {
   );
 }
 
-const LABELS: { stop: StopId; anchor: string; left?: boolean; width?: number; body: ReactNode }[] = [
-  { stop: 'kidneys', anchor: 'label_RightKidney', left: true, body: 'Right kidney' },
-  { stop: 'kidneys', anchor: 'label_LeftKidney', body: 'Left kidney' },
-  {
-    stop: 'kidneys',
-    anchor: 'label_Adrenals',
-    left: true,
-    width: 44,
-    body: (
-      <>
-        Adrenal gland <small>sits on top</small> <Cites ids={[14]} />
-      </>
-    ),
-  },
-  {
-    stop: 'kidneys',
-    anchor: 'label_Ureters',
-    left: true,
-    body: (
-      <>
-        <TermButton termKey="ureter">Ureter</TermButton> <small>to the bladder</small>
-      </>
-    ),
-  },
-  {
-    stop: 'signs',
-    anchor: 'label_Bladder',
-    body: (
-      <>
-        <TermButton termKey="hematuria">Blood in the urine</TermButton> <Cites ids={[1, 2]} />
-      </>
-    ),
-  },
-  {
-    stop: 'treatment',
-    anchor: 'label_LeftKidney',
-    body: (
-      <>
-        <TermButton termKey="nephrectomy">Taken out</TermButton> <small>with the tumor</small> <Cites ids={[1]} />
-      </>
-    ),
-  },
-  {
-    stop: 'outlook',
-    anchor: 'label_RightKidney',
-    left: true,
-    body: (
-      <>
-        One kidney can do the work <Cites ids={[13]} />
-      </>
-    ),
-  },
+/** The names on the organ model: just enough to read it as a diagram of the urinary system. */
+const LABELS: { stop: StopId; anchor: string; left?: boolean; body: string }[] = [
+  { stop: 'body', anchor: 'label_Ureters', left: true, body: 'Ureter' },
+  { stop: 'body', anchor: 'label_Bladder', body: 'Bladder' },
+  { stop: 'treatment', anchor: 'label_LeftKidney', body: 'Removed with its tumor' },
 ];
 
 function OrganLabels({ visible }: { visible: boolean }) {
@@ -301,9 +251,9 @@ function OrganLabels({ visible }: { visible: boolean }) {
         const a = data.anchors[l.anchor];
         if (!a) return null;
         return (
-          <Label3D key={i} visible={visible} at={l.stop} position={a.position.clone().multiplyScalar(MODEL_SCALE)} interactive>
-            <div className={`leader${l.left ? ' leader--left' : ''}`} style={{ animation: `rise 700ms ${300 + i * 120}ms both` }}>
-              <span className="leader__line" style={{ width: l.width ?? 32 }} />
+          <Label3D key={i} visible={visible} at={l.stop} position={a.position.clone().multiplyScalar(MODEL_SCALE)}>
+            <div className={`leader${l.left ? ' leader--left' : ''}`}>
+              <span className="leader__line" />
               <span className="tag">{l.body}</span>
             </div>
           </Label3D>

@@ -2,7 +2,7 @@
 
 **Project:** Wilms tumor, interactive 3D exhibit (Medical Terminology, eponym #27)
 **Students:** Vardhmansinh Rathod, Eren Robinson and Shanya Prezy · 3rd Block
-**Report date:** September 28, 2026
+**Report date:** October 4, 2026
 
 ## What was built
 
@@ -42,21 +42,29 @@ credits.
   the surface opens around the one the camera enters.
 - **The story happens on the model.** The tumor grows on the lower half of the left kidney as the
   camera arrives at “A lump in the belly”; at “Treatment” that kidney glows, and scrolling on lifts it
-  out with its ureter, leaving one kidney for “The outlook”. It comes back, healthy, for the quiz.
-- **Plain words.** Each part has a short heading and one or two short, simple sentences (a unit
-  test keeps every caption under 25 words), written the way you would explain it to a friend. No “Fact 1” labels, no em dashes or dots between words (a unit test checks
-  this). Word parts are explained in the sentences, e.g. “Nephr means kidney and ectomy means
-  removal.” The presenter’s own lines are in a printable guide (`?guide`), not on the big screen.
-- **A one-minute talk.** The page still zooms through every scene, but the clicker, keyboard and swipes stop at ten of them (home, Max Wilms, the name, what it is, how it starts, the lump, finding it, treatment, the summary, the quiz); the camera flies through the others.
+  out with its ureter, leaving one kidney for “The outlook”. Then the camera pulls back out of the
+  book: the organs press back into the drawing on the page and Max Wilms is at his desk again for
+  the summary and the quiz.
+- **One infographic, not a set of slides.** Every stop the talk pauses at is built from the same
+  four parts on the same grid: the section it belongs to, a headline that states the takeaway, three
+  key facts as big figures (a number or one word over a short label), and a few plain sentences that
+  explain them (a unit test keeps each under 43 words, and checks that every stop has exactly three
+  facts and shows their reference numbers). Nothing is said twice on one screen. The models carry
+  short names (Kidneys, Ureter, Bladder; Wilms tumor; DNA and its gene; Probe, Tumor, Kidney). There
+  are no cards, boxes, decorative textures or disclaimers over the scene.
+- **Plain words.** Written the way you would explain it to a friend. No “Fact 1” labels, no em
+  dashes or dots between words (a unit test checks this). Word parts are explained in the sentences,
+  e.g. “nephr means kidney, ectomy means removal”. The presenter’s own lines are in a printable guide
+  (`?guide`), not on the big screen.
+- **A four-minute talk.** The page still zooms through every scene, but the clicker, keyboard and
+  swipes stop at ten of them (home, Max Wilms, the name, what it is, how it starts, the lump, finding
+  it, treatment, the summary, the quiz); the camera flies through the others.
 - **A real quiz.** Five big multiple-choice questions (A to D), one try each, green or red, then the results: the score, the percentage and every answer.
-- **An infographic.** The home screen and the summary lead with three numbers (about 600 children
-  a year in the U.S., 5% of childhood cancers, 93% alive 5 years later), and the stops carry small,
-  flat charts: age at diagnosis, blood filtered vs urine made, a million filters per kidney, 90% not
-  inherited, 5 to 10% in both kidneys, signs at diagnosis, and 93 of 100 dots. Every number is
-  copied from a cited source (a unit test checks each chart cites one).
-- **Immersive.** After the home screen the corner menu, the dot grid and the frame marks step
-  away, so only the scene and its words are on screen; the menu comes back when a mouse moves to
-  the top edge.
+- **Numbers you can read at a glance.** Who gets it (2 to 5 years old, about 600 children a year in
+  the U.S., 5% of childhood cancers), why (9 in 10 gene changes only in the tumor cells) and the
+  outlook (93 of 100 dots). Every figure is copied from a cited source (a unit test checks it).
+- **Immersive.** After the home screen the corner menu steps away, so only the scene and its words
+  are on screen; the menu comes back when a mouse moves to the top edge.
 - **Type in the style of igloo.inc** on the exhibit’s own warm palette: IBM Plex Mono for small
   labels and links, IBM Plex Sans for reading, Unbounded for the title.
 - **Runs on slow computers without losing anything.** Every device gets the same scenes. While the
@@ -74,8 +82,8 @@ Institute, American Cancer Society, MedlinePlus, NIDDK, OpenStax, the NCI dictio
 peer-reviewed articles on Max Wilms). The history uses only what those articles state: born 1867,
 the 1899 book at age 32 while a young surgeon in training, professor in 1904, died in 1918 during
 World War I from an infection caught while operating. The 1899 book appears with its real German
-title, typeset for the exhibit (not a scan of the original). The scans are drawings labelled “Illustration, not a patient image”; the zoomed-in
-scenes are labelled “Illustration, not to scale”.
+title, typeset for the exhibit (not a scan of the original). The media credits state that the 3D
+scenes are illustrations, not to scale, and that the scans are drawings, not patient images.
 
 ## Technology
 

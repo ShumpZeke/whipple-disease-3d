@@ -204,26 +204,22 @@ export function Scans({ visible }: { visible: boolean }) {
         </group>
       </group>
       <mesh ref={fan} geometry={built.fanGeo} material={built.image} position={built.apex} quaternion={built.fanQuat} scale={FAN_SCALE} renderOrder={20} visible={false} />
-      <Label3D visible={visible} at="ultrasound" position={fanPoint(0.22, 0.24)} interactive>
-        <div className="leader" style={{ animation: 'rise 700ms 450ms both' }}>
-          <span className="leader__line" style={{ width: 34 }} />
-          <span className="tag">
-            Probe <small>sends sound in</small> <Cites ids={[6]} />
-          </span>
+      <Label3D visible={visible} at="ultrasound" position={fanPoint(0.22, 0.24)}>
+        <div className="leader">
+          <span className="leader__line" />
+          <span className="tag">Probe</span>
         </div>
       </Label3D>
-      <Label3D visible={visible} at="ultrasound" position={kidneyOnFan} interactive>
-        <div className="leader" style={{ animation: 'rise 700ms 650ms both' }}>
-          <span className="leader__line" style={{ width: 40 }} />
+      <Label3D visible={visible} at="ultrasound" position={kidneyOnFan}>
+        <div className="leader">
+          <span className="leader__line" />
           <span className="tag">Kidney</span>
         </div>
       </Label3D>
-      <Label3D visible={visible} at="ultrasound" position={tumorOnFan} interactive>
-        <div className="leader leader--left" style={{ animation: 'rise 700ms 850ms both' }}>
-          <span className="leader__line" style={{ width: 40 }} />
-          <span className="tag">
-            Tumor <small>a round lump</small> <Cites ids={[6]} />
-          </span>
+      <Label3D visible={visible} at="ultrasound" position={tumorOnFan}>
+        <div className="leader leader--left">
+          <span className="leader__line" />
+          <span className="tag">Tumor</span>
         </div>
       </Label3D>
       {/* CT */}
@@ -263,16 +259,6 @@ export function Scans({ visible }: { visible: boolean }) {
             Tumor <small>in the left kidney</small> <Cites ids={[6]} />
           </span>
         </div>
-      </Label3D>
-      <Label3D visible={visible} at="ultrasound" position={fanPoint(0, -2.25)} center>
-        <span className="tag">
-          <small>Illustration, not a patient image</small>
-        </span>
-      </Label3D>
-      <Label3D visible={visible} at="scans" position={[0, built.Y - 0.01, -0.98]} center>
-        <span className="tag">
-          <small>Illustration, not a patient image</small>
-        </span>
       </Label3D>
     </group>
   );

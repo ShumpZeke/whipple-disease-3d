@@ -42,32 +42,67 @@ test('opens on a home screen that introduces the eponym and guides the viewer', 
   expect(errors).toEqual([]);
 });
 
-test('the history begins with a profile of Max Wilms at his desk, then his 1899 book', async ({ page }) => {
+test('the history begins with Max Wilms at his desk, then his 1899 book', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/?stop=doctor&e2e');
   await waitForStage(page);
-  // the profile hangs in the room next to him (a label pinned in the 3D scene)
-  const card = page.getByRole('article', { name: 'Profile of Max Wilms' });
-  await expect(card).toBeVisible();
-  for (const year of ['1867', '1899', '1904', '1918']) await expect(card).toContainText(year);
-  await expect(page.locator('section.caption[data-step="doctor"] .caption__body')).toContainText('German surgeon');
+  // his photograph hangs in the room next to him (a label pinned in the 3D scene), with its credit
+  const photo = page.getByRole('figure', { name: 'Portrait of Max Wilms' });
+  await expect(photo).toBeVisible();
+  await expect(photo).toContainText('Wellcome Collection');
+  // his dates are the stop's three key facts
+  const doctor = page.locator('section.caption[data-step="doctor"]');
+  await expect(doctor.locator('.fact__value')).toHaveText(['1867', '1899', '1918']);
+  await expect(doctor.locator('.caption__body')).toContainText('German surgeon');
+  // the eponym is explained accurately: he did not discover it
+  await expect(doctor.locator('.caption__body')).toContainText('Other doctors had already reported');
 
-  // scrolling on zooms over his shoulder to the book on his desk; the profile goes with the room
+  // scrolling on zooms over his shoulder to the book on his desk; the photograph goes with the room
   await page.keyboard.press('PageDown');
   await expect.poll(async () => (await state(page))?.id).toBe('name');
   await expect(page.locator('section.caption[data-step="name"] .caption__body')).toContainText('nephroblastoma');
-  await expect(card).toBeHidden();
+  await expect(photo).toBeHidden();
   expect(errors).toEqual([]);
 });
 
 test('the name stop splits nephroblastoma into its word parts', async ({ page }) => {
   await page.goto('/?stop=name&e2e');
   await waitForStage(page);
-  const card = page.getByRole('article', { name: 'The word parts of nephroblastoma' });
-  await expect(card).toBeVisible();
-  for (const part of ['kidney', 'young cell', 'tumor']) await expect(card).toContainText(part);
-  await expect(page.locator('section.caption[data-step="name"] .caption__note')).toContainText('Nephr means kidney');
+  const name = page.locator('section.caption[data-step="name"]');
+  await expect(name.locator('.fact__value')).toHaveText(['nephro', 'blast', 'oma']);
+  await expect(name.locator('.fact__label')).toHaveText(['kidney', 'young cell', 'tumor']);
+  await expect(name.locator('.caption__body')).toContainText('NEF-roh-blas-TOH-muh');
 });
+
+test('every stop is built the same way: section, headline, three key facts, a short explanation', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?e2e');
+  await waitForStage(page);
+  for (const i of PAUSES.slice(1, -1)) {
+    await page.keyboard.press('PageDown');
+    const s = STOPS[i];
+    const block = page.locator(`section.caption[data-step="${s.id}"]`);
+    await expect(block).toBeVisible();
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - i)).toBeLessThan(0.01);
+    await expect(block.locator('.caption__kicker')).toHaveText(s.eyebrow);
+    await expect(block.locator('.caption__title')).toHaveText(s.title);
+    if (s.id === 'end') await expect(block.locator('.facts__dots i.is-on')).toHaveCount(93);
+    else await expect(block.locator('.fact')).toHaveCount(3);
+    await expect(block.locator('.caption__body')).toBeVisible();
+    // every fact is tied to the reference list
+    expect(await block.locator('.cite').count()).toBeGreaterThan(0);
+    // nothing in the block runs off the screen
+    const box = (await block.boundingBox())!;
+    const vp = page.viewportSize()!;
+    expect(box.x, s.id).toBeGreaterThanOrEqual(0);
+    expect(box.y, s.id).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, s.id).toBeLessThanOrEqual(vp.height + 1);
+  }
+  // no decoration left over the scene
+  await expect(page.locator('.grain, .dots, .frame, .scale-note, .print')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
 
 test('one continuous page: a presenter clicker walks the talk, flying through the rest', async ({ page }) => {
   const errors = collectErrors(page);
@@ -204,9 +239,10 @@ test('falls back to still images when WebGL is unavailable', async ({ page }) =>
   await expect(page.locator('.fallback-img img')).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Interactive 3D isn’t available' })).toBeVisible();
   await expect(page.locator('section.caption[data-step="genes"]')).toBeVisible();
-  // the cards that hang in the 3D study are still there
+  // the photograph that hangs in the 3D study is still there, and so are the key facts
   await page.goto('/?stop=doctor');
-  await expect(page.getByRole('article', { name: 'Profile of Max Wilms' })).toBeVisible();
+  await expect(page.getByRole('figure', { name: 'Portrait of Max Wilms' })).toBeVisible();
+  await expect(page.locator('section.caption[data-step="doctor"] .fact')).toHaveCount(3);
   await expect(page.locator('.fallback-img img')).toHaveAttribute('src', '/fallback/study.webp');
 });
 
@@ -271,7 +307,9 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await page.goto('/?stop=end&e2e');
     await waitForStage(page);
     const end = page.locator('section.caption[data-step="end"]');
-    await expect(end.locator('.caption__body')).toContainText('most children survive it');
+    await expect(end.locator('.caption__title')).toHaveText('Most children survive');
+    await expect(end.locator('.fact__value')).toHaveText('93');
+    await expect(end.locator('.fact__label')).toContainText('alive five years later');
     await end.getByRole('button', { name: 'References' }).tap();
     const sources = page.locator('#sources');
     await expect.poll(async () => Math.abs((await sources.boundingBox())?.y ?? 999)).toBeLessThan(4);

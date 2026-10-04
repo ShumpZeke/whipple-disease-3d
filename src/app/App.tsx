@@ -144,7 +144,7 @@ function HoverTip() {
     return () => window.removeEventListener('pointermove', onMove);
   }, []);
   const id = STOPS[stop].id;
-  if (!hovered || !pt || !['body', 'end'].includes(id)) return null;
+  if (!hovered || !pt || id !== 'body') return null;
   return (
     <div className="hover-tip" style={{ left: pt.x, top: pt.y }} aria-hidden="true">
       {ORGANS[hovered].name}
@@ -152,13 +152,6 @@ function HoverTip() {
   );
 }
 
-function ScaleNote() {
-  const stop = useStory((s) => s.stop);
-  const world = STOPS[stop].world;
-  // (the scans carry their own note: they are drawings, not patient images)
-  if (!['kidney', 'nephron', 'cells'].includes(world)) return null;
-  return <p className="scale-note">Illustration, not to scale</p>;
-}
 
 export default function App() {
   useKeyboard();
@@ -209,22 +202,13 @@ export default function App() {
         )}
         {fallback && <Fallback />}
         {!fallback && <StageLoading />}
-        <div className="dots" aria-hidden="true" />
         <HistoryLayer />
         <Caption />
-        <ScaleNote />
         <HudTop />
         <HoverTip />
         <TermPopover />
         <SourcesOverlay />
         <GlossaryOverlay />
-        <div className="frame" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
-        <div className="grain" aria-hidden="true" />
       </main>
       <EndSources />
     </>

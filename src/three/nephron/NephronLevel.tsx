@@ -283,25 +283,21 @@ function Dna({ active }: { active: boolean }) {
         <mesh geometry={built.change} material={built.changeMat} />
       </group>
       <Label3D visible at="genes" position={along(0.1, HELIX.radius + 0.08)}>
-        <div className="leader leader--left" style={{ animation: 'rise 700ms 450ms both' }}>
-          <span className="leader__line" style={{ width: 30 }} />
+        <div className="leader leader--left">
+          <span className="leader__line" />
           <span className="tag">DNA</span>
         </div>
       </Label3D>
-      <Label3D visible at="genes" position={along((HELIX.gene[0] + HELIX.gene[1]) / 2 - 0.05, HELIX.radius + 0.06)} interactive>
-        <div className="leader" style={{ animation: 'rise 700ms 650ms both' }}>
-          <span className="leader__line" style={{ width: 40 }} />
-          <span className="tag">
-            <TermButton termKey="gene">A gene</TermButton> <small>like WT1</small> <Cites ids={[8]} />
-          </span>
+      <Label3D visible at="genes" position={along((HELIX.gene[0] + HELIX.gene[1]) / 2 - 0.05, HELIX.radius + 0.06)}>
+        <div className="leader">
+          <span className="leader__line" />
+          <span className="tag">A gene, like WT1</span>
         </div>
       </Label3D>
-      <Label3D visible at="genes" position={along(HELIX.change, -HELIX.radius - 0.05)} interactive>
-        <div className="leader leader--left" style={{ animation: 'rise 700ms 850ms both' }}>
-          <span className="leader__line" style={{ width: 36 }} />
-          <span className="tag">
-            A change <small>in its code</small>
-          </span>
+      <Label3D visible at="genes" position={along(HELIX.change, -HELIX.radius - 0.05)}>
+        <div className="leader leader--left">
+          <span className="leader__line" />
+          <span className="tag">A change in the gene</span>
         </div>
       </Label3D>
     </group>

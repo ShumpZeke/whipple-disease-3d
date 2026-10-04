@@ -58,7 +58,7 @@ const LAYOUT: Partial<Record<StopId, [number, number]>> = {
   genes: [0.22, 0.05],
   lump: [0.3, 0.04],
   signs: [0.3, 0],
-  ultrasound: [0.26, 0.02],
+  ultrasound: [0.37, 0.02],
   scans: [0.26, 0],
   treatment: [0.3, 0],
   outlook: [0.3, 0],
@@ -80,10 +80,10 @@ export function localPose(id: StopId, r: AnatomyRefs): LocalPose {
       // over his right shoulder, looking at the open book on its stand
       return { level: 'study', pos: [0.5, 1.5, 0.66], target: [0.0, 0.95, -0.13], fov: 30 };
     // the name: square on to the open book, between Max Wilms and his book (half a metre from the
-    // page, in front of his face), the book on the right of the screen, clear of the caption and the
-    // word card (organ-scene units: the page is the scene)
+    // page, in front of his face), the book on the right of the screen, clear of the words
+    // (organ-scene units: the page is the scene)
     case 'name':
-      return organs([-1.8, 0.02, 4.77], [-1.8, 0, 0], 38);
+      return organs([-2.08, 0.02, 5.3], [-2.08, 0, 0], 38);
     case 'body':
       return organs([0.45, 0.2, 4.0], [0, -0.02, 0], 30);
     case 'kidneys':
