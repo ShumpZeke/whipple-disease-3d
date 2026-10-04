@@ -58,7 +58,7 @@ const LAYOUT: Partial<Record<StopId, [number, number]>> = {
   genes: [0.22, 0.05],
   lump: [0.3, 0.04],
   signs: [0.3, 0],
-  ultrasound: [0.37, 0.02],
+  ultrasound: [0.42, 0.02],
   scans: [0.26, 0],
   treatment: [0.3, 0],
   outlook: [0.3, 0],

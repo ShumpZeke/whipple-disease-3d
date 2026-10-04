@@ -31,8 +31,11 @@ const DEG = Math.PI / 180;
 /** The top of his neck, which his head turns about (study metres; see HEAD_C in build_study.py). */
 const NECK_TOP = new THREE.Vector3(0, 1.225, 0.435);
 
-/** The meshes that make up the man (he leaves before the room does). */
-const MAN = /^(Suit|Cuff|Shoe|Hand|Pen|Nib|Head|Eye|Moustache|Brow|Neck|Collar|JacketCollar|BowTie|ShirtFront|Lapel)/;
+/**
+ * The meshes that leave before the room does: the man, and the oil lamp beside the book (up close
+ * it would only be a cropped shape at the edge of the view of the open book).
+ */
+const MAN = /^(Suit|Cuff|Shoe|Hand|Pen|Nib|Head|Eye|Moustache|Brow|Neck|Collar|JacketCollar|BowTie|ShirtFront|Lapel|Lamp)/;
 
 /** The desk, the man and everything else in the room dissolve (with a burnt edge) above the sweep. */
 function withSweep<M extends THREE.Material>(m: M, man = false): M {
@@ -121,7 +124,7 @@ export function StudyLevel({ visible }: { visible: boolean }) {
 
   const built = useMemo(() => {
     const root = gltf.scene.clone(true);
-    const flameMat = withSweep(new THREE.MeshBasicMaterial({ color: '#ffe0a8', toneMapped: false }));
+    const flameMat = withSweep(new THREE.MeshBasicMaterial({ color: '#ffe0a8', toneMapped: false }), true);
     root.traverse((o) => {
       o.layers.set(STUDY_LAYER);
       const mesh = o as THREE.Mesh;
