@@ -229,12 +229,12 @@ function World() {
 
 /**
  * Pixel budget: big screens (a 4K smart board, a projector) would otherwise draw millions of
- * pixels per frame. The 3D is drawn at most ~2600 pixels wide (~1920 on lite devices) and
+ * pixels per frame. The 3D is drawn at most ~2200 pixels wide (~1920 on lite devices) and
  * stretched to fill the screen. It only goes lower if the device keeps dropping frames.
  */
 const CSS_WIDTH = Math.max(1, window.innerWidth);
 const LITE_CAP = Math.min(1, Math.max(0.5, 1920 / CSS_WIDTH));
-const DPR_CAP = LITE ? LITE_CAP : Math.min(1.5, Math.max(0.75, 2600 / CSS_WIDTH));
+const DPR_CAP = LITE ? LITE_CAP : Math.min(1.5, Math.max(0.75, 2200 / CSS_WIDTH));
 
 /**
  * If a device that looked fast keeps dropping frames once everything has loaded, switch it to the

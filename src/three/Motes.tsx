@@ -53,6 +53,7 @@ export function Motes() {
   const gl = useThree((s) => s.gl);
   const size = useThree((s) => s.size);
   const speed = useRef({ last: journey.t, v: 0 });
+  const points = useRef<(THREE.Object3D | null)[]>([]);
 
   const built = useMemo(() => {
     const rnd = mulberry32(1899);
@@ -100,19 +101,22 @@ export function Motes() {
     const scale = (size.height * gl.getPixelRatio()) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
     const c = camera.position;
     built.layers.forEach((m, j) => {
+      const pts = points.current[j];
       const L = 10 ** (k0 + j);
       const u = m.uniforms;
       u.uL.value = L;
       u.uScale.value = scale;
       u.uCamFrac.value.set(frac(c.x / L), frac(c.y / L), frac(c.z / L));
       u.uOpacity.value = 0.18 * moving * (j === 0 ? 1 - f : f);
+      // nothing is drawn at all while the camera rests
+      if (pts) pts.visible = u.uOpacity.value > 0.004;
     });
   });
 
   return (
     <>
       {built.layers.map((m, j) => (
-        <points key={j} geometry={built.geo} material={m} frustumCulled={false} renderOrder={30} />
+        <points key={j} ref={(p) => void (points.current[j] = p)} geometry={built.geo} material={m} frustumCulled={false} renderOrder={30} />
       ))}
     </>
   );

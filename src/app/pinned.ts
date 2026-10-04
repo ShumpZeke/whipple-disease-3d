@@ -82,13 +82,19 @@ const dist = (a: V, b: V) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
  */
 export function pinToScene(el: HTMLElement, index: number) {
   let rest: { key: string; cx: number; cy: number; anchor: V; depth: number } | null = null;
+  let last = '';
   el.style.transformOrigin = '50% 50%';
-  return onCameraPath((cam) => {
+  // its own layer, so moving it never repaints the text (smooth on a slow board computer)
+  el.style.willChange = 'transform, opacity';
+  // measure again only when its size really changes (never read layout on every frame)
+  const sized = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => (rest = null));
+  sized?.observe(el);
+  const off = onCameraPath((cam) => {
     const stops = restPoses.list;
     if (!stops || !stops[index] || el.style.visibility === 'hidden') return;
     const W = window.innerWidth;
     const H = window.innerHeight;
-    const key = `${index}:${W}x${H}:${el.offsetWidth}x${el.offsetHeight}`;
+    const key = `${index}:${W}x${H}`;
     if (!rest || rest.key !== key) {
       // where the page lays it out (measured without the move)
       const was = el.style.transform;
@@ -102,11 +108,19 @@ export function pinToScene(el: HTMLElement, index: number) {
       rest = { key, cx, cy, depth, anchor: unproject(at, cx, cy, depth, W, H) };
     }
     const s = project(cam, rest.anchor, W, H);
-    if (!s) {
-      el.style.transform = 'scale(0)';
-      return;
+    let next = 'scale(0)';
+    if (s) {
+      const dx = s.x - rest.cx;
+      const dy = s.y - rest.cy;
+      const scale = Math.min(2, Math.max(0.45, rest.depth / s.z));
+      // exactly at rest: no transform at all, so the text is drawn crisp
+      next = Math.abs(dx) < 0.3 && Math.abs(dy) < 0.3 && Math.abs(scale - 1) < 0.002 ? 'none' : `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
     }
-    const scale = Math.min(3, Math.max(0.3, rest.depth / s.z));
-    el.style.transform = `translate(${(s.x - rest.cx).toFixed(1)}px, ${(s.y - rest.cy).toFixed(1)}px) scale(${scale.toFixed(4)})`;
+    if (next !== last) el.style.transform = last = next;
   });
+  return () => {
+    off();
+    sized?.disconnect();
+    el.style.willChange = '';
+  };
 }

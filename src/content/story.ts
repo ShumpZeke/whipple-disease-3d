@@ -279,7 +279,7 @@ export const SECTIONS: { title: string; stop: number }[] = [
   { title: 'Diagnosis', stop: STOP_INDEX.ultrasound },
   { title: 'Treatment', stop: STOP_INDEX.treatment },
   { title: 'Quick check', stop: STOP_INDEX.quiz },
-  { title: 'Sources', stop: SOURCES_PAGE },
+  { title: 'References', stop: SOURCES_PAGE },
 ];
 
 /** The four clinical facts (presenter guide). */

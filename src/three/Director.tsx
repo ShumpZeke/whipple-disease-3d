@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { journey, nearestStop } from '../app/journey';
+import { journey, nearestStop, stepJourney } from '../app/journey';
 import { emitCameraPath, restPoses } from '../app/pinned';
 import { useStory } from '../app/store';
 import { LAST_STOP, STOPS } from '../content/story';
@@ -120,6 +120,7 @@ export function Director() {
   }, [resetNonce, invalidate]);
 
   useFrame((_, dt) => {
+    stepJourney();
     const t = Math.min(LAST_STOP, Math.max(0, journey.t));
     const list = poses(camera.aspect);
     const i = Math.min(LAST_STOP - 1, Math.floor(t));

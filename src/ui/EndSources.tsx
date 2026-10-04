@@ -15,9 +15,9 @@ export function EndSources() {
       <div className="endnotes__inner">
         <header className="endnotes__head">
           <p className="endnotes__kicker">Wilms tumor</p>
-          <h2 id="endnotes-title">Sources</h2>
+          <h2 id="endnotes-title">References</h2>
           <p className="endnotes__lede">
-            Every fact in this exhibit comes from these sources. The small numbers beside each fact, like [1], point to
+            Every fact in this exhibit comes from these references. The small numbers beside each fact, like [1], point to
             this list.
           </p>
         </header>

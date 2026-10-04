@@ -34,7 +34,7 @@ function Extras({ id }: { id: string }) {
         <>
           <div className="caption__links">
             <button type="button" className="text-link" onClick={() => scrollToStop(SOURCES_PAGE)}>
-              Sources
+              References
             </button>
             <button type="button" className="text-link" onClick={restart}>
               Start again

@@ -70,7 +70,7 @@ export function Quiz() {
             Try again
           </button>
           <button type="button" className="quiz__btn" onClick={() => scrollToStop(SOURCES_PAGE)}>
-            Sources
+            References
           </button>
           <button type="button" className="quiz__btn" onClick={restart}>
             Start over

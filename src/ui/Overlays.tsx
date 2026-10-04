@@ -51,8 +51,8 @@ export function SourcesOverlay() {
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <CloseButton onClick={close} label="Close sources" />
-        <h2 id="sources-title">Sources</h2>
+        <CloseButton onClick={close} label="Close references" />
+        <h2 id="sources-title">References</h2>
         <p className="lede">
           APA references for the facts used throughout the infographic. Numbered citations match the markers beside each fact.
         </p>

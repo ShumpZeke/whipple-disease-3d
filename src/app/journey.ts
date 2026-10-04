@@ -97,6 +97,13 @@ export function currentTargetStop() {
 const settling = typeof location === 'undefined' || !new URLSearchParams(location.search).has('nosettle');
 
 let running = false;
+let stepNow: ((now: number) => void) | null = null;
+/** Bring the journey up to date for the frame being drawn (called by the 3D stage before it draws). */
+export function stepJourney() {
+  const now = document.timeline?.currentTime;
+  if (typeof now === 'number') stepNow?.(now);
+}
+
 export function startJourney(onStop: (i: number) => void, onWorld: (w: World) => void) {
   if (running) return () => undefined;
   running = true;
@@ -174,9 +181,14 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
   window.addEventListener('touchend', onTouchEnd, { passive: true });
   window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
-  const loop = (now: number) => {
-    if (!running) return;
-    const dt = Math.min(0.05, (now - last) / 1000);
+  // One step per screen refresh, whoever asks first: the browser's own frame callback, or the 3D
+  // stage just before it draws. Both see the same frame time, so the picture is always drawn from
+  // this frame's scroll position (never the last one), which keeps the zoom from juddering.
+  let stepped = -1;
+  const step = (now: number) => {
+    if (!running || now === stepped) return;
+    stepped = now;
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
     last = now;
     if (tween) {
       const k = Math.min(1, (now - tween.start) / tween.dur);
@@ -210,11 +222,17 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
       for (const fn of listeners) fn(journey.t, dt);
       invalidate?.();
     }
+  };
+  stepNow = step;
+  const loop = (now: number) => {
+    if (!running) return;
+    step(now);
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
   return () => {
     running = false;
+    stepNow = null;
     window.removeEventListener('wheel', cancelTween);
     window.removeEventListener('touchmove', cancelTween);
     window.removeEventListener('resize', onResize);

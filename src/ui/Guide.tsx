@@ -15,7 +15,7 @@ const PARTS = [
   { time: '0:00 to 0:19', name: 'History', what: 'Your eponym, Max Wilms, and why the tumor has his name' },
   { time: '0:19 to 0:47', name: 'The disease', what: 'What it is, how it starts, the first signs, how doctors find it, the treatment' },
   { time: '0:47 to 1:00', name: 'Summary', what: 'Sum it up in one sentence' },
-  { time: 'After 1:00', name: 'Quick check', what: 'Five questions, classmates call out the answers, then the results and the sources' },
+  { time: 'After 1:00', name: 'Quick check', what: 'Five questions, classmates call out the answers, then the results and the references' },
 ];
 
 /**
@@ -136,7 +136,7 @@ export function Guide() {
 
       <section className="guide__facts">
         <h2>If someone asks…</h2>
-        <p>Answer from your sources; say the source number if you want to show it on the list at the end.</p>
+        <p>Answer from your references; say the reference number if you want to show it on the list at the end.</p>
         <dl className="guide__qa">
           {QA.map((x) => (
             <div key={x.q}>

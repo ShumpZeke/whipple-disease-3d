@@ -71,7 +71,7 @@ export function HudTop() {
           Terms
         </button>
         <button type="button" className="link-btn" onClick={() => openSources()}>
-          Sources
+          References
         </button>
         <FullscreenLink />
       </nav>

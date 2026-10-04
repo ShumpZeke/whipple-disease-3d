@@ -147,8 +147,8 @@ test('sources, medical terms and inline definitions', async ({ page }) => {
   // after the home screen the corner menu hides until the mouse comes near the top
   await page.mouse.move(800, 400);
   await page.mouse.move(800, 30);
-  await page.locator('.hud-links').getByRole('button', { name: 'Sources' }).click();
-  const sources = page.getByRole('dialog', { name: 'Sources' });
+  await page.locator('.hud-links').getByRole('button', { name: 'References' }).click();
+  const sources = page.getByRole('dialog', { name: 'References' });
   await expect(sources).toBeVisible();
   expect(await sources.locator('.ref').count()).toBe(SOURCES.length);
   await page.keyboard.press('Escape');
@@ -271,11 +271,11 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await page.goto('/?stop=end&e2e');
     await waitForStage(page);
     const end = page.locator('section.caption[data-step="end"]');
-    await expect(end.locator('.caption__body')).toContainText('chemotherapy');
-    await end.getByRole('button', { name: 'Sources' }).tap();
+    await expect(end.locator('.caption__body')).toContainText('most children survive');
+    await end.getByRole('button', { name: 'References' }).tap();
     const sources = page.locator('#sources');
     await expect.poll(async () => Math.abs((await sources.boundingBox())?.y ?? 999)).toBeLessThan(4);
-    await expect(sources.getByRole('heading', { name: 'Sources' })).toBeVisible();
+    await expect(sources.getByRole('heading', { name: 'References' })).toBeVisible();
     expect(await sources.locator('.endnotes__refs li').count()).toBe(SOURCES.length);
     await expect(sources.locator('.endnotes__terms')).toContainText('Nephroblastoma');
     await expect(sources.locator('.endnotes__credits')).toContainText('BodyParts3D');

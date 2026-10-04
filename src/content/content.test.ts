@@ -99,7 +99,7 @@ describe('the one-page journey (storyboard order)', () => {
 
   it('lists the parts of the talk on the home screen, ending with the sources', () => {
     expect(SECTIONS[0].title).toBe('History');
-    expect(SECTIONS.at(-1)?.title).toBe('Sources');
+    expect(SECTIONS.at(-1)?.title).toBe('References');
     for (let i = 1; i < SECTIONS.length; i++) expect(SECTIONS[i].stop).toBeGreaterThan(SECTIONS[i - 1].stop);
   });
 });
