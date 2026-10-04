@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { stopPresence } from '../app/journey';
+import { creditLine } from '../app/config';
+import { scrollToStop, stopPresence } from '../app/journey';
 import { pinToScene } from '../app/pinned';
 import { useStory } from '../app/store';
-import { STOPS, type StopId } from '../content/story';
+import { SOURCES_PAGE, STOPS, type StopId } from '../content/story';
 import { StopFigures } from './Charts';
 import { Quiz } from './Quiz';
 import { RichText } from './RichText';
-import { Summary } from './Summary';
 import { useJourney } from './useJourney';
 
 /**
@@ -21,7 +21,32 @@ const DISPLAY_TEXT: Partial<Record<StopId, string>> = {
   lump: 'The first sign is often a painless belly lump; blood in urine is {t:hematuria}. {c:5,2}',
   ultrasound: '{t:ultrasound|Ultrasound} usually comes first; CT or MRI shows more detail. {c:6}',
   treatment: 'Removing the affected kidney is a {t:nephrectomy}; chemotherapy usually follows. {c:1,7}',
+  end: 'Wilms tumor is usually treatable, and most children survive. {c:1,2}',
 };
+
+/** The last stop: two quiet utility links and the project credit. */
+function Extras({ id }: { id: string }) {
+  const restart = useStory((s) => s.restart);
+
+  switch (id) {
+    case 'end':
+      return (
+        <>
+          <div className="caption__links">
+            <button type="button" className="text-link" onClick={() => scrollToStop(SOURCES_PAGE)}>
+              References
+            </button>
+            <button type="button" className="text-link" onClick={restart}>
+              Start again
+            </button>
+          </div>
+          <p className="caption__credit">{creditLine()}</p>
+        </>
+      );
+    default:
+      return null;
+  }
+}
 
 /**
  * The active fact is pinned beside the thing it describes. It moves with the 3D scene rather than
@@ -45,8 +70,7 @@ export function Caption() {
     [stop],
   );
 
-  // (the quiz and the summary drawing fill the screen: they stay put)
-  const pinned = s.id !== 'quiz' && s.id !== 'end' && !reduced;
+  const pinned = s.id !== 'quiz' && !reduced;
   useEffect(() => {
     const el = ref.current;
     if (!el || !pinned) return;
@@ -62,13 +86,6 @@ export function Caption() {
     return (
       <section ref={ref} className="caption caption--quiz" data-step="quiz">
         <Quiz />
-      </section>
-    );
-
-  if (s.id === 'end')
-    return (
-      <section ref={ref} className="caption caption--summary" aria-label="Wilms tumor, in short" data-step="end">
-        <Summary />
       </section>
     );
 
@@ -91,6 +108,7 @@ export function Caption() {
           </p>
         )}
         <StopFigures id={s.id} />
+        <Extras id={s.id} />
       </section>
     </>
   );
