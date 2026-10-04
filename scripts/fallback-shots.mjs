@@ -19,7 +19,7 @@ await withPreview(async (base) => {
   const browser = await chromium.launch({ headless: true, args: ['--enable-gpu', '--ignore-gpu-blocklist', '--use-angle=d3d11'] });
   for (const [stop, name] of shots) {
     const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
-    await page.goto(`${base}?stop=${stop}&e2e&reduced`);
+    await page.goto(`${base}?stop=${stop}&e2e&reduced&nosettle`);
     await page.waitForFunction(() => !!window.__exhibit, null, { timeout: 60000 });
     await page.waitForTimeout(4000);
     await page.addStyleTag({
