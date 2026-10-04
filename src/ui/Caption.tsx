@@ -10,18 +10,22 @@ import { RichText } from './RichText';
 import { useJourney } from './useJourney';
 
 /**
- * The full research copy stays in story.ts for the guide and sources. On the main journey we show
- * only the sentence needed at that moment. The 3D scene carries the rest of the explanation.
+ * What each stop says on screen: a few plain sentences that explain the scene (story.ts keeps a
+ * one-line version of each for the guide and the tests).
  */
 const DISPLAY_TEXT: Partial<Record<StopId, string>> = {
-  doctor: 'A German surgeon. The tumor is named after him. {c:9,10}',
-  name: 'Others reported it first. His 1899 study explained it. Medical name: {t:nephroblastoma}. {c:9,1}',
-  body: 'A kidney cancer in young children. System: urinary. Specialty: {t:oncologist|pediatric oncology}. {c:1,3}',
-  genes: 'A {t:gene} change makes young kidney cells keep dividing. {c:3,8}',
-  lump: 'The first sign is a painless lump in the belly. {c:5,2}',
-  ultrasound: 'An {t:ultrasound} finds the tumor. {c:6}',
-  treatment: 'Usually surgery plus {t:chemotherapy}. Some children also get radiation. {c:1,2}',
-  end: 'Most children survive it. {c:2}',
+  doctor:
+    'A German surgeon who lived from 1867 to 1918. He died during World War I from an infection he caught after operating on a prisoner of war. The tumor carries his name. {c:9,10}',
+  name: 'Other doctors had already reported kidney tumors like this in children. In 1899, at age 32, Max Wilms published a detailed study that brought those reports together and explained it as one disease, so his name stayed with it. The medical name is {t:nephroblastoma}. {c:9,1}',
+  body: 'Wilms tumor is a cancer that starts in a kidney, part of the urinary system. It is the most common kidney cancer in children. It usually affects one kidney; about 5 to 10 in 100 children have it in both. It is treated in {t:oncologist|pediatric oncology}. {c:1,3}',
+  genes:
+    'Before birth, the kidneys grow from young cells that should mature by age 3 or 4. In Wilms tumor some of them stay young and keep dividing. A change in a {t:gene} such as WT1 is often behind it. {c:3,8}',
+  lump: 'The first sign is usually a swelling or hard lump in the belly that does not hurt, often noticed by a parent while bathing or dressing the child. Some children also have blood in the urine, called {t:hematuria}, a fever or high blood pressure. {c:5,1}',
+  ultrasound:
+    'An {t:ultrasound} usually comes first. It uses sound waves to make a picture of the kidney. A {t:ct|CT scan} or MRI then shows how big the tumor is and whether it has spread, and the tumor is checked under a microscope. {c:6}',
+  treatment:
+    'Treatment usually combines surgery and {t:chemotherapy}. Removing the kidney is called a {t:nephrectomy}. Chemotherapy can come before or after surgery, some children also get radiation, and the plan depends on the stage. {c:1,2}',
+  end: 'Wilms tumor is a kidney cancer of young children, named after Max Wilms. With today’s treatment most children survive it: about 93 in 100 are alive five years after diagnosis. {c:1,2}',
 };
 
 /** The last stop: two quiet utility links and the project credit. */
