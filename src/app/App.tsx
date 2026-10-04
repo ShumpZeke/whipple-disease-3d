@@ -152,6 +152,27 @@ function HoverTip() {
   );
 }
 
+/**
+ * An unseen button over the bottom-right corner of the screen. During a talk, one click or tap
+ * there moves on to the next part, exactly like a presenter clicker. It draws nothing at all (no
+ * outline, no hover change, no pointer hand), and it is left out of the Tab order, so it never
+ * shows; the keyboard, a clicker, the wheel and swipes all still work as before.
+ */
+function NextZone() {
+  return (
+    <button
+      type="button"
+      className="next-zone"
+      aria-label="Go to the next part"
+      tabIndex={-1}
+      onClick={(e) => {
+        // never keep the focus (a focused button could show a ring on the next key press)
+        e.currentTarget.blur();
+        useStory.getState().next();
+      }}
+    />
+  );
+}
 
 export default function App() {
   useKeyboard();
@@ -202,6 +223,7 @@ export default function App() {
         )}
         {fallback && <Fallback />}
         {!fallback && <StageLoading />}
+        <NextZone />
         <HistoryLayer />
         <Caption />
         <HudTop />

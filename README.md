@@ -36,13 +36,16 @@ you move by zooming, and the words for each part arrive with the scene.
 
 1. Open the link on the board in Chrome or Edge and tap **Full screen** in the top-right corner (or
    press **F**). Text grows with the screen, so it stays readable from the back of the room.
-2. **Swipe up** on the board to zoom on to the next part, **swipe down** to go back. A clicker, the
-   arrow keys, Page Down or a mouse wheel do the same. It always comes to rest on the next part.
+2. **Click or tap the bottom-right corner of the screen** to go on to the next part. The button
+   there is invisible on purpose, so nothing is drawn. A clicker, the arrow keys, Page Down, a mouse
+   wheel or a **swipe up** do the same, and a **swipe down** goes back. It always comes to rest on
+   the next part.
 3. At each part, point at the three key facts and explain them in your own words. The presenter
    guide has a line to say for every part.
 
 | Do this | To |
 | --- | --- |
+| Click or tap the bottom-right corner (invisible button) | zoom on to the next part |
 | Swipe up, clicker, **→ / ↓ / Page Down / Space**, mouse wheel | zoom on to the next part |
 | Swipe down, **← / ↑ / Page Up** | go back |
 | Tap a part in the home screen list | jump straight there |
@@ -98,7 +101,7 @@ still pictures instead of 3D.
 | --- | --- |
 | Clear title, consistent colors and fonts, readable text, logical sections | Parts: History, The disease, The cause, Signs, Diagnosis, Treatment, Quick check, References, named above every headline; one warm palette; every stop laid out the same way |
 | A home screen that introduces the eponym and guides the viewer | Home screen with the definition and a list of the parts that jumps to each one |
-| At least three interaction types | Navigation (the list of parts, swiping and scrolling), hotspots and pop-ups (+ marker, medical terms, reference numbers), and the self-check quiz, plus the 3D model you can turn |
+| At least three interaction types | Navigation (the list of parts, the corner click, swiping and scrolling), hotspots and pop-ups (+ marker, medical terms, reference numbers), and the self-check quiz, plus the 3D model you can turn |
 | School-appropriate visuals, patient privacy | No patient photos; the scans are drawings; the portrait is openly licensed (CC BY 4.0) |
 | At least three credible sources (not Wikipedia or AI) | 17: National Cancer Institute, American Cancer Society, MedlinePlus (NIH), NIDDK (NIH), OpenStax, and three peer-reviewed history articles |
 | Paraphrased, numbered citations and a full APA reference page | Yes, the reference page is the end of the exhibit (and [SOURCES.md](SOURCES.md)) |

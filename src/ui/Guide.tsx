@@ -56,8 +56,9 @@ export function Guide() {
             (or press <b>F</b>).
           </li>
           <li>
-            There are no buttons to go forward. <b>Swipe up</b> on the board to zoom on to the next part and{' '}
-            <b>swipe down</b> to go back. A clicker, the arrow keys or a mouse wheel do the same. It always stops on
+            To move on, <b>click or tap the bottom-right corner of the screen</b>. Nothing is drawn there (the button is
+            invisible on purpose), but one click anywhere in that corner goes to the next part. A clicker, the arrow
+            keys, a mouse wheel or a <b>swipe up</b> do the same, and a <b>swipe down</b> goes back. It always stops on
             the next part by itself.
           </li>
           <li>

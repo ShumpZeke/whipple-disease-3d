@@ -69,7 +69,7 @@ export const STOPS: Stop[] = [
     eyebrow: 'Home',
     title: 'Wilms Tumor',
     text: 'A kidney cancer in young children. Its medical name is nephroblastoma. {c:1,3}',
-    demo: 'Point to the list of parts along the bottom, then tap History to jump there',
+    demo: 'Point to the list of parts along the bottom, then click the bottom-right corner of the screen to move on',
     term: 'wilms',
     say: 'Our eponym is Wilms tumor, said WILMZ TOO-mer. It is a kidney cancer that young children get, and its medical name is nephroblastoma. I organized this into the history, what the disease is, how it starts, the signs, diagnosis, treatment, and a quick check. That list is along the bottom, and each one jumps to its part. Every part has the same layout: a headline, three key facts, and a short explanation next to the 3D model.',
   },

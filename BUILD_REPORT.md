@@ -59,6 +59,8 @@ credits.
 - **A four-minute talk.** The page still zooms through every scene, but the clicker, keyboard and
   swipes stop at ten of them (home, Max Wilms, the name, what it is, how it starts, the lump, finding
   it, treatment, the summary, the quiz); the camera flies through the others.
+- **An unseen “next” corner.** One click or tap on the bottom-right corner of the screen moves on to
+  the next part. The button there draws nothing (no outline, hover change or pointer hand).
 - **A real quiz.** Five big multiple-choice questions (A to D), one try each, green or red, then the results: the score, the percentage and every answer.
 - **Numbers you can read at a glance.** Who gets it (2 to 5 years old, about 600 children a year in
   the U.S., 5% of childhood cancers), why (9 in 10 gene changes only in the tumor cells) and the

@@ -103,6 +103,46 @@ test('every stop is built the same way: section, headline, three key facts, a sh
   expect(errors).toEqual([]);
 });
 
+test('an unseen corner of the screen moves on to the next part', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?e2e');
+  await waitForStage(page);
+  const zone = page.locator('.next-zone');
+  await expect(zone).toHaveCount(1);
+  // it sits over the bottom-right corner
+  const vp = page.viewportSize()!;
+  const box = (await zone.boundingBox())!;
+  expect(box.x).toBeGreaterThan(vp.width * 0.7);
+  expect(box.x + box.width).toBeGreaterThan(vp.width - 2);
+  expect(box.y).toBeGreaterThan(vp.height * 0.45);
+  expect(box.y + box.height).toBeGreaterThan(vp.height * 0.9);
+  // and draws nothing: fully transparent, no border, outline, text or pointer hand, never in the Tab order
+  const look = await zone.evaluate((el) => {
+    const c = getComputedStyle(el);
+    return { opacity: c.opacity, border: c.borderTopWidth, outline: c.outlineStyle, cursor: c.cursor, text: el.textContent, tab: el.getAttribute('tabindex') };
+  });
+  expect(look).toEqual({ opacity: '0', border: '0px', outline: 'none', cursor: 'default', text: '', tab: '-1' });
+
+  // one click there goes to the next part, like a clicker
+  const x = vp.width * 0.87;
+  const y = vp.height * 0.75;
+  await page.mouse.click(x, y);
+  await expect.poll(async () => (await state(page))?.id).toBe('doctor');
+  await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - STOPS.findIndex((s) => s.id === 'doctor'))).toBeLessThan(0.01);
+  await page.mouse.click(x, y);
+  await expect.poll(async () => (await state(page))?.id).toBe('name');
+  // it does not keep the focus (so no focus ring can appear on a later key press)
+  expect(await page.evaluate(() => String(document.activeElement?.className ?? ''))).not.toContain('next-zone');
+  // the keyboard still works after it
+  await page.keyboard.press('PageDown');
+  await expect.poll(async () => (await state(page))?.id).toBe('body');
+  // from the last stop it goes on to the references, where it is out of the way
+  await page.goto('/?stop=quiz&e2e');
+  await waitForStage(page);
+  await page.mouse.click(x, y);
+  await expect.poll(async () => Math.round(await page.evaluate(() => window.scrollY / innerHeight))).toBe(SOURCES_PAGE);
+  expect(errors).toEqual([]);
+});
 
 test('one continuous page: a presenter clicker walks the talk, flying through the rest', async ({ page }) => {
   const errors = collectErrors(page);
@@ -300,6 +340,28 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await swipe(1300, 400, 420);
     await expect.poll(async () => (await state(page))?.id).toBe('doctor');
     await expect(page.getByRole('button', { name: /Full screen/ })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('a tap on the unseen corner moves on, and a swipe that starts there still zooms', async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto('/?e2e&stop=doctor');
+    await waitForStage(page);
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 1)).toBeLessThan(0.01);
+    // one tap in the bottom-right corner: on to the next part
+    await page.touchscreen.tap(1920 * 0.87, 1080 * 0.75);
+    await expect.poll(async () => (await state(page))?.id).toBe('name');
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 3)).toBeLessThan(0.01);
+    // a finger that swipes up from that corner scrolls the page (the zoom) instead of tapping
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 1700, y: 880 }] });
+    for (let i = 1; i <= 12; i++) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 1700, y: 880 - (420 * i) / 12 }] });
+      await page.waitForTimeout(16);
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect.poll(async () => (await state(page))?.id).toBe('body');
+    await expect.poll(async () => Math.abs(((await state(page))?.t ?? 0) - 4)).toBeLessThan(0.01);
     expect(errors).toEqual([]);
   });
 
