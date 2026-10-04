@@ -22,5 +22,60 @@ export type Figure =
   | { kind: 'meta'; rows: { label: string; value: string }[]; cites: number[] };
 
 export const FIGURES: Partial<Record<StopId, Figure[]>> = {
+  body: [
+    {
+      kind: 'stats',
+      title: 'Who gets it',
+      items: [
+        { value: '2 to 5', label: 'years old, most often', cites: [1, 4] },
+        { value: '600', label: 'children a year in the U.S.', cites: [4] },
+        { value: '5%', label: 'of childhood cancers', cites: [4] },
+      ],
+    },
+  ],
+  genes: [
+    {
+      kind: 'stats',
+      title: 'Why it happens',
+      items: [
+        { value: '9 in 10', label: 'happen by chance', cites: [8] },
+        { value: '1 in 10', label: 'are inherited', cites: [8] },
+        { value: 'WT1', label: 'a gene often changed', cites: [8] },
+      ],
+    },
+  ],
+  lump: [
+    {
+      kind: 'stats',
+      title: 'Signs',
+      items: [
+        { value: 'Lump', label: 'in the belly, no pain', cites: [5] },
+        { value: 'Blood', label: 'in the urine', cites: [1] },
+        { value: 'Fever', label: 'or high blood pressure', cites: [5, 1] },
+      ],
+    },
+  ],
+  ultrasound: [
+    {
+      kind: 'stats',
+      title: 'Tests, in order',
+      items: [
+        { value: '1', label: 'Ultrasound', cites: [6] },
+        { value: '2', label: 'CT scan or MRI', cites: [6] },
+        { value: '3', label: 'Tumor checked under a microscope', cites: [6] },
+      ],
+    },
+  ],
+  treatment: [
+    {
+      kind: 'stats',
+      title: 'Treatment, in order',
+      items: [
+        { value: '1', label: 'Surgery (nephrectomy)', cites: [1] },
+        { value: '2', label: 'Chemotherapy', cites: [7] },
+        { value: '3', label: 'Sometimes radiation', cites: [1, 7] },
+      ],
+    },
+  ],
   end: [{ kind: 'dots', title: 'Five-year survival', value: 93, label: 'out of 100 are alive 5 years later', cites: [2] }],
 };
