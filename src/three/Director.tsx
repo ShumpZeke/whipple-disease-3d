@@ -124,7 +124,7 @@ export function Director() {
     const t = Math.min(LAST_STOP, Math.max(0, journey.t));
     const list = poses(camera.aspect);
     const i = Math.min(LAST_STOP - 1, Math.floor(t));
-    zoomLerp(list[i], list[i + 1], t - i, cur);
+    zoomLerp(list[i], list[i + 1], t - i, cur, !!STOPS[i].pass, !!STOPS[i + 1].pass);
     // the words pinned in the scene follow the path (not the visitor's drag)
     emitCameraPath(cur);
 

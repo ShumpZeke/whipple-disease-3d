@@ -22,7 +22,5 @@ export type Figure =
   | { kind: 'meta'; rows: { label: string; value: string }[]; cites: number[] };
 
 export const FIGURES: Partial<Record<StopId, Figure[]>> = {
-  body: [{ kind: 'ages', title: 'Usually found young', cites: [4, 8] }],
-  genes: [{ kind: 'split', title: 'Most cases are not inherited', value: 90, a: 'Not inherited', b: 'Inherited', cites: [8] }],
   end: [{ kind: 'dots', title: 'Five-year survival', value: 93, label: 'out of 100 are alive 5 years later', cites: [2] }],
 };

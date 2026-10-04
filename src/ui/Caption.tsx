@@ -14,14 +14,14 @@ import { useJourney } from './useJourney';
  * only the sentence needed at that moment. The 3D scene carries the rest of the explanation.
  */
 const DISPLAY_TEXT: Partial<Record<StopId, string>> = {
-  doctor: 'Max Wilms was a German surgeon; the tumor is named after him. {c:9,10}',
-  name: 'His 1899 work gave the tumor its name. The medical term is {t:nephroblastoma}. {c:9,1}',
-  body: 'Wilms tumor is the most common kidney cancer in children. {c:1,3}',
-  genes: 'It begins when young kidney cells keep dividing, often after a {t:gene} change such as WT1. {c:3,8}',
-  lump: 'The first sign is often a painless belly lump; blood in urine is {t:hematuria}. {c:5,2}',
-  ultrasound: '{t:ultrasound|Ultrasound} usually comes first; CT or MRI shows more detail. {c:6}',
-  treatment: 'Removing the affected kidney is a {t:nephrectomy}; chemotherapy usually follows. {c:1,7}',
-  end: 'Wilms tumor is usually treatable, and most children survive. {c:1,2}',
+  doctor: 'A German surgeon. The tumor is named after him. {c:9,10}',
+  name: 'He described it in 1899. Its medical name is {t:nephroblastoma}. {c:9,1}',
+  body: 'A kidney cancer in young children. {c:1,3}',
+  genes: 'A {t:gene} change makes young kidney cells keep dividing. {c:3,8}',
+  lump: 'The first sign is a painless lump in the belly. {c:5,2}',
+  ultrasound: 'An {t:ultrasound} finds the tumor. {c:6}',
+  treatment: 'Surgery removes the kidney. Then chemotherapy. {c:1,7}',
+  end: 'Most children are cured. {c:1,2}',
 };
 
 /** The last stop: two quiet utility links and the project credit. */

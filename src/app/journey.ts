@@ -66,7 +66,21 @@ export const stopPresence = (t: number, index: number) => 1 - smoothstep(0.16, 0
 /* ------------------------------------------------------------------ scroll driver */
 
 const vh = () => window.innerHeight;
-let tween: { index: number; from: number; to: number; start: number; dur: number } | null = null;
+let tween: { index: number; from: number; to: number; start: number; dur: number; real: boolean } | null = null;
+/**
+ * Where a running zoom is, as a scroll position. Between two stops nothing on the page moves (the
+ * 3D camera does), so the zoom is not scrolled frame by frame, which would make the browser lay the
+ * whole page out again every frame: the page is put at the end position once the zoom is over.
+ */
+let virtualY: number | null = null;
+const scrollNow = () => virtualY ?? window.scrollY;
+const endTween = (land: boolean) => {
+  if (!tween) return;
+  if (virtualY !== null && (land || !tween.real)) window.scrollTo(0, virtualY);
+  tween = null;
+  virtualY = null;
+  document.documentElement.classList.remove('is-tweening');
+};
 
 /**
  * Smoothly scroll the page to a stop (keyboard, presenter clicker, Back/Next buttons, rail).
@@ -77,20 +91,25 @@ export function scrollToStop(index: number, instant = false) {
   const to = i * vh();
   if (instant || journey.reduced) {
     tween = null;
+    virtualY = null;
     document.documentElement.classList.remove('is-tweening');
     window.scrollTo(0, to);
     return;
   }
-  const from = window.scrollY;
+  const from = scrollNow();
   const dist = Math.abs(to - from) / vh();
-  tween = { index: i, from, to, start: performance.now(), dur: Math.min(2600, 900 + 700 * Math.sqrt(dist)) };
+  // (to and from the list of references the page itself has to scroll)
+  const real = Math.max(from, to) > LAST_STOP * vh() + 1;
+  if (real && virtualY !== null) window.scrollTo(0, virtualY);
+  virtualY = real ? null : from;
+  tween = { index: i, from, to, start: performance.now(), dur: Math.min(4200, 1000 + 1000 * Math.sqrt(dist)), real };
   document.documentElement.classList.add('is-tweening');
 }
 
 /** The stop the page is at, or heading to (so pressing Next twice quickly moves two stops). */
 export function currentTargetStop() {
   if (tween) return tween.index;
-  return Math.min(SOURCES_PAGE, Math.round(window.scrollY / vh()));
+  return Math.min(SOURCES_PAGE, Math.round(scrollNow() / vh()));
 }
 
 /** `?nosettle` turns settling off, so the screenshot scripts can stop between two stops. */
@@ -110,12 +129,7 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
   let last = performance.now();
   let lastStop = -1;
   let lastWorld: World | null = null;
-  const cancelTween = () => {
-    if (tween) {
-      tween = null;
-      document.documentElement.classList.remove('is-tweening');
-    }
-  };
+  const cancelTween = () => endTween(true);
   // a wheel turn or a finger dragging the page takes over from a running zoom (a tap does not,
   // so tapping Next twice on a touch screen moves two stops)
   window.addEventListener('wheel', cancelTween, { passive: true });
@@ -130,6 +144,7 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
     if (tween) {
       const i = tween.index;
       tween = null;
+      virtualY = null;
       document.documentElement.classList.remove('is-tweening');
       window.scrollTo(0, i * vh());
     } else {
@@ -192,14 +207,14 @@ export function startJourney(onStop: (i: number) => void, onWorld: (w: World) =>
     last = now;
     if (tween) {
       const k = Math.min(1, (now - tween.start) / tween.dur);
-      const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      window.scrollTo(0, tween.from + (tween.to - tween.from) * e);
-      if (k >= 1) {
-        tween = null;
-        document.documentElement.classList.remove('is-tweening');
-      }
+      // a gentle ease: the fastest moment is only 1.5× the average speed, so long flights never rush
+      const e = k * k * (3 - 2 * k);
+      const y = tween.from + (tween.to - tween.from) * e;
+      if (tween.real) window.scrollTo(0, y);
+      else virtualY = y;
+      if (k >= 1) endTween(true);
     }
-    lastRatio = window.scrollY / vh();
+    lastRatio = scrollNow() / vh();
     journey.target = Math.min(LAST_STOP, Math.max(0, lastRatio));
     const prev = journey.t;
     if (journey.reduced) journey.t = journey.target;

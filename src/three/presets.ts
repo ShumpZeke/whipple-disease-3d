@@ -170,7 +170,16 @@ export function worldPose(id: StopId, r: AnatomyRefs, levels: Levels | null, asp
   return { pos, target, up, fov: p.fov };
 }
 
-const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+/**
+ * Progress along one move, as a smooth curve with a chosen speed at each end: 0.5 at a stop the
+ * talk pauses at (a soft start and landing; the scroll itself already eases) and 1 at a stop the
+ * camera only flies through, so it keeps its speed there instead of braking and setting off again.
+ */
+const glide = (k: number, m0: number, m1: number) => {
+  const k2 = k * k;
+  const k3 = k2 * k;
+  return (k3 - 2 * k2 + k) * m0 + (3 * k2 - 2 * k3) + (k3 - k2) * m1;
+};
 
 const tmpA = new THREE.Vector3();
 const q = new THREE.Quaternion();
@@ -188,10 +197,11 @@ function orientation(p: WorldPose, out: THREE.Quaternion) {
  * A continuous zoom from pose A to pose B, even when they are at very different scales: the
  * viewing distance changes geometrically (every second of the move zooms by the same factor), the
  * point we look at travels in step with the zoom so the spot we dive into stays in view, and the
- * camera turns smoothly (quaternion slerp). `k` is 0..1 (eased inside).
+ * camera turns smoothly (quaternion slerp). `k` is 0..1 (eased inside); `throughA`/`throughB` say
+ * the camera does not stop at that end.
  */
-export function zoomLerp(a: WorldPose, b: WorldPose, k: number, out: WorldPose) {
-  const e = easeInOut(Math.min(1, Math.max(0, k)));
+export function zoomLerp(a: WorldPose, b: WorldPose, k: number, out: WorldPose, throughA = false, throughB = false) {
+  const e = glide(Math.min(1, Math.max(0, k)), throughA ? 1 : 0.5, throughB ? 1 : 0.5);
   const dA = a.pos.distanceTo(a.target);
   const dB = b.pos.distanceTo(b.target);
   const la = Math.log(dA);

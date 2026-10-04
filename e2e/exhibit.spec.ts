@@ -271,7 +271,7 @@ test.describe('on a smart board (1920×1080 touch screen)', () => {
     await page.goto('/?stop=end&e2e');
     await waitForStage(page);
     const end = page.locator('section.caption[data-step="end"]');
-    await expect(end.locator('.caption__body')).toContainText('most children survive');
+    await expect(end.locator('.caption__body')).toContainText('Most children are cured');
     await end.getByRole('button', { name: 'References' }).tap();
     const sources = page.locator('#sources');
     await expect.poll(async () => Math.abs((await sources.boundingBox())?.y ?? 999)).toBeLessThan(4);

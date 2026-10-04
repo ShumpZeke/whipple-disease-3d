@@ -33,6 +33,7 @@ export function Label3D({
   const p: [number, number, number] = Array.isArray(position) ? position : [position.x, position.y, position.z];
   const box = useRef<HTMLDivElement>(null);
   const shift = useRef(0);
+  const tick = useRef(0);
 
   useFrame(() => {
     const el = box.current;
@@ -46,6 +47,8 @@ export function Label3D({
       el.style.visibility = k > 0.3 ? 'visible' : 'hidden';
       if (k <= 0.01) return;
     }
+    // keeping a label on screen means measuring it, which is slow: only now and then, not every frame
+    if (tick.current++ % 15) return;
     const vw = window.innerWidth;
     const leader = el.firstElementChild as HTMLElement | null;
     if (leader?.classList.contains('leader')) {
