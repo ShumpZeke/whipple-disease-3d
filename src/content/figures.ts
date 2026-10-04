@@ -36,10 +36,10 @@ export const FIGURES: Partial<Record<StopId, Figure[]>> = {
   genes: [
     {
       kind: 'stats',
-      title: 'Why it happens',
+      title: 'Most do not run in families',
       items: [
-        { value: '9 in 10', label: 'happen by chance', cites: [8] },
-        { value: '1 in 10', label: 'are inherited', cites: [8] },
+        { value: '9 in 10', label: 'gene change only in tumor cells', cites: [8] },
+        { value: '1 in 10', label: 'gene change in every cell', cites: [8] },
         { value: 'WT1', label: 'a gene often changed', cites: [8] },
       ],
     },
@@ -69,13 +69,13 @@ export const FIGURES: Partial<Record<StopId, Figure[]>> = {
   treatment: [
     {
       kind: 'stats',
-      title: 'Treatment, in order',
+      title: 'Nephr = kidney, ectomy = removal',
       items: [
-        { value: '1', label: 'Surgery (nephrectomy)', cites: [1] },
-        { value: '2', label: 'Chemotherapy', cites: [7] },
-        { value: '3', label: 'Sometimes radiation', cites: [1, 7] },
+        { value: 'Surgery', label: 'a nephrectomy', cites: [1, 15] },
+        { value: 'Chemo', label: 'before or after surgery', cites: [1] },
+        { value: 'Radiation', label: 'for some children', cites: [1] },
       ],
     },
   ],
-  end: [{ kind: 'dots', title: 'Five-year survival', value: 93, label: 'out of 100 are alive 5 years later', cites: [2] }],
+  end: [{ kind: 'dots', title: 'Five-year survival', value: 93, label: 'out of 100 children are alive 5 years later', cites: [2] }],
 };

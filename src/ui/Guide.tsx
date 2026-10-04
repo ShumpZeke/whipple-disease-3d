@@ -8,14 +8,15 @@ import { FACTS, QA, STOPS } from '../content/story';
 const TALK = STOPS.filter((s) => !s.pass);
 import { plainText } from './RichText';
 
-/** When to reach each stop in a one-minute talk, before the quiz (same order as TALK). */
-const TIMES = ['0:00', '0:06', '0:12', '0:19', '0:26', '0:33', '0:40', '0:47', '0:54', '1:00'];
+/** When to reach each stop in a talk of about four minutes (same order as TALK). */
+const TIMES = ['0:00', '0:30', '0:50', '1:25', '1:50', '2:20', '2:40', '3:00', '3:30', '3:50'];
 
 const PARTS = [
-  { time: '0:00 to 0:19', name: 'History', what: 'Your eponym, Max Wilms, and why the tumor has his name' },
-  { time: '0:19 to 0:47', name: 'The disease', what: 'What it is, how it starts, the first signs, how doctors find it, the treatment' },
-  { time: '0:47 to 1:00', name: 'Summary', what: 'Sum it up in one sentence' },
-  { time: 'After 1:00', name: 'Quick check', what: 'Five questions, classmates call out the answers, then the results and the references' },
+  { time: '0:00 to 0:30', name: 'Opening', what: 'Name the eponym, say how the exhibit is organized, jump to a part from the list' },
+  { time: '0:30 to 1:25', name: 'History', what: 'Max Wilms, why the tumor has his name (he did not discover it), and what nephroblastoma means' },
+  { time: '1:25 to 3:30', name: 'The disease', what: 'Body system and specialty, how it starts, signs, diagnosis, treatment' },
+  { time: '3:30 to 3:50', name: 'Summary', what: 'The outlook: 93 out of 100 alive five years later' },
+  { time: '3:50 to 4:30', name: 'Quick check', what: 'Five questions, classmates call out the answers, then show the references' },
 ];
 
 /**
@@ -73,7 +74,7 @@ export function Guide() {
       </section>
 
       <section className="guide__plan">
-        <h2>The one-minute plan</h2>
+        <h2>The four-minute plan</h2>
         <table>
           <tbody>
             {PARTS.map((p) => (
@@ -169,7 +170,7 @@ export function Guide() {
           <li>All interactive features work: the list of parts, swiping, underlined words, source numbers, the + marker, turning the model, the quiz</li>
           <li>Reference page included: it is at the end of the exhibit</li>
           <li>Student name and class period appear on the home screen and at the end ({creditLine()})</li>
-          <li>Proofread, and practiced out loud with this guide (about 5 minutes)</li>
+          <li>Proofread, and practiced out loud with this guide (about 4 minutes; the assignment asks for 3 to 5)</li>
         </ul>
       </section>
     </main>

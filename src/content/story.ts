@@ -70,8 +70,9 @@ export const STOPS: Stop[] = [
     eyebrow: 'Home',
     title: 'Wilms Tumor',
     text: 'A kidney cancer in young children. Its medical name is nephroblastoma. {c:1,3}',
-    demo: 'Point to the list of parts along the bottom, then scroll down',
-    say: 'Our eponym is Wilms tumor, a kidney cancer in young children. It is also called nephroblastoma.',
+    demo: 'Point to the list of parts along the bottom, then tap History to jump there',
+    term: 'wilms',
+    say: 'Our eponym is Wilms tumor, said WILMZ TOO-mer. It is a kidney cancer that young children get, and its medical name is nephroblastoma. I organized this into the history, what the disease is, how it starts, the signs, diagnosis, treatment, and a quick check. That list is along the bottom, and each one jumps to its part. Scrolling moves one camera through the whole thing.',
   },
   {
     id: 'doctor',
@@ -80,8 +81,8 @@ export const STOPS: Stop[] = [
     eyebrow: 'History',
     title: 'Dr. Max Wilms',
     text: 'A German surgeon who lived from 1867 to 1918. The tumor is named after him. {c:9,10}',
-    demo: 'Tap a small source number to show where a fact comes from',
-    say: 'It is named after Max Wilms, a German surgeon who lived from 1867 to 1918.',
+    demo: 'Tap a small reference number to show where a fact comes from',
+    say: 'This is Max Wilms, a German surgeon who lived from 1867 to 1918. The card shows his timeline. The small numbers next to the facts are my references. If I tap one, it shows where that fact came from.',
   },
   {
     id: 'book',
@@ -99,12 +100,12 @@ export const STOPS: Stop[] = [
     world: 'none',
     eyebrow: 'History',
     title: 'Why it has his name',
-    text: 'His book made the tumor known, so it carries his name. The medical name is {t:nephroblastoma}. {c:9,1}',
+    text: 'Other doctors had reported this tumor. His detailed 1899 study brought the findings together, so it took his name. The medical name is {t:nephroblastoma}. {c:9,1}',
     term: 'nephroblastoma',
     termLabel: 'Its medical name',
     note: 'Nephr means kidney, blast means bud, oma means tumor. {c:15}',
-    demo: 'Scroll slowly from here: the drawing in his book turns into the 3D model',
-    say: 'In 1899 he wrote a book about this tumor, so it carries his name. Nephroblastoma means a tumor of young kidney cells.',
+    demo: 'Tap the underlined word nephroblastoma to show how to say it and its word parts',
+    say: 'Here is the part people get wrong. Max Wilms did not discover this tumor. Other doctors had already reported kidney tumors like it in children. In 1899, when he was 32, he published a detailed study that pulled those reports together and explained it as one disease. That is why his name stuck to it. The medical name is nephroblastoma. If I tap the word, it breaks down: nephr means kidney, blast means a young cell, and oma means tumor.',
   },
   {
     id: 'body',
@@ -114,7 +115,7 @@ export const STOPS: Stop[] = [
     title: 'What is Wilms tumor?',
     text: 'A cancer that starts in a kidney, part of the urinary system. It is the most common kidney cancer in kids. {c:1,3}',
     demo: 'Drag the model to turn it, then tap the + on the kidney',
-    say: 'It starts in a kidney, part of the urinary system. It is the most common kidney cancer in kids.',
+    say: 'Now we go into the drawing in his book, and it becomes the urinary system. Wilms tumor starts in a kidney. It is the most common kidney cancer in children, mostly ages 2 to 5, about 600 kids a year in the U.S. The doctors who treat it are pediatric oncologists. I can drag the model to turn it.',
   },
   {
     id: 'kidneys',
@@ -168,7 +169,7 @@ export const STOPS: Stop[] = [
     title: 'How it starts',
     text: 'Before birth, some young kidney cells never grow up. A change in a {t:gene} like WT1 keeps them dividing. {c:3,8}',
     term: 'gene',
-    say: 'It starts before birth. Some young kidney cells never grow up, and a gene change like WT1 keeps them dividing.',
+    say: 'We just zoomed from the kidney, into one of its tiny filters, down to the cells and their DNA. Before birth, the kidneys grow from young cells. Sometimes a few never mature and keep dividing, and that becomes the tumor. A gene called WT1 is often involved. In about 9 out of 10 cases the gene change is only in the tumor cells, so it usually does not run in families.',
   },
   {
     id: 'lump',
@@ -179,7 +180,8 @@ export const STOPS: Stop[] = [
     text: 'The first sign is often a lump in the belly that does not hurt. Some kids have blood in the urine, called {t:hematuria}. {c:5,2,1}',
     term: 'hematuria',
     note: 'Hemat means blood, uria means urine. {c:15}',
-    say: 'The first sign is often a painless lump in the belly. Some kids have blood in the urine, called hematuria.',
+    demo: 'Tap the underlined word hematuria',
+    say: 'Back out at the kidney, this is the tumor. The first sign is usually a lump or swelling in the belly that does not hurt. A parent often notices it. Some kids also have blood in the urine. That is called hematuria: hemat means blood and uria means urine. Fever and high blood pressure can happen too.',
   },
   {
     id: 'signs',
@@ -202,7 +204,7 @@ export const STOPS: Stop[] = [
     title: 'Finding it',
     text: 'An {t:ultrasound} uses sound waves to show the lump. A CT scan or MRI shows more detail. {c:6,16}',
     term: 'ultrasound',
-    say: 'Doctors find it with an ultrasound first, then a CT scan or MRI for more detail.',
+    say: 'To find it, doctors usually start with an ultrasound, which makes a picture from sound waves. Then a CT scan or MRI shows how big it is and whether it has spread. The final answer comes from looking at the tumor under a microscope.',
   },
   {
     id: 'scans',
@@ -221,10 +223,11 @@ export const STOPS: Stop[] = [
     world: 'anatomy',
     eyebrow: 'Treatment',
     title: 'Treatment',
-    text: 'Surgery takes out the kidney with the tumor. This is a {t:nephrectomy}. Most kids then get {t:chemotherapy}. {c:1,7}',
+    text: 'Treatment usually combines surgery and {t:chemotherapy}. Removing the kidney is a {t:nephrectomy}. Some children also get radiation. {c:1,2}',
     term: 'nephrectomy',
     note: 'Nephr means kidney, ectomy means removal. {c:15}',
-    say: 'Surgery takes out the kidney with the tumor, a nephrectomy, and most kids then get chemotherapy.',
+    demo: 'Tap the word chemotherapy, then scroll on to watch the kidney come out',
+    say: 'Treatment usually combines surgery and chemotherapy, said KEE-moh-THAYR-uh-pee. The surgery is a nephrectomy: nephr means kidney and ectomy means removal. Watch the kidney with the tumor come out. Chemotherapy can come before or after surgery, and some children also need radiation. The exact plan depends on the stage and on whether one or both kidneys are affected. A person can live a healthy life with one kidney.',
   },
   {
     id: 'outlook',
@@ -233,7 +236,7 @@ export const STOPS: Stop[] = [
     world: 'anatomy',
     eyebrow: 'Treatment',
     title: 'The outlook',
-    text: 'You can live a healthy life with one kidney. About 9 in 10 kids with Wilms tumor survive. {c:13,2,9}',
+    text: 'You can live a healthy life with one kidney. About 93 in 100 children are alive five years later. {c:13,2}',
     say: 'Here is the good news. You can live a healthy life with one kidney, and each dot here is a child: 93 out of 100 are alive five years later. Treating it with medicine even helped open the door to chemotherapy for cancer.',
   },
   {
@@ -242,9 +245,9 @@ export const STOPS: Stop[] = [
     world: 'none',
     eyebrow: 'Summary',
     title: 'In short',
-    text: 'A kidney cancer in young kids, named after Max Wilms. Scans find it, surgery and chemotherapy treat it, and most kids are cured. {c:1,2,9}',
-    demo: 'Point out that the camera came back out of his book to Max Wilms, where the talk began',
-    say: 'So: a kidney cancer in young kids, named after Max Wilms, and most kids are cured. Now a quick quiz.',
+    text: 'A kidney cancer in young children, named after Max Wilms. About 93 in 100 children are alive five years later. {c:1,2,9}',
+    demo: 'Point to the 93 dots, then to the References link',
+    say: 'The camera comes back out of the book to Max Wilms, where we started. So, in short: a kidney cancer in young children, named after Max Wilms. And the outlook is good. Each dot is a child: about 93 out of 100 are alive five years later.',
   },
   {
     id: 'quiz',
@@ -253,8 +256,8 @@ export const STOPS: Stop[] = [
     eyebrow: 'Quick check',
     title: 'Quick check',
     text: '',
-    demo: 'Read each question and let a classmate tap the answer',
-    say: 'Five quick questions to finish. Call out the answer, then we tap it.',
+    demo: 'Read each question, let a classmate call the answer, tap it, then scroll down to the references',
+    say: 'To finish, five quick questions. Call out the answer and I will tap it. After that, the full reference list is one scroll down, in APA format.',
   },
 ];
 
@@ -284,7 +287,7 @@ export const SECTIONS: { title: string; stop: number }[] = [
 
 /** The four clinical facts (presenter guide). */
 export const FACTS: { label: string; text: string; cites: number[] }[] = [
-  { label: 'Cause', text: 'young kidney cells that keep dividing, usually after a gene change that happened by chance', cites: [3, 8] },
+  { label: 'Cause', text: 'young kidney cells that keep dividing, usually after a gene change found only in the tumor cells', cites: [3, 8] },
   { label: 'Symptoms', text: 'a lump in the belly, blood in the urine, fever, high blood pressure', cites: [5, 1] },
   { label: 'Diagnosis', text: 'ultrasound, then a CT scan or MRI, and a look at the tumor under a microscope', cites: [6] },
   { label: 'Treatment', text: 'surgery to remove the kidney, chemotherapy, and sometimes radiation', cites: [1, 7] },
@@ -294,7 +297,9 @@ export const FACTS: { label: string; text: string; cites: number[] }[] = [
 export const QA: { q: string; a: string; cites: number[] }[] = [
   { q: 'Can adults get it?', a: 'Very rarely. Nearly all cases are found before age 10.', cites: [8] },
   { q: 'Can it be in both kidneys?', a: 'Yes, in about 5 to 10 out of 100 children.', cites: [3] },
-  { q: 'Is it inherited?', a: 'Usually not. About 9 out of 10 cases come from gene changes that happen by chance.', cites: [8] },
+  { q: 'Did Max Wilms discover it?', a: 'No. Other doctors had reported it earlier. His 1899 study brought the findings together, and his name became attached to it.', cites: [9] },
+  { q: 'Is it inherited?', a: 'Usually not. In about 9 out of 10 cases the gene change is only in the tumor cells. Most Wilms tumors do not run in families.', cites: [8] },
+  { q: 'Is the treatment always the same?', a: 'No. It depends on the stage and on whether one or both kidneys are affected. Chemotherapy can come before or after surgery.', cites: [1, 2] },
   { q: 'Can you live with one kidney?', a: 'Yes. People with one kidney can live full, healthy lives.', cites: [13] },
   { q: 'How many kids get it?', a: 'About 600 children a year in the United States. It is about 5 out of 100 childhood cancers.', cites: [4] },
   { q: 'How did Max Wilms die?', a: 'In 1918, during World War I, from an infection after he operated on a prisoner of war.', cites: [9] },

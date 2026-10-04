@@ -109,7 +109,7 @@ export const SOURCES: Source[] = [
     title: 'Wilms tumor',
     container: 'MedlinePlus Genetics',
     url: 'https://medlineplus.gov/genetics/condition/wilms-tumor/',
-    usedFor: 'The genes involved (such as WT1), and that about 90% of cases come from gene changes that happen by chance, not inherited.',
+    usedFor: 'The genes involved (such as WT1); about 90% of cases come from gene changes found only in the tumor cells, about 10% from changes in every cell, and most do not run in families.',
     kind: 'medical',
   },
   {

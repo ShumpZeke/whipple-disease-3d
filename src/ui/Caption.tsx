@@ -15,13 +15,13 @@ import { useJourney } from './useJourney';
  */
 const DISPLAY_TEXT: Partial<Record<StopId, string>> = {
   doctor: 'A German surgeon. The tumor is named after him. {c:9,10}',
-  name: 'He described it in 1899. Its medical name is {t:nephroblastoma}. {c:9,1}',
-  body: 'A kidney cancer in young children. {c:1,3}',
+  name: 'Others reported it first. His 1899 study explained it. Medical name: {t:nephroblastoma}. {c:9,1}',
+  body: 'A kidney cancer in young children. System: urinary. Specialty: {t:oncologist|pediatric oncology}. {c:1,3}',
   genes: 'A {t:gene} change makes young kidney cells keep dividing. {c:3,8}',
   lump: 'The first sign is a painless lump in the belly. {c:5,2}',
   ultrasound: 'An {t:ultrasound} finds the tumor. {c:6}',
-  treatment: 'Surgery removes the kidney. Then chemotherapy. {c:1,7}',
-  end: 'Most children are cured. {c:1,2}',
+  treatment: 'Usually surgery plus {t:chemotherapy}. Some children also get radiation. {c:1,2}',
+  end: 'Most children survive it. {c:2}',
 };
 
 /** The last stop: two quiet utility links and the project credit. */

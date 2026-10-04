@@ -147,7 +147,7 @@ export const GLOSSARY: Term[] = [
     say: 'jeen',
     short: 'a piece of DNA with instructions for a cell',
     definition:
-      'A section of DNA that tells a cell what to do. Changes in genes such as WT1 can let kidney cells grow out of control. Most of these changes happen by chance.',
+      'A section of DNA that tells a cell what to do. Changes in genes such as WT1 can let kidney cells grow out of control. Most of these changes are found only in the tumor cells.',
     cites: [8],
   },
   {

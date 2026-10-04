@@ -42,11 +42,11 @@ export const QUESTIONS: Question[] = [
     cites: [6],
   },
   {
-    id: 'cured',
+    id: 'outlook',
     topic: 'The outlook',
-    prompt: 'How many kids with Wilms tumor are cured?',
-    options: [{ text: 'About 1 in 10' }, { text: 'About 3 in 10' }, { text: 'About half' }, { text: 'About 9 in 10', correct: true }],
-    cites: [2, 9],
+    prompt: 'How many children are alive five years later?',
+    options: [{ text: 'About 13%' }, { text: 'About 43%' }, { text: 'About 63%' }, { text: 'About 93%', correct: true }],
+    cites: [2],
   },
 ];
 
