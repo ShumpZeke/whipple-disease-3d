@@ -1,7 +1,7 @@
 import { createPortal, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, type ReactNode } from 'react';
 import * as THREE from 'three';
-import { journey, smoothstep } from '../../app/journey';
+import { isOverviewTreatmentTravel, journey, smoothstep } from '../../app/journey';
 import { STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
 import { view } from '../Director';
@@ -197,7 +197,8 @@ export function KidneyHalves({ visible }: { visible: boolean }) {
   const p = useMemo(() => new THREE.Vector3(), []);
   useFrame(() => {
     const t = journey.t;
-    const open = kidneyOpen(t);
+    const simple = isOverviewTreatmentTravel();
+    const open = simple ? 0 : kidneyOpen(t);
     const e = open * open * (3 - 2 * open);
     built.pivot.rotation.y = e * THREE.MathUtils.degToRad(155);
     // closed, the two trimmed halves make a whole kidney; the painted faces are only for when it is open
@@ -223,9 +224,9 @@ export function KidneyHalves({ visible }: { visible: boolean }) {
     // the dive into the outer layer: detail sharpens, then the surface opens around the filter
     const u = view.d / levels.size.nephron;
     // (deep in, the opened front half is far out of sight)
-    built.pivot.visible = !(t > STOP_INDEX.inside && t < STOP_INDEX.lump && u < 40);
-    const detail = t > STOP_INDEX.inside - 0.5 && t < STOP_INDEX.lump ? smoothstep(320, 70, u) : 0;
-    const hole = t > STOP_INDEX.inside && t < STOP_INDEX.lump ? smoothstep(60, 16, u) : 0;
+    built.pivot.visible = simple || !(t > STOP_INDEX.inside && t < STOP_INDEX.lump && u < 40);
+    const detail = !simple && t > STOP_INDEX.inside - 0.5 && t < STOP_INDEX.lump ? smoothstep(320, 70, u) : 0;
+    const hole = !simple && t > STOP_INDEX.inside && t < STOP_INDEX.lump ? smoothstep(60, 16, u) : 0;
     for (const m of [built.back, built.frontCap]) m.uniforms.uDetail.value = detail;
     built.back.uniforms.uHole.value.set(levels.dot.x, levels.dot.y, hole * 9 * NEPHRON_SCALE);
     if (open > 0 && open < 1) invalidate();
