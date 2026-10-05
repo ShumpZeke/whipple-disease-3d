@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { journey, nearestStop, stepJourney } from '../app/journey';
+import { isOverviewTreatmentTravel, journey, nearestStop, stepJourney, travel, travelProgress } from '../app/journey';
 import { emitCameraPath, restPoses } from '../app/pinned';
 import { useStory } from '../app/store';
 import { LAST_STOP, STOPS } from '../content/story';
@@ -123,8 +123,15 @@ export function Director() {
     stepJourney();
     const t = Math.min(LAST_STOP, Math.max(0, journey.t));
     const list = poses(camera.aspect);
-    const i = Math.min(LAST_STOP - 1, Math.floor(t));
-    zoomLerp(list[i], list[i + 1], t - i, cur, !!STOPS[i].pass, !!STOPS[i + 1].pass);
+    if (isOverviewTreatmentTravel()) {
+      // Cause, signs and diagnosis are already on the overview screen. For presenter navigation,
+      // glide straight from that organ view to treatment instead of diving through every hidden
+      // kidney/cell/scan waypoint.
+      zoomLerp(list[travel.from], list[travel.to], travelProgress(t), cur);
+    } else {
+      const i = Math.min(LAST_STOP - 1, Math.floor(t));
+      zoomLerp(list[i], list[i + 1], t - i, cur, !!STOPS[i].pass, !!STOPS[i + 1].pass);
+    }
     // the words pinned in the scene follow the path (not the visitor's drag)
     emitCameraPath(cur);
 
