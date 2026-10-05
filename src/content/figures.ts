@@ -40,30 +40,6 @@ export const FIGURES: Partial<Record<StopId, Figure>> = {
       { value: '5%', label: 'of childhood cancers', cites: [4] },
     ],
   },
-  genes: {
-    kind: 'facts',
-    items: [
-      { value: '9 in 10', label: 'gene change only in the tumor cells', cites: [8] },
-      { value: '1 in 10', label: 'gene change in every cell', cites: [8] },
-      { value: 'WT1', label: 'a gene that is often changed', cites: [8] },
-    ],
-  },
-  lump: {
-    kind: 'facts',
-    items: [
-      { value: 'Lump', label: 'in the belly, usually painless', cites: [5] },
-      { value: 'Blood', label: 'in the urine', cites: [1] },
-      { value: 'Fever', label: 'or high blood pressure', cites: [5, 1] },
-    ],
-  },
-  ultrasound: {
-    kind: 'facts',
-    items: [
-      { value: '1', label: 'Ultrasound', cites: [6] },
-      { value: '2', label: 'CT scan or MRI', cites: [6] },
-      { value: '3', label: 'Tumor checked under a microscope', cites: [6] },
-    ],
-  },
   treatment: {
     kind: 'facts',
     items: [
