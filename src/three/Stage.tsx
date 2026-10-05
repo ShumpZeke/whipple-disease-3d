@@ -2,7 +2,7 @@ import { AdaptiveDpr, Environment, Lightformer, PerformanceMonitor } from '@reac
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { journey, pokeJourney, registerInvalidate } from '../app/journey';
+import { isOverviewTreatmentTravel, journey, pokeJourney, registerInvalidate, travel, travelProgress } from '../app/journey';
 import { LITE, rememberLite } from '../app/quality';
 import { useStory } from '../app/store';
 import { LAST_STOP, STOPS, type StopId } from '../content/story';
@@ -36,7 +36,7 @@ function LoopControl() {
   useEffect(() => {
     setFrameloop('demand');
     invalidate();
-    if (!ANIMATED.includes(STOPS[stop].id) || reduced) return;
+    if (isOverviewTreatmentTravel() || !ANIMATED.includes(STOPS[stop].id) || reduced) return;
     const gap = 1000 / (LITE || lowPower ? 30 : 60) - 2;
     let last = 0;
     let raf = requestAnimationFrame(function tick(now) {
@@ -102,10 +102,19 @@ function LightRig() {
   const v = useMemo(() => ({ right: new THREE.Vector3(), up: new THREE.Vector3(), back: new THREE.Vector3() }), []);
   useFrame(() => {
     const t = Math.min(LAST_STOP, Math.max(0, journey.t));
-    const i = Math.min(LAST_STOP - 1, Math.floor(t));
-    const k = ease(t - i);
-    const A = RIGS[STOPS[i].id];
-    const B = RIGS[STOPS[i + 1].id];
+    let k: number;
+    let A: Rig;
+    let B: Rig;
+    if (isOverviewTreatmentTravel()) {
+      k = ease(travelProgress(t));
+      A = RIGS[STOPS[travel.from].id];
+      B = RIGS[STOPS[travel.to].id];
+    } else {
+      const i = Math.min(LAST_STOP - 1, Math.floor(t));
+      k = ease(t - i);
+      A = RIGS[STOPS[i].id];
+      B = RIGS[STOPS[i + 1].id];
+    }
     const mix = (a: number, b: number) => a + (b - a) * k;
     if (amb.current) amb.current.intensity = mix(A.amb, B.amb);
     if (hemi.current) hemi.current.intensity = mix(A.hemi, B.hemi);
