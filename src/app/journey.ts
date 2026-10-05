@@ -1,4 +1,4 @@
-import { LAST_STOP, PAUSES, SOURCES_PAGE, STOPS, type Stop, type World } from '../content/story';
+import { LAST_STOP, PAUSES, SOURCES_PAGE, STOPS, STOP_INDEX, type Stop, type World } from '../content/story';
 
 /**
  * The scroll-driven zoom. `journey.t` is a continuous position along the story:
@@ -14,6 +14,26 @@ export const journey = {
   still: 0,
   reduced: false,
 };
+
+/**
+ * Presenter-clicker travel can skip visual-only pass-through stops. The logical scroll position
+ * still crosses those stops, so deep links and manual exploration keep working, but the camera and
+ * scene effects can choose one clean move between the two presentation stops.
+ */
+export const travel = { active: false, from: 0, to: 0 };
+
+export function isOverviewTreatmentTravel() {
+  return (
+    travel.active &&
+    ((travel.from === STOP_INDEX.body && travel.to === STOP_INDEX.treatment) ||
+      (travel.from === STOP_INDEX.treatment && travel.to === STOP_INDEX.body))
+  );
+}
+
+export function travelProgress(t = journey.t) {
+  if (!travel.active || travel.from === travel.to) return 0;
+  return Math.min(1, Math.max(0, (t - travel.from) / (travel.to - travel.from)));
+}
 
 type Listener = (t: number, dt: number) => void;
 const listeners = new Set<Listener>();
@@ -78,6 +98,7 @@ const endTween = (land: boolean) => {
   if (!tween) return;
   if (virtualY !== null && (land || !tween.real)) window.scrollTo(0, virtualY);
   tween = null;
+  travel.active = false;
   virtualY = null;
   document.documentElement.classList.remove('is-tweening');
 };
@@ -91,6 +112,7 @@ export function scrollToStop(index: number, instant = false) {
   const to = i * vh();
   if (instant || journey.reduced) {
     tween = null;
+    travel.active = false;
     virtualY = null;
     document.documentElement.classList.remove('is-tweening');
     window.scrollTo(0, to);
@@ -98,11 +120,22 @@ export function scrollToStop(index: number, instant = false) {
   }
   const from = scrollNow();
   const dist = Math.abs(to - from) / vh();
+  const fromIndex = Math.min(SOURCES_PAGE, Math.max(0, Math.round(from / vh())));
+  const simpleOverviewMove =
+    (fromIndex === STOP_INDEX.body && i === STOP_INDEX.treatment) ||
+    (fromIndex === STOP_INDEX.treatment && i === STOP_INDEX.body);
+  travel.active = simpleOverviewMove;
+  travel.from = fromIndex;
+  travel.to = i;
   // (to and from the list of references the page itself has to scroll)
   const real = Math.max(from, to) > LAST_STOP * vh() + 1;
   if (real && virtualY !== null) window.scrollTo(0, virtualY);
   virtualY = real ? null : from;
-  tween = { index: i, from, to, start: performance.now(), dur: Math.min(4200, 1000 + 1000 * Math.sqrt(dist)), real };
+  const normalDuration = Math.min(4200, 1000 + 1000 * Math.sqrt(dist));
+  // The overview already contains the skipped facts, so this should read as one restrained camera
+  // move, not a four-second tour through kidney, cells and scan scenes.
+  const dur = simpleOverviewMove ? 1200 : normalDuration;
+  tween = { index: i, from, to, start: performance.now(), dur, real };
   document.documentElement.classList.add('is-tweening');
 }
 
