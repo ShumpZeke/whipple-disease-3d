@@ -2,7 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { journey, smoothstep } from '../../app/journey';
+import { isOverviewTreatmentTravel, journey, smoothstep } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX } from '../../content/story';
 import { Cites, TermButton } from '../../ui/RichText';
@@ -152,14 +152,15 @@ export function Scans({ visible }: { visible: boolean }) {
 
   useFrame((_, dt) => {
     const t = journey.t;
-    const us = usIn(t);
-    const ctk = ctIn(t);
+    const simple = isOverviewTreatmentTravel();
+    const us = simple ? 0 : usIn(t);
+    const ctk = simple ? 0 : ctIn(t);
     // ultrasound: the probe comes to the front of the body, the organs on our side are sliced away
     if (probe.current) {
       probe.current.visible = us > 0.001;
       probe.current.position.copy(built.apex).add(new THREE.Vector3(0, 0, (1 - us) * 0.7));
     }
-    const fanOpacity = at(t, STOP_INDEX.signs + 0.78, STOP_INDEX.signs + 0.95) * (1 - at(t, STOP_INDEX.ultrasound + 0.25, STOP_INDEX.ultrasound + 0.4));
+    const fanOpacity = simple ? 0 : at(t, STOP_INDEX.signs + 0.78, STOP_INDEX.signs + 0.95) * (1 - at(t, STOP_INDEX.ultrasound + 0.25, STOP_INDEX.ultrasound + 0.4));
     if (fan.current) fan.current.visible = fanOpacity > 0.001;
     built.image.uniforms.uOpacity.value = fanOpacity;
     if (us > 0.001) slicePlanes.sagittal.set(new THREE.Vector3(-1, 0, 0), built.X + (1 - us) * 0.9);
@@ -172,7 +173,7 @@ export function Scans({ visible }: { visible: boolean }) {
     }
     if (ctk > 0.001) slicePlanes.axial.set(new THREE.Vector3(0, 1, 0), -yRing);
     else slicePlanes.axial.set(new THREE.Vector3(0, 1, 0), 1e6);
-    const discOpacity = at(t, STOP_INDEX.ultrasound + 0.84, STOP_INDEX.ultrasound + 0.95) * (1 - at(t, STOP_INDEX.scans + 0.08, STOP_INDEX.scans + 0.2));
+    const discOpacity = simple ? 0 : at(t, STOP_INDEX.ultrasound + 0.84, STOP_INDEX.ultrasound + 0.95) * (1 - at(t, STOP_INDEX.scans + 0.08, STOP_INDEX.scans + 0.2));
     built.discMat.opacity = discOpacity;
     if (disc.current) disc.current.visible = discOpacity > 0.001;
     const moving = stopId === 'ultrasound' || stopId === 'scans';
