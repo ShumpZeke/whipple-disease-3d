@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { HINGE, journey, onJourneyFrame, smoothstep } from '../../app/journey';
+import { HINGE, isOverviewTreatmentTravel, journey, onJourneyFrame, smoothstep, travelProgress } from '../../app/journey';
 import { useStopId, useStory } from '../../app/store';
 import { STOP_INDEX, type StopId } from '../../content/story';
 import { useJourney } from '../../ui/useJourney';
@@ -60,7 +60,14 @@ function HingeController() {
 const LIFT = new THREE.Vector3(0.95, 0.3, 0.8);
 
 /** 0 → 1 while the tumor grows in, on the way to the "lump" stop (it leaves with the kidney). */
-const tumorGrowth = (t: number) => smoothstep(STOP_INDEX.lump - 0.22, STOP_INDEX.lump, t) * (t < RETURN ? 1 : 0);
+const tumorGrowth = (t: number) => {
+  if (isOverviewTreatmentTravel()) {
+    // Keep one meaningful motion in the simplified route: the tumor appears gradually as the
+    // camera moves toward treatment, instead of popping in at the old hidden "lump" waypoint.
+    return smoothstep(0.48, 0.82, travelProgress(t)) * (t < RETURN ? 1 : 0);
+  }
+  return smoothstep(STOP_INDEX.lump - 0.22, STOP_INDEX.lump, t) * (t < RETURN ? 1 : 0);
+};
 /**
  * 0 → 1 while the left kidney is taken out (treatment → outlook). On the way back out of the book
  * it comes back, healthy, so the drawing on the page is whole again (see hinge.ts).
@@ -276,7 +283,10 @@ export function AnatomyWorld({ visible }: { visible: boolean }) {
   useEffect(
     () =>
       onJourneyFrame((t) => {
-        if (shadow.current) shadow.current.visible = hingeState(t).shadow > 0.02 && (t < STOP_INDEX.ultrasound - 0.3 || t > STOP_INDEX.scans + 0.45);
+        if (shadow.current)
+          shadow.current.visible =
+            hingeState(t).shadow > 0.02 &&
+            (isOverviewTreatmentTravel() || t < STOP_INDEX.ultrasound - 0.3 || t > STOP_INDEX.scans + 0.45);
       }),
     [],
   );
