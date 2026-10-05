@@ -5,7 +5,7 @@
 One continuous page. Scrolling is a camera zoom: from Max Wilms and his 1899 book, into the
 urinary system, inside a kidney, down to its tiny filters and the young cells where the tumor
 starts, then back out to the lump, the other signs, the scans, the operation and the outlook,
-then back out of the book to Max Wilms for a short summary, a quick quiz and the references. The talk pauses at ten stops (about four minutes); the camera flies through the rest on its own.
+then back out of the book to Max Wilms for a short summary, a quick quiz and the references. The talk pauses at seven stops (about four minutes); the cause, signs and diagnosis are grouped into one disease-overview stop, and the camera flies through the supporting close-ups on its own.
 
 It is built as one infographic: every stop has the same four parts (its section, a headline that states the takeaway, three key facts as big figures, and a short explanation) beside a labeled 3D model.
 
@@ -88,7 +88,7 @@ still pictures instead of 3D.
 | Brief historical profile and why the name stuck | The two History stops: a German surgeon; other doctors had already reported the tumor, and his detailed 1899 study, *The Mixed Tumors of the Kidney*, brought the reports together, so his name stayed with it |
 | A clear definition in your own words | Home screen, and the stop “A kidney cancer in young children” |
 | Body system or medical specialty | The same stop: “part of the urinary system” and “treated in pediatric oncology”, on a 3D model labeled Kidneys, Ureter and Bladder |
-| At least four clinical facts | Three key facts each for who gets it, the cause, the signs, the diagnosis and the treatment, plus the outlook (93 of 100 alive five years later) |
+| At least four clinical facts | The disease-overview stop groups who gets it, the cause, signs and diagnosis on one screen; treatment has its own stop, plus the outlook (93 of 100 alive five years later) |
 | At least three terms, word parts, abbreviations or pronunciation tips | Word parts on screen (nephro, blast, oma; hemat, uria; nephr, ectomy), the pronunciation NEF-roh-blas-TOH-muh, 14 terms with pronunciation in the **Terms** panel and at the end, the abbreviation CT |
 | At least two visuals with captions or labels | Labeled 3D scenes (the urinary system, the tumor, the DNA and its gene, the ultrasound), the captioned and credited portrait, and the chart of 93 in 100 dots |
 | Purposeful interactive elements | The list of parts, the + marker on the kidney, term pop-ups, reference numbers, the 3D model you can turn, the five-question quiz with a results screen |
