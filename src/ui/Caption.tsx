@@ -29,6 +29,37 @@ function Extras() {
   );
 }
 
+function DiseaseOverview() {
+  return (
+    <div className="overview-grid" aria-label="Wilms tumor overview">
+      <section className="overview-card">
+        <h2>Cause</h2>
+        <p>
+          <RichText text="Some young kidney cells stay immature and keep dividing. Most cases are not inherited. {c:3,8}" />
+        </p>
+      </section>
+      <section className="overview-card">
+        <h2>Signs</h2>
+        <p>
+          <RichText text="A painless belly lump is common. Blood in the urine ({t:hematuria}), fever or high blood pressure can also happen. {c:1,5}" />
+        </p>
+      </section>
+      <section className="overview-card">
+        <h2>Diagnosis</h2>
+        <p>
+          <RichText text="Ultrasound first, then CT or MRI to check size and spread. The tumor is examined under a microscope. {c:6}" />
+        </p>
+      </section>
+      <section className="overview-card">
+        <h2>Medical name</h2>
+        <p>
+          <RichText text="{t:nephroblastoma}: nephro = kidney, blast = young cell, oma = tumor. {c:15}" />
+        </p>
+      </section>
+    </div>
+  );
+}
+
 /**
  * The words for the stop the camera rests at, built the same way every time so the exhibit reads as
  * one infographic: the section it belongs to, a headline that states the takeaway, three key facts
@@ -85,6 +116,7 @@ export function Caption() {
         <p className="caption__body">
           <RichText text={s.text} />
         </p>
+        {s.id === 'body' && <DiseaseOverview />}
         {s.id === 'end' && <Extras />}
       </section>
     </>
