@@ -3749,3 +3749,93 @@ body,
 .quiz__letter {
   border-radius: 2px;
 }
+
+
+/* ==================================================================
+   Condensed disease overview.
+   The first kidney view now carries cause, signs and diagnosis together so the presenter can cover
+   the core medical content in one stop instead of triggering several separate scene transitions.
+   ================================================================== */
+.caption[data-step='body'] {
+  --cap-w: min(54vw, 760px);
+  width: var(--cap-w);
+  bottom: clamp(28px, 5vh, 58px);
+}
+
+.caption[data-step='body'] .caption__body {
+  max-width: 62ch;
+  margin-top: max(10px, calc(var(--u) * 0.8));
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: max(10px, calc(var(--u) * 0.8)) max(18px, calc(var(--u) * 1.4));
+  margin-top: max(12px, calc(var(--u) * 1));
+}
+
+.overview-card {
+  min-width: 0;
+  padding-top: max(8px, calc(var(--u) * 0.6));
+  border-top: 1px solid var(--hair);
+}
+
+.overview-card h2 {
+  margin: 0 0 max(4px, calc(var(--u) * 0.28));
+  font-family: var(--mono);
+  font-size: max(11px, calc(var(--u) * 0.76));
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.overview-card p {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: max(13px, calc(var(--u) * 0.92));
+  line-height: 1.36;
+  color: var(--ivory-soft);
+}
+
+@media (max-width: 900px) {
+  .caption[data-step='body'] {
+    --cap-w: calc(100vw - 2 * var(--gutter));
+    width: var(--cap-w);
+    bottom: clamp(20px, 4vh, 40px);
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .overview-card {
+    padding-top: 6px;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 901px) {
+  .caption[data-step='body'] {
+    bottom: 22px;
+  }
+
+  .caption[data-step='body'] .caption__title {
+    font-size: max(25px, calc(var(--u) * 2.2));
+  }
+
+  .caption[data-step='body'] .facts {
+    margin-top: 10px;
+  }
+
+  .overview-grid {
+    margin-top: 8px;
+    gap: 7px 16px;
+  }
+
+  .overview-card p {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+}
