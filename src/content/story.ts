@@ -110,10 +110,12 @@ export const STOPS: Stop[] = [
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'The disease',
-    title: 'A kidney cancer in young children',
-    text: 'Wilms tumor starts in a kidney, part of the urinary system. It is the most common kidney cancer in children and usually affects one kidney. It is treated in {t:oncologist|pediatric oncology}. {c:1,3,4}',
-    demo: 'Drag the model to turn it, then tap the + on the kidney to zoom in',
-    say: 'Now we go into the drawing in his book, and it becomes the urinary system. Wilms tumor starts in a kidney. It is the most common kidney cancer in children, mostly ages 2 to 5, about 600 kids a year in the U.S. The doctors who treat it are pediatric oncologists. I can drag the model to turn it.',
+    title: 'Wilms tumor at a glance',
+    text: 'Wilms tumor, or {t:nephroblastoma}, is a cancer that starts in a kidney, part of the urinary system. It is the most common kidney cancer in children and usually affects one kidney. {c:1,3,4}',
+    term: 'nephroblastoma',
+    termLabel: 'Its medical name',
+    demo: 'Drag the model to turn it, then use the overview beside it to explain the cause, signs and diagnosis without changing scenes',
+    say: 'This screen gives the whole disease overview so we do not need a separate stop for every fact. Wilms tumor, or nephroblastoma, is a kidney cancer found mainly in children ages 2 to 5, with about 600 cases a year in the United States. It starts when some young kidney cells stay immature and keep dividing, and most cases are not inherited. The most common sign is a painless lump in the belly; blood in the urine, fever and high blood pressure can also happen. Doctors usually start with ultrasound, then use CT or MRI to see the size and spread, and examine the tumor under a microscope.',
   },
   {
     id: 'kidneys',
@@ -161,6 +163,7 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'genes',
+    pass: true,
     scene: 'dna',
     world: 'cells',
     eyebrow: 'The cause',
@@ -171,6 +174,7 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'lump',
+    pass: true,
     scene: 'anatomy',
     world: 'anatomy',
     eyebrow: 'Signs',
@@ -194,6 +198,7 @@ export const STOPS: Stop[] = [
   },
   {
     id: 'ultrasound',
+    pass: true,
     scene: 'ultrasound',
     world: 'diagnosis',
     eyebrow: 'Diagnosis',
@@ -271,10 +276,7 @@ export const prevPause = (i: number) => [...PAUSES].reverse().find((p) => p < i)
 /** The home screen's list of parts (each one jumps there). */
 export const SECTIONS: { title: string; stop: number }[] = [
   { title: 'History', stop: STOP_INDEX.doctor },
-  { title: 'The disease', stop: STOP_INDEX.body },
-  { title: 'The cause', stop: STOP_INDEX.genes },
-  { title: 'Signs', stop: STOP_INDEX.lump },
-  { title: 'Diagnosis', stop: STOP_INDEX.ultrasound },
+  { title: 'Disease overview', stop: STOP_INDEX.body },
   { title: 'Treatment', stop: STOP_INDEX.treatment },
   { title: 'Quick check', stop: STOP_INDEX.quiz },
   { title: 'References', stop: SOURCES_PAGE },
